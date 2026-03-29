@@ -692,6 +692,7 @@
             <div class="profile-header-info">
                 <h2 id="form-display-name"></h2>
                 <p>Pulled from Twitch. Looking good.</p>
+                <a href="#" id="view-public-profile" style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent-bright); text-decoration: none; display: inline-block; margin-top: 0.35rem;">↗ View public profile</a>
             </div>
         </div>
 
@@ -916,6 +917,7 @@
             // Avatar and display name (from Twitch)
             document.getElementById('form-avatar').src = profile.avatar_url || meta.avatar_url || '';
             document.getElementById('form-display-name').textContent = profile.username || meta.user_name || 'Streamer';
+            document.getElementById('view-public-profile').href = `/streamer.html?user=${encodeURIComponent(profile.username || meta.user_name || '')}`;
 
             // Bio
             const bioField = document.getElementById('bio');

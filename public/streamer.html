@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamer Profile — NobodysWatching.live</title>
+    <meta name="description" content="Check out this streamer on NobodysWatching.live — where small streamers get seen.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #16161f;
+            --bg-card-hover: #1c1c28;
+            --border: #2a2a3a;
+            --border-glow: #0ea5a5;
+            --text-primary: #e8e6f0;
+            --text-secondary: #8a879a;
+            --text-muted: #5a576a;
+            --accent: #0ea5a5;
+            --accent-bright: #2dd4bf;
+            --accent-glow: rgba(14, 165, 165, 0.15);
+            --live-red: #ef4444;
+            --live-glow: rgba(239, 68, 68, 0.3);
+            --twitch: #9146ff;
+            --youtube: #ff0000;
+            --kick: #53fc18;
+            --font-display: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ========== NAVIGATION ========== */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .nav-logo span { color: var(--accent-bright); }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--text-primary); }
+
+        /* ========== SECTION STYLES ========== */
+        .section-comment {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        /* ========== STREAMER PAGE ========== */
+        .streamer-page {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 8rem 2rem 4rem;
+        }
+
+        /* ========== LIVE BANNER ========== */
+        .live-banner {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .live-banner-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--live-red);
+            border-radius: 50%;
+            animation: liveGlow 2s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes liveGlow {
+            0%, 100% { box-shadow: 0 0 8px var(--live-glow); }
+            50% { box-shadow: 0 0 20px var(--live-glow); }
+        }
+
+        .live-banner-text {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .live-banner-meta {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+
+        .offline-banner {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .offline-text {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .offline-text span {
+            color: var(--text-secondary);
+        }
+
+        /* ========== STREAM THUMBNAIL ========== */
+        .stream-thumbnail {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .stream-thumbnail img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* ========== PROFILE HEADER ========== */
+        .profile-hero {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            border: 3px solid var(--border);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar.is-live {
+            border-color: var(--live-red);
+            box-shadow: 0 0 20px var(--live-glow);
+        }
+
+        .profile-name {
+            font-size: 2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+
+        .profile-genre {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-bright);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .profile-timezone {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* ========== BIO ========== */
+        .profile-bio {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ========== GAMES ========== */
+        .profile-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .profile-section-title {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent-bright);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+        }
+
+        .game-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .game-tag {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-bright);
+            background: var(--accent-glow);
+            border: 1px solid rgba(14, 165, 165, 0.2);
+            padding: 0.4rem 0.9rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ========== PLATFORM LINKS ========== */
+        .platform-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .platform-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        .platform-link:hover {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+            transform: translateX(4px);
+        }
+
+        .platform-link-icon {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .platform-link-icon.twitch {
+            background: rgba(145, 70, 255, 0.15);
+            color: var(--twitch);
+            border: 1px solid rgba(145, 70, 255, 0.25);
+        }
+
+        .platform-link-icon.youtube {
+            background: rgba(255, 0, 0, 0.1);
+            color: var(--youtube);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+
+        .platform-link-icon.kick {
+            background: rgba(83, 252, 24, 0.1);
+            color: var(--kick);
+            border: 1px solid rgba(83, 252, 24, 0.2);
+        }
+
+        .platform-link-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .platform-link-url {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .platform-link-arrow {
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .platform-link:hover .platform-link-arrow {
+            transform: translateX(4px);
+            color: var(--accent-bright);
+        }
+
+        /* ========== WATCH NOW BUTTON ========== */
+        .btn-watch {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--live-red);
+            color: #fff;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            border: none;
+            flex-shrink: 0;
+        }
+
+        .btn-watch:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-channel {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            color: var(--text-primary);
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .btn-channel:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        /* ========== MEMBER SINCE ========== */
+        .member-since {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            margin-top: 1rem;
+        }
+
+        /* ========== BACK LINK ========== */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 2rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover { color: var(--accent-bright); }
+
+        /* ========== SHARE LINK ========== */
+        .share-section {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+
+        .share-section p {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .share-url {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .share-url input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            outline: none;
+        }
+
+        .share-copy-btn {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--accent-bright);
+            background: var(--accent-glow);
+            border: 1px solid rgba(14, 165, 165, 0.2);
+            padding: 0.3rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .share-copy-btn:hover {
+            background: rgba(14, 165, 165, 0.25);
+        }
+
+        /* ========== LOADING / ERROR ========== */
+        .loading-state, .error-state {
+            text-align: center;
+            padding: 6rem 2rem;
+        }
+
+        .loading-state p, .error-state p {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .error-state h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .error-state a {
+            color: var(--accent-bright);
+            text-decoration: none;
+        }
+
+        .error-state a:hover { text-decoration: underline; }
+
+        /* ========== FOOTER ========== */
+        footer {
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-logo {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo span { color: var(--accent-bright); }
+
+        .footer-copy {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            .nav-links { display: none; }
+            .streamer-page { padding: 6rem 1.25rem 2rem; }
+            .profile-hero { flex-direction: column; text-align: center; }
+            .profile-avatar { width: 80px; height: 80px; }
+            .profile-name { font-size: 1.5rem; }
+            .live-banner, .offline-banner { flex-direction: column; text-align: center; }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <a href="/" class="nav-logo">nobodys<span>watching</span>.live</a>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/#directory">Directory</a></li>
+        </ul>
+    </nav>
+
+    <!-- LOADING STATE -->
+    <div class="streamer-page" id="loading-state">
+        <div class="loading-state">
+            <p>// loading streamer profile...</p>
+        </div>
+    </div>
+
+    <!-- ERROR STATE (hidden) -->
+    <div class="streamer-page" id="error-state" style="display: none;">
+        <div class="error-state">
+            <h2>404: STREAMER NOT FOUND</h2>
+            <p>Either this person doesn't exist, they deleted their profile, 
+            or you've mistyped the URL. It happens.</p>
+            <p style="margin-top: 1rem;"><a href="/">← Back to the directory</a></p>
+        </div>
+    </div>
+
+    <!-- PROFILE CONTENT (hidden until loaded) -->
+    <div class="streamer-page" id="profile-content" style="display: none;">
+        <a href="/#directory" class="back-link">← Back to directory</a>
+
+        <!-- Live/Offline Banner -->
+        <div id="status-banner"></div>
+
+        <!-- Stream Thumbnail (live only) -->
+        <div id="stream-thumb-container"></div>
+
+        <!-- Profile Header -->
+        <div class="profile-hero">
+            <img id="p-avatar" src="" alt="" class="profile-avatar">
+            <div>
+                <div id="p-name" class="profile-name"></div>
+                <div id="p-genre" class="profile-genre"></div>
+                <div id="p-timezone" class="profile-timezone"></div>
+            </div>
+        </div>
+
+        <!-- Bio -->
+        <div id="p-bio" class="profile-bio"></div>
+
+        <!-- Games -->
+        <div id="games-section" class="profile-section">
+            <div class="profile-section-title">// top games</div>
+            <div id="p-games" class="game-tags"></div>
+        </div>
+
+        <!-- Platforms -->
+        <div class="profile-section">
+            <div class="profile-section-title">// where to watch</div>
+            <div id="p-platforms" class="platform-links"></div>
+        </div>
+
+        <!-- Share -->
+        <div class="share-section" id="share-section">
+            <p>// share this profile</p>
+            <div class="share-url">
+                <input type="text" id="share-url-input" readonly>
+                <button class="share-copy-btn" onclick="copyShareUrl()">Copy</button>
+            </div>
+        </div>
+
+        <!-- Member Since -->
+        <div id="p-member" class="member-since"></div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-logo">nobodys<span>watching</span>.live</div>
+        <div class="footer-copy">© 2026 nobodyswatching.live. No algorithms were harmed in the making of this site.</div>
+    </footer>
+
+    <script>
+        // =============================================
+        // SUPABASE INIT
+        // =============================================
+        const SUPABASE_URL = 'https://hnjfzfdraoqpvyopgldi.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuamZ6ZmRyYW9xcHZ5b3BnbGRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTkzNzAsImV4cCI6MjA5MDI5NTM3MH0.EchviZ7rgkmO7ixtFuwE8aEPMxu590beO_ww-u0wxxc';
+
+        const { createClient } = supabase;
+        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // =============================================
+        // HELPERS
+        // =============================================
+        function esc(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function timeAgo(dateStr) {
+            const now = new Date();
+            const then = new Date(dateStr);
+            const diffMs = now - then;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHrs = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHrs < 24) return `${diffHrs}hr${diffHrs !== 1 ? 's' : ''} ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return `${Math.floor(diffDays / 7)}w ago`;
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+        }
+
+        // =============================================
+        // RENDER PROFILE
+        // =============================================
+        function renderProfile(p) {
+            // Update page title
+            document.title = `${p.username} — NobodysWatching.live`;
+
+            // Update meta description
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) {
+                metaDesc.content = p.bio 
+                    ? `${p.username}: ${p.bio}` 
+                    : `Check out ${p.username} on NobodysWatching.live`;
+            }
+
+            // Avatar
+            const avatar = document.getElementById('p-avatar');
+            avatar.src = p.avatar_url || '';
+            avatar.alt = p.username;
+            if (p.is_live) avatar.classList.add('is-live');
+
+            // Name, genre, timezone
+            document.getElementById('p-name').textContent = p.username;
+            document.getElementById('p-genre').textContent = p.genre || '';
+            document.getElementById('p-timezone').textContent = p.timezone ? `🕐 ${p.timezone}` : '';
+
+            // Status banner
+            const bannerEl = document.getElementById('status-banner');
+            const primaryUrl = p.twitch_url || p.youtube_url || p.kick_url || '#';
+
+            if (p.is_live) {
+                bannerEl.innerHTML = `
+                    <div class="live-banner">
+                        <div class="live-banner-info">
+                            <div class="live-dot"></div>
+                            <div>
+                                <div class="live-banner-text">Live Now${p.live_game ? ' — ' + esc(p.live_game) : ''}</div>
+                                <div class="live-banner-meta">${p.live_viewer_count || 0} viewer${p.live_viewer_count !== 1 ? 's' : ''} watching${p.live_platform ? ' on ' + esc(p.live_platform) : ''}</div>
+                            </div>
+                        </div>
+                        <a href="${esc(primaryUrl)}" target="_blank" rel="noopener" class="btn-watch">▶ Watch Now</a>
+                    </div>
+                `;
+            } else {
+                const lastLive = p.last_live_at 
+                    ? `Last live <span>${timeAgo(p.last_live_at)}</span>` 
+                    : 'Hasn\'t streamed yet — but there\'s a first time for everything';
+                bannerEl.innerHTML = `
+                    <div class="offline-banner">
+                        <div class="offline-text">${lastLive}</div>
+                        <a href="${esc(primaryUrl)}" target="_blank" rel="noopener" class="btn-channel">↗ Visit Channel</a>
+                    </div>
+                `;
+            }
+
+            // Stream thumbnail (live only)
+            const thumbContainer = document.getElementById('stream-thumb-container');
+            if (p.is_live && p.live_thumbnail_url) {
+                thumbContainer.innerHTML = `
+                    <a href="${esc(primaryUrl)}" target="_blank" rel="noopener" class="stream-thumbnail">
+                        <img src="${esc(p.live_thumbnail_url)}" alt="${esc(p.username)} live stream">
+                    </a>
+                `;
+            }
+
+            // Bio
+            const bioEl = document.getElementById('p-bio');
+            if (p.bio) {
+                bioEl.textContent = p.bio;
+            } else {
+                bioEl.textContent = 'This streamer hasn\'t written a bio yet. Mysterious.';
+                bioEl.style.fontStyle = 'italic';
+            }
+
+            // Games
+            const gamesSection = document.getElementById('games-section');
+            const gamesEl = document.getElementById('p-games');
+            if (p.top_games && p.top_games.length > 0) {
+                gamesEl.innerHTML = p.top_games
+                    .map(g => `<span class="game-tag">${esc(g)}</span>`)
+                    .join('');
+            } else {
+                gamesSection.style.display = 'none';
+            }
+
+            // Platforms
+            const platformsEl = document.getElementById('p-platforms');
+            let platformsHtml = '';
+
+            if (p.twitch_url) {
+                platformsHtml += `
+                    <a href="${esc(p.twitch_url)}" target="_blank" rel="noopener" class="platform-link">
+                        <span class="platform-link-icon twitch">Twitch</span>
+                        <div>
+                            <div class="platform-link-name">Twitch</div>
+                            <div class="platform-link-url">${esc(p.twitch_url)}</div>
+                        </div>
+                        <span class="platform-link-arrow">→</span>
+                    </a>
+                `;
+            }
+
+            if (p.youtube_url) {
+                platformsHtml += `
+                    <a href="${esc(p.youtube_url)}" target="_blank" rel="noopener" class="platform-link">
+                        <span class="platform-link-icon youtube">YouTube</span>
+                        <div>
+                            <div class="platform-link-name">YouTube</div>
+                            <div class="platform-link-url">${esc(p.youtube_url)}</div>
+                        </div>
+                        <span class="platform-link-arrow">→</span>
+                    </a>
+                `;
+            }
+
+            if (p.kick_url) {
+                platformsHtml += `
+                    <a href="${esc(p.kick_url)}" target="_blank" rel="noopener" class="platform-link">
+                        <span class="platform-link-icon kick">Kick</span>
+                        <div>
+                            <div class="platform-link-name">Kick</div>
+                            <div class="platform-link-url">${esc(p.kick_url)}</div>
+                        </div>
+                        <span class="platform-link-arrow">→</span>
+                    </a>
+                `;
+            }
+
+            platformsEl.innerHTML = platformsHtml;
+
+            // Share URL
+            const shareInput = document.getElementById('share-url-input');
+            shareInput.value = window.location.href;
+
+            // Member since
+            if (p.created_at) {
+                document.getElementById('p-member').textContent = 
+                    `Member since ${formatDate(p.created_at)} · NobodysWatching.live`;
+            }
+        }
+
+        // =============================================
+        // COPY SHARE URL
+        // =============================================
+        async function copyShareUrl() {
+            const input = document.getElementById('share-url-input');
+            const btn = document.querySelector('.share-copy-btn');
+            try {
+                await navigator.clipboard.writeText(input.value);
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+            } catch (e) {
+                input.select();
+                document.execCommand('copy');
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+            }
+        }
+
+        // =============================================
+        // INIT
+        // =============================================
+        async function init() {
+            // Get username from URL
+            const params = new URLSearchParams(window.location.search);
+            const username = params.get('user');
+
+            if (!username) {
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('error-state').style.display = 'block';
+                return;
+            }
+
+            // Fetch profile
+            const { data: profile, error } = await sb
+                .from('profiles')
+                .select('*')
+                .ilike('username', username)
+                .single();
+
+            if (error || !profile) {
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('error-state').style.display = 'block';
+                return;
+            }
+
+            // Render
+            renderProfile(profile);
+
+            // Show content
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('profile-content').style.display = 'block';
+        }
+
+        init();
+    </script>
+
+</body>
+</html>

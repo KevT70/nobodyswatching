@@ -1250,7 +1250,7 @@
             emptyMsg.style.display = 'none';
 
             grid.innerHTML = filtered.map(p => {
-                const streamUrl = p.twitch_url || p.youtube_url || p.kick_url || '#';
+                const profileUrl = `/streamer.html?user=${encodeURIComponent(p.username)}`;
                 const isLive = p.is_live;
 
                 // Meta line
@@ -1283,7 +1283,7 @@
                     : '🎮';
 
                 return `
-                    <a href="${streamUrl}" target="_blank" rel="noopener" class="streamer-card ${isLive ? 'is-live' : ''}">
+                    <a href="${profileUrl}" class="streamer-card ${isLive ? 'is-live' : ''}">
                         <div class="streamer-card-header">
                             <div class="streamer-avatar">${avatarHtml}</div>
                             <div>
