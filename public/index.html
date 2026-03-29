@@ -499,6 +499,48 @@
             flex-wrap: wrap;
         }
 
+        .filter-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .timezone-filter {
+            flex-shrink: 0;
+        }
+
+        .filter-select {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.5rem 2.5rem 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            outline: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a879a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+        }
+
+        .filter-select:hover,
+        .filter-select:focus {
+            color: var(--text-primary);
+            border-color: var(--accent);
+            background-color: var(--accent-glow);
+        }
+
+        .filter-select option {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
         .filter-btn {
             font-family: var(--font-mono);
             font-size: 0.7rem;
@@ -888,6 +930,15 @@
                 align-items: flex-start;
             }
 
+            .filter-controls {
+                align-items: flex-start;
+                width: 100%;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+
             .streamer-grid {
                 grid-template-columns: 1fr;
             }
@@ -1048,19 +1099,43 @@
                 <div class="section-comment">// browse the directory</div>
                 <h2 class="section-title">FIND A STREAMER</h2>
             </div>
-            <div class="filters" id="filters">
-                <button class="filter-btn active" data-genre="all">All</button>
-                <button class="filter-btn" data-genre="FPS">FPS</button>
-                <button class="filter-btn" data-genre="RPG">RPG</button>
-                <button class="filter-btn" data-genre="Battle Royale">Battle Royale</button>
-                <button class="filter-btn" data-genre="Survival">Survival</button>
-                <button class="filter-btn" data-genre="Horror">Horror</button>
-                <button class="filter-btn" data-genre="Racing">Racing</button>
-                <button class="filter-btn" data-genre="Sports">Sports</button>
-                <button class="filter-btn" data-genre="Strategy">Strategy</button>
-                <button class="filter-btn" data-genre="Sandbox">Sandbox</button>
-                <button class="filter-btn" data-genre="Platformer">Platformer</button>
-                <button class="filter-btn" data-genre="Variety">Variety</button>
+            <div class="filter-controls">
+                <div class="filters" id="filters">
+                    <button class="filter-btn active" data-genre="all">All</button>
+                    <button class="filter-btn" data-genre="FPS">FPS</button>
+                    <button class="filter-btn" data-genre="RPG">RPG</button>
+                    <button class="filter-btn" data-genre="Battle Royale">Battle Royale</button>
+                    <button class="filter-btn" data-genre="Survival">Survival</button>
+                    <button class="filter-btn" data-genre="Horror">Horror</button>
+                    <button class="filter-btn" data-genre="Racing">Racing</button>
+                    <button class="filter-btn" data-genre="Sports">Sports</button>
+                    <button class="filter-btn" data-genre="Strategy">Strategy</button>
+                    <button class="filter-btn" data-genre="Sandbox">Sandbox</button>
+                    <button class="filter-btn" data-genre="Platformer">Platformer</button>
+                    <button class="filter-btn" data-genre="Variety">Variety</button>
+                </div>
+                <div class="timezone-filter">
+                    <select class="filter-select" id="timezone-filter">
+                        <option value="all">All Timezones</option>
+                        <option value="UTC-10:00">UTC-10 Hawaii</option>
+                        <option value="UTC-09:00">UTC-9 Alaska</option>
+                        <option value="UTC-08:00">UTC-8 Pacific</option>
+                        <option value="UTC-07:00">UTC-7 Mountain</option>
+                        <option value="UTC-06:00">UTC-6 Central</option>
+                        <option value="UTC-05:00">UTC-5 Eastern</option>
+                        <option value="UTC-04:00">UTC-4 Atlantic</option>
+                        <option value="UTC-03:00">UTC-3 South America</option>
+                        <option value="UTC+00:00">UTC+0 UK / Ireland</option>
+                        <option value="UTC+01:00">UTC+1 Central Europe</option>
+                        <option value="UTC+02:00">UTC+2 Eastern Europe</option>
+                        <option value="UTC+03:00">UTC+3 Moscow / Istanbul</option>
+                        <option value="UTC+05:30">UTC+5:30 India</option>
+                        <option value="UTC+08:00">UTC+8 Singapore / Perth</option>
+                        <option value="UTC+09:00">UTC+9 Tokyo / Seoul</option>
+                        <option value="UTC+10:00">UTC+10 Sydney</option>
+                        <option value="UTC+12:00">UTC+12 New Zealand</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -1111,6 +1186,7 @@
 
         let allProfiles = [];
         let currentFilter = 'all';
+        let currentTimezone = 'all';
 
         // =============================================
         // AUTH FUNCTIONS
@@ -1239,13 +1315,16 @@
         // =============================================
         // RENDER: STREAMER GRID
         // =============================================
-        function renderStreamerGrid(profiles, genre) {
+        function renderStreamerGrid(profiles, genre, timezone) {
             const grid = document.getElementById('streamer-grid');
             const emptyMsg = document.getElementById('grid-empty');
 
             let filtered = profiles;
             if (genre && genre !== 'all') {
-                filtered = profiles.filter(p => (p.genres || []).includes(genre));
+                filtered = filtered.filter(p => (p.genres || []).includes(genre));
+            }
+            if (timezone && timezone !== 'all') {
+                filtered = filtered.filter(p => p.timezone === timezone);
             }
 
             if (filtered.length === 0) {
@@ -1368,8 +1447,14 @@
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentFilter = btn.dataset.genre;
-                renderStreamerGrid(allProfiles, currentFilter);
+                renderStreamerGrid(allProfiles, currentFilter, currentTimezone);
             });
+        });
+
+        // Timezone dropdown
+        document.getElementById('timezone-filter').addEventListener('change', (e) => {
+            currentTimezone = e.target.value;
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone);
         });
 
         // =============================================
@@ -1388,7 +1473,7 @@
             // Fetch and render all data
             allProfiles = await fetchProfiles();
             renderLiveCarousel(allProfiles);
-            renderStreamerGrid(allProfiles, currentFilter);
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone);
             renderStats(allProfiles);
         }
 
