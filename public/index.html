@@ -117,12 +117,21 @@
             padding: 0.5rem 1.25rem;
             border-radius: 6px;
             font-weight: 500;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
             transition: background 0.3s, transform 0.2s !important;
         }
 
         .nav-cta:hover {
             background: var(--accent-bright);
             transform: translateY(-1px);
+        }
+
+        .nav-auth {
+            flex-shrink: 0;
         }
 
         /* ========== SECTION COMMENTS ========== */
@@ -902,10 +911,12 @@
             <li><a href="#live">Live Now</a></li>
             <li><a href="#directory">Directory</a></li>
             <li><a href="#how">How It Works</a></li>
+        </ul>
+        <div class="nav-auth">
             <!-- Logged out state -->
-            <li id="nav-auth-out"><a href="#" class="nav-cta" onclick="signInWithTwitch(); return false;">Sign In With Twitch</a></li>
+            <div id="nav-auth-out"><a href="#" class="nav-cta" onclick="signInWithTwitch(); return false;">Sign In With Twitch</a></div>
             <!-- Logged in state (hidden by default) -->
-            <li id="nav-auth-in" style="display: none;">
+            <div id="nav-auth-in" style="display: none;">
                 <div class="nav-user">
                     <img id="nav-avatar" src="" alt="" class="nav-avatar">
                     <span id="nav-username" class="nav-username"></span>
@@ -914,8 +925,8 @@
                         <a href="#" onclick="signOut(); return false;">Sign Out</a>
                     </div>
                 </div>
-            </li>
-        </ul>
+            </div>
+        </div>
     </nav>
 
     <!-- HERO -->

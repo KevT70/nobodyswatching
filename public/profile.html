@@ -96,6 +96,10 @@
 
         .nav-links a:hover { color: var(--text-primary); }
 
+        .nav-auth {
+            flex-shrink: 0;
+        }
+
         .nav-user {
             position: relative;
             display: flex;
@@ -501,6 +505,93 @@
             color: var(--error);
         }
 
+        /* ========== DANGER ZONE ========== */
+        .danger-zone {
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            cursor: pointer;
+            font-family: var(--font-display);
+            transition: all 0.3s;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--error);
+        }
+
+        .btn-danger:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ========== MODAL ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            color: var(--error);
+        }
+
+        .modal p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .modal .modal-disclaimer {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .modal .form-input {
+            margin-bottom: 1.25rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
         /* ========== LOADING STATE ========== */
         .loading-state {
             text-align: center;
@@ -558,7 +649,9 @@
         <ul class="nav-links">
             <li><a href="/">Home</a></li>
             <li><a href="/#directory">Directory</a></li>
-            <li id="nav-auth-in">
+        </ul>
+        <div class="nav-auth">
+            <div id="nav-auth-in">
                 <div class="nav-user">
                     <img id="nav-avatar" src="" alt="" class="nav-avatar">
                     <span id="nav-username" class="nav-username"></span>
@@ -567,8 +660,8 @@
                         <a href="#" onclick="signOut(); return false;">Sign Out</a>
                     </div>
                 </div>
-            </li>
-        </ul>
+            </div>
+        </div>
     </nav>
 
     <!-- LOADING STATE (shown while checking auth) -->
@@ -712,6 +805,30 @@
         <div class="form-actions">
             <button class="btn-primary" id="save-btn" onclick="saveProfile()">💾 Save Profile</button>
             <a href="/" class="btn-secondary">← Back to Home</a>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="danger-zone">
+            <div class="form-section-title" style="color: var(--error);">// danger zone</div>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;">
+                Want out? No hard feelings. This removes your profile from the directory and deletes your account entirely. It's permanent — no take-backsies.
+            </p>
+            <button class="btn-danger" onclick="confirmDelete()">🗑️ Delete My Profile</button>
+            <div class="form-hint">*This cannot be undone. Your profile and account will be permanently removed.</div>
+        </div>
+    </div>
+
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div class="modal-overlay" id="delete-modal" style="display: none;">
+        <div class="modal">
+            <h3>Are you sure?</h3>
+            <p>This will permanently delete your profile and account from NobodysWatching.live. Your Twitch account is not affected — this only removes you from our directory.</p>
+            <p class="modal-disclaimer">*Type your username below to confirm you mean it.</p>
+            <input type="text" class="form-input" id="delete-confirm-input" placeholder="Type your username to confirm...">
+            <div class="modal-actions">
+                <button class="btn-danger" id="delete-confirm-btn" onclick="deleteProfile()" disabled>🗑️ Yes, Delete Everything</button>
+                <button class="btn-secondary" onclick="closeDeleteModal()">← Nah, Keep Me</button>
+            </div>
         </div>
     </div>
 
@@ -949,6 +1066,61 @@
                 toast.classList.remove('show');
             }, 3000);
         }
+
+        // =============================================
+        // DELETE PROFILE
+        // =============================================
+        function confirmDelete() {
+            document.getElementById('delete-modal').style.display = 'flex';
+            document.getElementById('delete-confirm-input').value = '';
+            document.getElementById('delete-confirm-btn').disabled = true;
+
+            // Listen for username confirmation
+            const input = document.getElementById('delete-confirm-input');
+            input.addEventListener('input', () => {
+                const matches = input.value.trim().toLowerCase() === 
+                    (currentProfile.username || '').toLowerCase();
+                document.getElementById('delete-confirm-btn').disabled = !matches;
+            });
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').style.display = 'none';
+        }
+
+        async function deleteProfile() {
+            const deleteBtn = document.getElementById('delete-confirm-btn');
+            deleteBtn.disabled = true;
+            deleteBtn.textContent = '⏳ Deleting...';
+
+            // 1. Delete profile from profiles table
+            const { error: profileError } = await sb
+                .from('profiles')
+                .delete()
+                .eq('id', currentUser.id);
+
+            if (profileError) {
+                console.error('Delete error:', profileError);
+                showToast('Something went wrong. Profile not deleted.', 'error');
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = '🗑️ Yes, Delete Everything';
+                return;
+            }
+
+            // 2. Sign out
+            await sb.auth.signOut();
+
+            // 3. Redirect home
+            showToast('Profile deleted. Sorry to see you go.', 'success');
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1500);
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeDeleteModal();
+        });
 
         // =============================================
         // GO
