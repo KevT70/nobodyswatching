@@ -816,14 +816,18 @@
         .nav-dropdown {
             display: none;
             position: absolute;
-            top: calc(100% + 8px);
+            top: 100%;
             right: 0;
+            padding-top: 8px;
+            z-index: 100;
+        }
+
+        .nav-dropdown-inner {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 8px;
             min-width: 160px;
             overflow: hidden;
-            z-index: 100;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
         }
 
@@ -921,8 +925,10 @@
                     <img id="nav-avatar" src="" alt="" class="nav-avatar">
                     <span id="nav-username" class="nav-username"></span>
                     <div class="nav-dropdown">
-                        <a href="/profile.html">My Profile</a>
-                        <a href="#" onclick="signOut(); return false;">Sign Out</a>
+                        <div class="nav-dropdown-inner">
+                            <a href="/profile.html">My Profile</a>
+                            <a href="#" onclick="signOut(); return false;">Sign Out</a>
+                        </div>
                     </div>
                 </div>
             </div>
