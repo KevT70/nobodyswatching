@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy — NobodysWatching.live</title>
+    <meta name="description" content="Privacy policy for NobodysWatching.live. Short version: we barely collect anything.">
+    <meta property="og:title" content="Privacy — NobodysWatching.live">
+    <meta property="og:description" content="Privacy policy for NobodysWatching.live. We barely collect anything. Here's the proof.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nobodyswatching.live/privacy.html">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #16161f;
+            --bg-card-hover: #1c1c28;
+            --border: #2a2a3a;
+            --text-primary: #e8e6f0;
+            --text-secondary: #8a879a;
+            --text-muted: #5a576a;
+            --accent: #0ea5a5;
+            --accent-bright: #2dd4bf;
+            --accent-glow: rgba(14, 165, 165, 0.15);
+            --font-display: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .nav-logo span { color: var(--accent-bright); }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--text-primary); }
+
+        .page-content {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 8rem 2rem 4rem;
+        }
+
+        .section-comment {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+        }
+
+        .content-block {
+            margin-bottom: 2.5rem;
+        }
+
+        .content-block h2 {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-bright);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+        }
+
+        .content-block p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .content-block a {
+            color: var(--accent-bright);
+            text-decoration: none;
+        }
+
+        .content-block a:hover { text-decoration: underline; }
+
+        .disclaimer {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .data-table th,
+        .data-table td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .data-table th {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent-bright);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background: var(--bg-card);
+        }
+
+        .data-table td {
+            color: var(--text-secondary);
+        }
+
+        .data-table .yes {
+            color: var(--accent-bright);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+        }
+
+        .data-table .no {
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+        }
+
+        footer {
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-logo {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo span { color: var(--accent-bright); }
+
+        .footer-tagline {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover { color: var(--text-primary); }
+
+        .footer-copy {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            .nav-links { display: none; }
+            .page-content { padding: 6rem 1.25rem 2rem; }
+            .page-title { font-size: 2rem; }
+            .data-table { font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="/" class="nav-logo">nobodys<span>watching</span>.live</a>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/#directory">Directory</a></li>
+            <li><a href="/about.html">About</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-content">
+        <div class="section-comment">// the boring but important bit</div>
+        <h1 class="page-title">PRIVACY</h1>
+        <p class="page-subtitle">Last updated: March 2026. Written in plain English because legal jargon helps nobody.</p>
+
+        <div class="content-block">
+            <h2>// the short version</h2>
+            <p>
+                We collect as little data as possible. We don't store your email. 
+                We don't track you across the web. We don't sell anything to anyone. 
+                If you delete your profile, your data goes with it.
+            </p>
+            <p class="disclaimer">*That's genuinely it. But here's the longer version if you need it.</p>
+        </div>
+
+        <div class="content-block">
+            <h2>// what we store</h2>
+            <p>When you sign in with Twitch and create a profile, we store:</p>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Stored?</th>
+                        <th>Why</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Twitch username</td>
+                        <td class="yes">Yes</td>
+                        <td>Your display name in the directory</td>
+                    </tr>
+                    <tr>
+                        <td>Twitch avatar URL</td>
+                        <td class="yes">Yes</td>
+                        <td>Your profile picture</td>
+                    </tr>
+                    <tr>
+                        <td>Bio</td>
+                        <td class="yes">Yes</td>
+                        <td>You wrote it, we display it</td>
+                    </tr>
+                    <tr>
+                        <td>Timezone</td>
+                        <td class="yes">Yes</td>
+                        <td>Helps viewers find streamers in their timezone</td>
+                    </tr>
+                    <tr>
+                        <td>Genres &amp; top games</td>
+                        <td class="yes">Yes</td>
+                        <td>Feeds the directory filters</td>
+                    </tr>
+                    <tr>
+                        <td>Platform links</td>
+                        <td class="yes">Yes</td>
+                        <td>So viewers can find your channels</td>
+                    </tr>
+                    <tr>
+                        <td>Live status &amp; viewer count</td>
+                        <td class="yes">Yes</td>
+                        <td>Updated automatically via Twitch API</td>
+                    </tr>
+                    <tr>
+                        <td>Email address</td>
+                        <td class="no">No</td>
+                        <td>We don't ask for it, don't need it</td>
+                    </tr>
+                    <tr>
+                        <td>Real name</td>
+                        <td class="no">No</td>
+                        <td>None of our business</td>
+                    </tr>
+                    <tr>
+                        <td>Location / IP address</td>
+                        <td class="no">No</td>
+                        <td>Not stored by us</td>
+                    </tr>
+                    <tr>
+                        <td>Browsing activity</td>
+                        <td class="no">No</td>
+                        <td>No tracking scripts, no analytics</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="content-block">
+            <h2>// twitch oauth</h2>
+            <p>
+                When you sign in, we use Twitch's OAuth system. This means you log in 
+                directly with Twitch — we never see or store your Twitch password. 
+                Twitch sends us your public username and avatar, and that's all we use.
+            </p>
+            <p>
+                You can revoke our access at any time by going to your 
+                <a href="https://www.twitch.tv/settings/connections" target="_blank" rel="noopener">Twitch Connections settings</a> 
+                and removing NobodysWatching.
+            </p>
+        </div>
+
+        <div class="content-block">
+            <h2>// third-party services</h2>
+            <p>
+                The site is hosted on <a href="https://www.netlify.com" target="_blank" rel="noopener">Netlify</a> 
+                and our database is on <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a>. 
+                Both are reputable services with their own privacy policies. 
+                We use the <a href="https://dev.twitch.tv" target="_blank" rel="noopener">Twitch API</a> 
+                to check live status. We don't use Google Analytics, Facebook Pixel, 
+                or any other tracking tools.
+            </p>
+            <p>
+                Fonts are loaded from Google Fonts, which may log basic request data 
+                on their end. That's the extent of third-party involvement.
+            </p>
+        </div>
+
+        <div class="content-block">
+            <h2>// cookies</h2>
+            <p>
+                We use a single authentication cookie to keep you logged in. 
+                That's it. No tracking cookies, no advertising cookies, 
+                no cookie consent banner taking up half your screen.
+            </p>
+            <p class="disclaimer">*You're welcome.</p>
+        </div>
+
+        <div class="content-block">
+            <h2>// deleting your data</h2>
+            <p>
+                You can delete your entire profile and account at any time from your 
+                <a href="/profile.html">profile settings</a>. It's permanent, it's immediate, 
+                and it removes everything we have on you. No waiting period, 
+                no "we'll keep your data for 30 days just in case" nonsense.
+            </p>
+        </div>
+
+        <div class="content-block">
+            <h2>// changes to this policy</h2>
+            <p>
+                If we ever change what we collect or how we use it, we'll update this page. 
+                We'll try to make noise about it too. But honestly, the whole point of this 
+                project is to collect as little as possible, so major changes are unlikely.
+            </p>
+        </div>
+
+        <div class="content-block">
+            <h2>// contact</h2>
+            <p>
+                Got questions about your data? Want something removed? 
+                Find us on <a href="https://bsky.app/profile/xtaptapx.com" target="_blank" rel="noopener">Bluesky</a> 
+                or the <a href="https://discord.gg/29JPRXPQ" target="_blank" rel="noopener">Discord</a>.
+            </p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-logo">nobodys<span>watching</span>.live</div>
+        <div class="footer-tagline">Where small streamers get seen. Eventually.</div>
+        <ul class="footer-links">
+            <li><a href="/about.html">About</a></li>
+            <li><a href="/privacy.html">Privacy</a></li>
+            <li><a href="https://bsky.app/profile/xtaptapx.com" target="_blank" rel="noopener">Bluesky</a></li>
+            <li><a href="https://discord.gg/29JPRXPQ" target="_blank" rel="noopener">Discord</a></li>
+        </ul>
+        <div class="footer-copy">© 2026 nobodyswatching.live. All rights reserved. No algorithms were harmed in the making of this site.</div>
+    </footer>
+
+</body>
+</html>
