@@ -684,9 +684,10 @@
             <div class="form-group">
                 <div class="platform-input-group">
                     <span class="platform-prefix twitch">Twitch</span>
-                    <input type="text" class="platform-input" id="twitch-url" disabled>
+                    <input type="url" class="platform-input" id="twitch-url"
+                        placeholder="https://twitch.tv/yourchannel">
                 </div>
-                <div class="form-hint">*Pulled from your sign-in. Can't be changed here.</div>
+                <div class="form-hint">*Pre-filled from your sign-in. Edit if needed.</div>
             </div>
 
             <div class="form-group">
@@ -897,11 +898,21 @@
             saveBtn.disabled = true;
             saveBtn.textContent = '⏳ Saving...';
 
+            const twitchUrl = document.getElementById('twitch-url').value.trim() || null;
+            // Extract username from Twitch URL for the polling function
+            let twitchUsername = null;
+            if (twitchUrl) {
+                const match = twitchUrl.match(/twitch\.tv\/([a-zA-Z0-9_]+)/);
+                twitchUsername = match ? match[1] : null;
+            }
+
             const updates = {
                 bio: document.getElementById('bio').value.trim() || null,
                 timezone: document.getElementById('timezone').value || 'UTC',
                 genre: document.getElementById('genre').value || null,
                 top_games: games,
+                twitch_url: twitchUrl,
+                twitch_username: twitchUsername,
                 youtube_url: document.getElementById('youtube-url').value.trim() || null,
                 kick_url: document.getElementById('kick-url').value.trim() || null,
                 updated_at: new Date().toISOString()
