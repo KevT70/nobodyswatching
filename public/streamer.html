@@ -726,7 +726,7 @@
             } else {
                 const lastLive = p.last_live_at 
                     ? `Last live <span>${timeAgo(p.last_live_at)}</span>` 
-                    : 'Hasn\'t streamed yet — but there\'s a first time for everything';
+                    : 'Currently offline';
                 bannerEl.innerHTML = `
                     <div class="offline-banner">
                         <div class="offline-text">${lastLive}</div>
