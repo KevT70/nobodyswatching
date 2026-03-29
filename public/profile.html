@@ -306,6 +306,48 @@
 
         .char-count.warn { color: var(--error); }
 
+        /* ========== GENRE CHECKBOXES ========== */
+        .genre-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .genre-checkbox {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .genre-checkbox input[type="checkbox"] {
+            display: none;
+        }
+
+        .genre-checkbox span {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.85rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .genre-checkbox:hover span {
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        .genre-checkbox input:checked + span {
+            color: var(--accent-bright);
+            background: var(--accent-glow);
+            border-color: rgba(14, 165, 165, 0.3);
+        }
+
         /* ========== GAME TAGS INPUT ========== */
         .game-tags-container {
             display: flex;
@@ -750,21 +792,21 @@
             <div class="form-section-title">// 02 — What You Play</div>
 
             <div class="form-group">
-                <label class="form-label" for="genre">Main Genre</label>
-                <select class="form-select" id="genre">
-                    <option value="">Pick your main genre...</option>
-                    <option value="FPS">FPS</option>
-                    <option value="RPG">RPG</option>
-                    <option value="Battle Royale">Battle Royale</option>
-                    <option value="Survival">Survival</option>
-                    <option value="Horror">Horror</option>
-                    <option value="Racing">Racing</option>
-                    <option value="Sports">Sports</option>
-                    <option value="Strategy">Strategy</option>
-                    <option value="Sandbox">Sandbox</option>
-                    <option value="Platformer">Platformer</option>
-                    <option value="Variety">Variety</option>
-                </select>
+                <label class="form-label">Genres</label>
+                <div class="genre-checkboxes" id="genre-checkboxes">
+                    <label class="genre-checkbox"><input type="checkbox" value="FPS"><span>FPS</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="RPG"><span>RPG</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Battle Royale"><span>Battle Royale</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Survival"><span>Survival</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Horror"><span>Horror</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Racing"><span>Racing</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Sports"><span>Sports</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Strategy"><span>Strategy</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Sandbox"><span>Sandbox</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Platformer"><span>Platformer</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Variety"><span>Variety</span></label>
+                </div>
+                <div class="form-hint">*Tick all that apply. No judgement.</div>
             </div>
 
             <div class="form-group">
@@ -927,8 +969,11 @@
             // Timezone
             document.getElementById('timezone').value = profile.timezone || '';
 
-            // Genre
-            document.getElementById('genre').value = profile.genre || '';
+            // Genres (checkboxes)
+            const selectedGenres = profile.genres || [];
+            document.querySelectorAll('#genre-checkboxes input[type="checkbox"]').forEach(cb => {
+                cb.checked = selectedGenres.includes(cb.value);
+            });
 
             // Top games
             games = profile.top_games || [];
@@ -1031,10 +1076,16 @@
                 twitchUsername = match ? match[1] : null;
             }
 
+            // Collect selected genres
+            const selectedGenres = [];
+            document.querySelectorAll('#genre-checkboxes input[type="checkbox"]:checked').forEach(cb => {
+                selectedGenres.push(cb.value);
+            });
+
             const updates = {
                 bio: document.getElementById('bio').value.trim() || null,
                 timezone: document.getElementById('timezone').value || 'UTC',
-                genre: document.getElementById('genre').value || null,
+                genres: selectedGenres,
                 top_games: games,
                 twitch_url: twitchUrl,
                 twitch_username: twitchUsername,

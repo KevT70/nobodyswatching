@@ -225,12 +225,23 @@
             letter-spacing: -0.02em;
         }
 
-        .profile-genre {
+        .profile-genres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.25rem;
+        }
+
+        .profile-genre-tag {
             font-family: var(--font-mono);
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: var(--accent-bright);
+            background: var(--accent-glow);
+            border: 1px solid rgba(14, 165, 165, 0.2);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
         }
 
         .profile-timezone {
@@ -601,7 +612,7 @@
             <img id="p-avatar" src="" alt="" class="profile-avatar">
             <div>
                 <div id="p-name" class="profile-name"></div>
-                <div id="p-genre" class="profile-genre"></div>
+                <div id="p-genres" class="profile-genres"></div>
                 <div id="p-timezone" class="profile-timezone"></div>
             </div>
         </div>
@@ -701,9 +712,14 @@
             avatar.alt = p.username;
             if (p.is_live) avatar.classList.add('is-live');
 
-            // Name, genre, timezone
+            // Name, genres, timezone
             document.getElementById('p-name').textContent = p.username;
-            document.getElementById('p-genre').textContent = p.genre || '';
+            const genresEl = document.getElementById('p-genres');
+            if (p.genres && p.genres.length > 0) {
+                genresEl.innerHTML = p.genres
+                    .map(g => `<span class="profile-genre-tag">${esc(g)}</span>`)
+                    .join('');
+            }
             document.getElementById('p-timezone').textContent = p.timezone ? `🕐 ${p.timezone}` : '';
 
             // Status banner

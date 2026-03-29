@@ -1237,7 +1237,7 @@
 
             let filtered = profiles;
             if (genre && genre !== 'all') {
-                filtered = profiles.filter(p => p.genre === genre);
+                filtered = profiles.filter(p => (p.genres || []).includes(genre));
             }
 
             if (filtered.length === 0) {
