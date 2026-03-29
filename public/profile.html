@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile — NobodysWatching.live</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #16161f;
+            --bg-card-hover: #1c1c28;
+            --border: #2a2a3a;
+            --border-glow: #0ea5a5;
+            --text-primary: #e8e6f0;
+            --text-secondary: #8a879a;
+            --text-muted: #5a576a;
+            --accent: #0ea5a5;
+            --accent-bright: #2dd4bf;
+            --accent-glow: rgba(14, 165, 165, 0.15);
+            --live-red: #ef4444;
+            --twitch: #9146ff;
+            --youtube: #ff0000;
+            --kick: #53fc18;
+            --success: #22c55e;
+            --error: #ef4444;
+            --font-display: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ========== NAVIGATION ========== */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .nav-logo span { color: var(--accent-bright); }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--text-primary); }
+
+        .nav-user {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            padding: 0.35rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-user:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .nav-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .nav-username {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .nav-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            min-width: 160px;
+            overflow: hidden;
+            z-index: 100;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-user:hover .nav-dropdown { display: block; }
+
+        .nav-dropdown a {
+            display: block;
+            padding: 0.75rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary) !important;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .nav-dropdown a:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary) !important;
+        }
+
+        /* ========== SECTION STYLES ========== */
+        .section-comment {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ========== PROFILE PAGE ========== */
+        .profile-page {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 8rem 2rem 4rem;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--accent);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .profile-header-info h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .profile-header-info p {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ========== FORM STYLES ========== */
+        .form-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .form-section-title {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent-bright);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-hint {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.6;
+        }
+
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a879a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+
+        .form-select option {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .char-count {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 0.35rem;
+            transition: color 0.2s;
+        }
+
+        .char-count.warn { color: var(--error); }
+
+        /* ========== GAME TAGS INPUT ========== */
+        .game-tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            min-height: 50px;
+            cursor: text;
+            transition: all 0.2s;
+        }
+
+        .game-tags-container:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .game-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent-bright);
+            background: var(--accent-glow);
+            border: 1px solid rgba(14, 165, 165, 0.2);
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .game-tag-remove {
+            cursor: pointer;
+            opacity: 0.6;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+            line-height: 1;
+        }
+
+        .game-tag-remove:hover { opacity: 1; }
+
+        .game-tag-input {
+            flex: 1;
+            min-width: 120px;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            outline: none;
+            padding: 0.2rem;
+        }
+
+        .game-tag-input::placeholder {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* ========== PLATFORM LINKS ========== */
+        .platform-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 0.75rem;
+        }
+
+        .platform-prefix {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.75rem 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-right: none;
+            border-radius: 8px 0 0 8px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .platform-prefix.twitch { color: var(--twitch); }
+        .platform-prefix.youtube { color: var(--youtube); }
+        .platform-prefix.kick { color: var(--kick); }
+
+        .platform-input {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0 8px 8px 0;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .platform-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .platform-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ========== BUTTONS ========== */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            color: #fff;
+            padding: 0.85rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-family: var(--font-display);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-bright);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(14, 165, 165, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            color: var(--text-primary);
+            padding: 0.85rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+            cursor: pointer;
+            font-family: var(--font-display);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        /* ========== TOAST NOTIFICATION ========== */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            z-index: 10000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: var(--success);
+        }
+
+        .toast.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error);
+        }
+
+        /* ========== LOADING STATE ========== */
+        .loading-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .loading-state p {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ========== FOOTER ========== */
+        footer {
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-logo {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo span { color: var(--accent-bright); }
+
+        .footer-copy {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            .nav-links { display: none; }
+            .profile-page { padding: 6rem 1.25rem 2rem; }
+            .profile-header { flex-direction: column; text-align: center; }
+            .form-actions { flex-direction: column; }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <a href="/" class="nav-logo">nobodys<span>watching</span>.live</a>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/#directory">Directory</a></li>
+            <li id="nav-auth-in">
+                <div class="nav-user">
+                    <img id="nav-avatar" src="" alt="" class="nav-avatar">
+                    <span id="nav-username" class="nav-username"></span>
+                    <div class="nav-dropdown">
+                        <a href="/profile.html">My Profile</a>
+                        <a href="#" onclick="signOut(); return false;">Sign Out</a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- LOADING STATE (shown while checking auth) -->
+    <div class="profile-page" id="loading-state">
+        <div class="loading-state">
+            <p>// checking credentials...</p>
+        </div>
+    </div>
+
+    <!-- PROFILE FORM (hidden until auth confirmed) -->
+    <div class="profile-page" id="profile-form" style="display: none;">
+        <div class="section-comment">// your profile — make it count</div>
+        <h1 class="section-title">EDIT PROFILE</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            This is what people see when they find you in the directory. 
+            Keep it honest, keep it you. 60 seconds and you're done.
+        </p>
+
+        <!-- Profile Header Preview -->
+        <div class="profile-header">
+            <img id="form-avatar" src="" alt="" class="profile-avatar-large">
+            <div class="profile-header-info">
+                <h2 id="form-display-name"></h2>
+                <p>Pulled from Twitch. Looking good.</p>
+            </div>
+        </div>
+
+        <!-- Bio Section -->
+        <div class="form-section">
+            <div class="form-section-title">// 01 — About You</div>
+
+            <div class="form-group">
+                <label class="form-label" for="bio">Bio</label>
+                <textarea class="form-textarea" id="bio" maxlength="250"
+                    placeholder="Tell people who you are in a sentence or two. Keep it real."></textarea>
+                <div class="char-count"><span id="bio-count">0</span> / 250</div>
+                <div class="form-hint">*This is harder than it sounds. We know.</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="timezone">Your Timezone</label>
+                <select class="form-select" id="timezone">
+                    <option value="">Select your timezone...</option>
+                    <option value="UTC-12:00">(UTC-12:00) Baker Island</option>
+                    <option value="UTC-11:00">(UTC-11:00) American Samoa</option>
+                    <option value="UTC-10:00">(UTC-10:00) Hawaii</option>
+                    <option value="UTC-09:00">(UTC-09:00) Alaska</option>
+                    <option value="UTC-08:00">(UTC-08:00) Pacific Time (US)</option>
+                    <option value="UTC-07:00">(UTC-07:00) Mountain Time (US)</option>
+                    <option value="UTC-06:00">(UTC-06:00) Central Time (US)</option>
+                    <option value="UTC-05:00">(UTC-05:00) Eastern Time (US)</option>
+                    <option value="UTC-04:00">(UTC-04:00) Atlantic Time</option>
+                    <option value="UTC-03:00">(UTC-03:00) Buenos Aires, São Paulo</option>
+                    <option value="UTC-02:00">(UTC-02:00) Mid-Atlantic</option>
+                    <option value="UTC-01:00">(UTC-01:00) Azores</option>
+                    <option value="UTC+00:00">(UTC+00:00) London, Dublin, Lisbon</option>
+                    <option value="UTC+01:00">(UTC+01:00) Berlin, Paris, Rome</option>
+                    <option value="UTC+02:00">(UTC+02:00) Athens, Helsinki, Cairo</option>
+                    <option value="UTC+03:00">(UTC+03:00) Moscow, Istanbul</option>
+                    <option value="UTC+04:00">(UTC+04:00) Dubai, Baku</option>
+                    <option value="UTC+05:00">(UTC+05:00) Karachi, Tashkent</option>
+                    <option value="UTC+05:30">(UTC+05:30) Mumbai, Delhi</option>
+                    <option value="UTC+06:00">(UTC+06:00) Dhaka, Almaty</option>
+                    <option value="UTC+07:00">(UTC+07:00) Bangkok, Jakarta</option>
+                    <option value="UTC+08:00">(UTC+08:00) Singapore, Perth, Beijing</option>
+                    <option value="UTC+09:00">(UTC+09:00) Tokyo, Seoul</option>
+                    <option value="UTC+09:30">(UTC+09:30) Adelaide</option>
+                    <option value="UTC+10:00">(UTC+10:00) Sydney, Melbourne</option>
+                    <option value="UTC+11:00">(UTC+11:00) Solomon Islands</option>
+                    <option value="UTC+12:00">(UTC+12:00) Auckland, Fiji</option>
+                    <option value="UTC+13:00">(UTC+13:00) Tonga, Samoa</option>
+                </select>
+                <div class="form-hint">*Helps viewers find streamers in their time zone.</div>
+            </div>
+        </div>
+
+        <!-- Games Section -->
+        <div class="form-section">
+            <div class="form-section-title">// 02 — What You Play</div>
+
+            <div class="form-group">
+                <label class="form-label" for="genre">Main Genre</label>
+                <select class="form-select" id="genre">
+                    <option value="">Pick your main genre...</option>
+                    <option value="FPS">FPS</option>
+                    <option value="RPG">RPG</option>
+                    <option value="Battle Royale">Battle Royale</option>
+                    <option value="Survival">Survival</option>
+                    <option value="Horror">Horror</option>
+                    <option value="Racing">Racing</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Strategy">Strategy</option>
+                    <option value="Sandbox">Sandbox</option>
+                    <option value="Platformer">Platformer</option>
+                    <option value="Variety">Variety</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Top 5 Games</label>
+                <div class="game-tags-container" id="game-tags-container">
+                    <input type="text" class="game-tag-input" id="game-input"
+                        placeholder="Type a game name and press Enter...">
+                </div>
+                <div class="form-hint">*Press Enter or comma to add a game. Max 5. Choose wisely — or don't.</div>
+            </div>
+        </div>
+
+        <!-- Platform Links Section -->
+        <div class="form-section">
+            <div class="form-section-title">// 03 — Where You Stream</div>
+
+            <div class="form-group">
+                <div class="platform-input-group">
+                    <span class="platform-prefix twitch">Twitch</span>
+                    <input type="text" class="platform-input" id="twitch-url" disabled>
+                </div>
+                <div class="form-hint">*Pulled from your sign-in. Can't be changed here.</div>
+            </div>
+
+            <div class="form-group">
+                <div class="platform-input-group">
+                    <span class="platform-prefix youtube">YouTube</span>
+                    <input type="url" class="platform-input" id="youtube-url"
+                        placeholder="https://youtube.com/@yourchannel">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="platform-input-group">
+                    <span class="platform-prefix kick">Kick</span>
+                    <input type="url" class="platform-input" id="kick-url"
+                        placeholder="https://kick.com/yourchannel">
+                </div>
+                <div class="form-hint">*At least one platform is required. More is better.</div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+            <button class="btn-primary" id="save-btn" onclick="saveProfile()">💾 Save Profile</button>
+            <a href="/" class="btn-secondary">← Back to Home</a>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-logo">nobodys<span>watching</span>.live</div>
+        <div class="footer-copy">© 2026 nobodyswatching.live. No algorithms were harmed in the making of this site.</div>
+    </footer>
+
+    <script>
+        // =============================================
+        // SUPABASE INIT
+        // =============================================
+        const SUPABASE_URL = 'https://hnjfzfdraoqpvyopgldi.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuamZ6ZmRyYW9xcHZ5b3BnbGRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTkzNzAsImV4cCI6MjA5MDI5NTM3MH0.EchviZ7rgkmO7ixtFuwE8aEPMxu590beO_ww-u0wxxc';
+
+        const { createClient } = supabase;
+        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+        let currentProfile = null;
+        let games = [];
+
+        // =============================================
+        // AUTH
+        // =============================================
+        async function signOut() {
+            await sb.auth.signOut();
+            window.location.href = '/';
+        }
+
+        // =============================================
+        // INIT — Check auth and load profile
+        // =============================================
+        async function init() {
+            const { data: { session } } = await sb.auth.getSession();
+
+            if (!session) {
+                // Not logged in — redirect to home
+                window.location.href = '/';
+                return;
+            }
+
+            currentUser = session.user;
+            const meta = currentUser.user_metadata || {};
+
+            // Update nav
+            document.getElementById('nav-avatar').src = meta.avatar_url || '';
+            document.getElementById('nav-avatar').alt = meta.user_name || '';
+            document.getElementById('nav-username').textContent = meta.user_name || 'Streamer';
+
+            // Load existing profile from Supabase
+            const { data: profile, error } = await sb
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+
+            if (error) {
+                console.error('Error loading profile:', error);
+                showToast('Failed to load profile. Please try again.', 'error');
+                return;
+            }
+
+            currentProfile = profile;
+
+            // Populate the form
+            populateForm(profile, meta);
+
+            // Show the form, hide loading
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('profile-form').style.display = 'block';
+        }
+
+        function populateForm(profile, meta) {
+            // Avatar and display name (from Twitch)
+            document.getElementById('form-avatar').src = profile.avatar_url || meta.avatar_url || '';
+            document.getElementById('form-display-name').textContent = profile.username || meta.user_name || 'Streamer';
+
+            // Bio
+            const bioField = document.getElementById('bio');
+            bioField.value = profile.bio || '';
+            updateCharCount();
+
+            // Timezone
+            document.getElementById('timezone').value = profile.timezone || '';
+
+            // Genre
+            document.getElementById('genre').value = profile.genre || '';
+
+            // Top games
+            games = profile.top_games || [];
+            renderGameTags();
+
+            // Platform links
+            document.getElementById('twitch-url').value = profile.twitch_url || `https://twitch.tv/${profile.twitch_username || ''}`;
+            document.getElementById('youtube-url').value = profile.youtube_url || '';
+            document.getElementById('kick-url').value = profile.kick_url || '';
+        }
+
+        // =============================================
+        // BIO CHARACTER COUNTER
+        // =============================================
+        function updateCharCount() {
+            const bio = document.getElementById('bio');
+            const count = document.getElementById('bio-count');
+            const len = bio.value.length;
+            count.textContent = len;
+            count.parentElement.classList.toggle('warn', len > 230);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('bio').addEventListener('input', updateCharCount);
+        });
+
+        // =============================================
+        // GAME TAGS
+        // =============================================
+        function renderGameTags() {
+            const container = document.getElementById('game-tags-container');
+            const input = document.getElementById('game-input');
+
+            // Remove existing tags (keep the input)
+            container.querySelectorAll('.game-tag').forEach(t => t.remove());
+
+            // Add tags before the input
+            games.forEach((game, index) => {
+                const tag = document.createElement('span');
+                tag.className = 'game-tag';
+                tag.innerHTML = `${game} <span class="game-tag-remove" onclick="removeGame(${index})">×</span>`;
+                container.insertBefore(tag, input);
+            });
+
+            // Hide input if at 5 games
+            input.style.display = games.length >= 5 ? 'none' : 'block';
+            input.placeholder = games.length === 0 
+                ? 'Type a game name and press Enter...' 
+                : games.length < 5 
+                    ? `${5 - games.length} more...` 
+                    : '';
+        }
+
+        function addGame(name) {
+            const trimmed = name.trim();
+            if (!trimmed || games.length >= 5) return;
+            if (games.some(g => g.toLowerCase() === trimmed.toLowerCase())) return;
+            games.push(trimmed);
+            renderGameTags();
+        }
+
+        function removeGame(index) {
+            games.splice(index, 1);
+            renderGameTags();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('game-input');
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    addGame(input.value);
+                    input.value = '';
+                }
+                // Backspace on empty input removes last tag
+                if (e.key === 'Backspace' && input.value === '' && games.length > 0) {
+                    removeGame(games.length - 1);
+                }
+            });
+
+            // Click container to focus input
+            document.getElementById('game-tags-container').addEventListener('click', () => {
+                input.focus();
+            });
+        });
+
+        // =============================================
+        // SAVE PROFILE
+        // =============================================
+        async function saveProfile() {
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = '⏳ Saving...';
+
+            const updates = {
+                bio: document.getElementById('bio').value.trim() || null,
+                timezone: document.getElementById('timezone').value || 'UTC',
+                genre: document.getElementById('genre').value || null,
+                top_games: games,
+                youtube_url: document.getElementById('youtube-url').value.trim() || null,
+                kick_url: document.getElementById('kick-url').value.trim() || null,
+                updated_at: new Date().toISOString()
+            };
+
+            const { error } = await sb
+                .from('profiles')
+                .update(updates)
+                .eq('id', currentUser.id);
+
+            saveBtn.disabled = false;
+            saveBtn.textContent = '💾 Save Profile';
+
+            if (error) {
+                console.error('Save error:', error);
+                showToast('Something went wrong. Give it another go.', 'error');
+            } else {
+                showToast('Profile saved. Looking good.', 'success');
+            }
+        }
+
+        // =============================================
+        // TOAST
+        // =============================================
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            // Trigger reflow
+            toast.offsetHeight;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // =============================================
+        // GO
+        // =============================================
+        init();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+    "name": "nobodyswatching",
+    "version": "1.0.0",
+    "description": "Where small streamers get seen",
+    "private": true,
+    "dependencies": {
+        "@supabase/supabase-js": "^2.49.0"
+    }
+}

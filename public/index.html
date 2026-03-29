@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NobodysWatching.live — Where Small Streamers Get Seen</title>
+    <meta name="description" content="A discovery platform for small streamers. No algorithms. No gatekeeping. Just people who deserve an audience.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #16161f;
+            --bg-card-hover: #1c1c28;
+            --border: #2a2a3a;
+            --border-glow: #0ea5a5;
+            --text-primary: #e8e6f0;
+            --text-secondary: #8a879a;
+            --text-muted: #5a576a;
+            --accent: #0ea5a5;
+            --accent-bright: #2dd4bf;
+            --accent-glow: rgba(14, 165, 165, 0.15);
+            --live-red: #ef4444;
+            --live-glow: rgba(239, 68, 68, 0.3);
+            --twitch: #9146ff;
+            --youtube: #ff0000;
+            --kick: #53fc18;
+            --success: #22c55e;
+            --font-display: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ========== NOISE OVERLAY ========== */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ========== NAVIGATION ========== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .nav-logo span {
+            color: var(--accent-bright);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-cta {
+            background: var(--accent);
+            color: #fff !important;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background 0.3s, transform 0.2s !important;
+        }
+
+        .nav-cta:hover {
+            background: var(--accent-bright);
+            transform: translateY(-1px);
+        }
+
+        /* ========== SECTION COMMENTS ========== */
+        .section-comment {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        /* ========== HERO ========== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent-bright);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 2rem;
+            padding: 0.4rem 1.2rem;
+            border: 1px solid rgba(14, 165, 165, 0.3);
+            border-radius: 50px;
+            background: rgba(14, 165, 165, 0.08);
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.03em;
+            line-height: 0.95;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .hero h1 .line-accent {
+            color: var(--accent-bright);
+        }
+
+        .hero-sub {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 550px;
+            line-height: 1.7;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-disclaimer {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            color: #fff;
+            padding: 0.85rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-bright);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(14, 165, 165, 0.3);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            color: var(--text-primary);
+            padding: 0.85rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 2rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        /* ========== LIVE NOW SECTION ========== */
+        .live-section {
+            padding: 5rem 2rem;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .live-carousel {
+            display: flex;
+            gap: 1.25rem;
+            overflow-x: auto;
+            padding: 1rem 0 2rem;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .live-carousel::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .live-carousel::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .live-carousel::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        .live-card {
+            flex: 0 0 300px;
+            scroll-snap-align: start;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .live-card:hover {
+            border-color: var(--live-red);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(239, 68, 68, 0.1);
+        }
+
+        .live-card-thumb {
+            width: 100%;
+            height: 170px;
+            background: var(--bg-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .live-card-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .live-card-thumb .placeholder-thumb {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+        }
+
+        .live-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--live-red);
+            color: #fff;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            animation: liveGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes liveGlow {
+            0%, 100% { box-shadow: 0 0 8px var(--live-glow); }
+            50% { box-shadow: 0 0 20px var(--live-glow); }
+        }
+
+        .live-viewer-count {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.75);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .live-card-info {
+            padding: 1rem;
+        }
+
+        .live-card-name {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .live-card-game {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-bright);
+        }
+
+        .live-card-platform {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* ========== HOW IT WORKS ========== */
+        .how-section {
+            padding: 5rem 2rem;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .how-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .how-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .how-card:hover {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+            transform: translateY(-4px);
+        }
+
+        .how-card-number {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent-bright);
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+        }
+
+        .how-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .how-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .how-card .disclaimer {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+        }
+
+        /* ========== DIRECTORY / GRID ========== */
+        .directory-section {
+            padding: 5rem 2rem;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .directory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            color: var(--text-primary);
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .streamer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .streamer-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .streamer-card:hover {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(14, 165, 165, 0.08);
+        }
+
+        .streamer-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .streamer-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            border: 2px solid var(--border);
+            overflow: hidden;
+        }
+
+        .streamer-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .streamer-card.is-live .streamer-avatar {
+            border-color: var(--live-red);
+            box-shadow: 0 0 12px var(--live-glow);
+        }
+
+        .streamer-name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .streamer-meta {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .streamer-live-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: var(--live-red);
+            border-radius: 50%;
+            animation: liveGlow 2s ease-in-out infinite;
+        }
+
+        .streamer-bio {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .streamer-games {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .game-tag {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--accent-bright);
+            background: var(--accent-glow);
+            border: 1px solid rgba(14, 165, 165, 0.2);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .streamer-platforms {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .platform-icon {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .platform-twitch {
+            background: rgba(145, 70, 255, 0.15);
+            color: var(--twitch);
+            border: 1px solid rgba(145, 70, 255, 0.25);
+        }
+
+        .platform-youtube {
+            background: rgba(255, 0, 0, 0.1);
+            color: var(--youtube);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+
+        .platform-kick {
+            background: rgba(83, 252, 24, 0.1);
+            color: var(--kick);
+            border: 1px solid rgba(83, 252, 24, 0.2);
+        }
+
+        /* ========== STATS BAR ========== */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            padding: 4rem 2rem;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 0.25rem;
+        }
+
+        .stat-note {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+        }
+
+        /* ========== CTA SECTION ========== */
+        .cta-section {
+            padding: 6rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta-section h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto 0.5rem;
+        }
+
+        .cta-section .hero-disclaimer {
+            margin-bottom: 2rem;
+        }
+
+        /* ========== FOOTER ========== */
+        footer {
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo span {
+            color: var(--accent-bright);
+        }
+
+        .footer-tagline {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer-copy {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* ========== NAV USER MENU ========== */
+        .nav-user {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            padding: 0.35rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-user:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .nav-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .nav-username {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .nav-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            min-width: 160px;
+            overflow: hidden;
+            z-index: 100;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-user:hover .nav-dropdown {
+            display: block;
+        }
+
+        .nav-dropdown a {
+            display: block;
+            padding: 0.75rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary) !important;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .nav-dropdown a:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary) !important;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: clamp(2.5rem, 10vw, 4rem);
+            }
+
+            .how-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .directory-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .streamer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .live-card {
+                flex: 0 0 260px;
+            }
+        }
+
+        /* ========== ANIMATIONS ========== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <a href="/" class="nav-logo">nobodys<span>watching</span>.live</a>
+        <ul class="nav-links">
+            <li><a href="#live">Live Now</a></li>
+            <li><a href="#directory">Directory</a></li>
+            <li><a href="#how">How It Works</a></li>
+            <!-- Logged out state -->
+            <li id="nav-auth-out"><a href="#" class="nav-cta" onclick="signInWithTwitch(); return false;">Sign In With Twitch</a></li>
+            <!-- Logged in state (hidden by default) -->
+            <li id="nav-auth-in" style="display: none;">
+                <div class="nav-user">
+                    <img id="nav-avatar" src="" alt="" class="nav-avatar">
+                    <span id="nav-username" class="nav-username"></span>
+                    <div class="nav-dropdown">
+                        <a href="/profile.html">My Profile</a>
+                        <a href="#" onclick="signOut(); return false;">Sign Out</a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-badge">// small streamers • big hearts • zero algorithms</div>
+        <h1>
+            NOBODY'S<br>
+            <span class="line-accent">WATCHING</span>
+        </h1>
+        <p class="hero-sub">
+            A discovery platform for small streamers who deserve an audience. 
+            No follower counts required. No algorithm to game. 
+            Just real people streaming real content — and a place to find them.
+        </p>
+        <p class="hero-disclaimer">*We know someone's watching. The name's ironic. Work with us here.</p>
+        <div class="hero-buttons">
+            <a href="#" class="btn-primary" id="hero-cta" onclick="signInWithTwitch(); return false;">⚡ List Your Stream</a>
+            <a href="#directory" class="btn-secondary">↓ Browse Streamers</a>
+        </div>
+        <div class="scroll-hint">↓ scroll</div>
+    </section>
+
+    <!-- LIVE NOW -->
+    <section class="live-section" id="live">
+        <div class="section-comment">// currently live — right now</div>
+        <h2 class="section-title">LIVE NOW</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; max-width: 550px;">
+            These legends are streaming right now to an audience of... well, not many. 
+            Be the one who changes that.
+        </p>
+
+        <div class="live-carousel" id="live-carousel">
+            <!-- Populated by JavaScript -->
+        </div>
+        <div id="live-empty" style="display: none;">
+            <p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); padding: 2rem 0;">
+                Nobody's live right now. Ironic, isn't it? Check back soon — or better yet, 
+                <a href="#join" style="color: var(--accent-bright); text-decoration: none;">list your stream</a> and be the first.
+            </p>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-section" id="how">
+        <div class="section-comment">// how this works — it's not complicated</div>
+        <h2 class="section-title">THE DEAL</h2>
+
+        <div class="how-grid">
+            <div class="how-card">
+                <div class="how-card-number">// 01</div>
+                <h3>Sign In With Twitch</h3>
+                <p>
+                    One click. No forms, no email, no personal info harvesting. 
+                    We grab your username and avatar from Twitch and that's it. 
+                    We're not interested in your data — just your stream.
+                </p>
+                <div class="disclaimer">*Seriously, we don't even have a database field for your email.</div>
+            </div>
+            <div class="how-card">
+                <div class="how-card-number">// 02</div>
+                <h3>Build Your Profile</h3>
+                <p>
+                    Add a short bio, pick your top 5 games, set your timezone, 
+                    and link any other platforms you stream on. 
+                    Takes about 60 seconds. Less if you can type fast.
+                </p>
+                <div class="disclaimer">*Bio writing is harder than it sounds. We know.</div>
+            </div>
+            <div class="how-card">
+                <div class="how-card-number">// 03</div>
+                <h3>Get Discovered</h3>
+                <p>
+                    When you go live, you appear in the carousel at the top of the page. 
+                    When you're offline, you're still in the directory. Either way, 
+                    people can find you — which is more than most platforms offer.
+                </p>
+                <div class="disclaimer">*We can't guarantee viewers. But we can guarantee visibility.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-number" id="stat-total">—</div>
+            <div class="stat-label">Streamers Listed</div>
+            <div class="stat-note" id="stat-total-note">loading...</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="stat-live">—</div>
+            <div class="stat-label">Currently Live</div>
+            <div class="stat-note" id="stat-live-note">loading...</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Algorithms Used</div>
+            <div class="stat-note">just kidding. it's zero.</div>
+        </div>
+    </div>
+
+    <!-- DIRECTORY -->
+    <section class="directory-section" id="directory">
+        <div class="directory-header">
+            <div>
+                <div class="section-comment">// browse the directory</div>
+                <h2 class="section-title">FIND A STREAMER</h2>
+            </div>
+            <div class="filters" id="filters">
+                <button class="filter-btn active" data-genre="all">All</button>
+                <button class="filter-btn" data-genre="FPS">FPS</button>
+                <button class="filter-btn" data-genre="RPG">RPG</button>
+                <button class="filter-btn" data-genre="Battle Royale">Battle Royale</button>
+                <button class="filter-btn" data-genre="Survival">Survival</button>
+                <button class="filter-btn" data-genre="Horror">Horror</button>
+                <button class="filter-btn" data-genre="Racing">Racing</button>
+                <button class="filter-btn" data-genre="Sports">Sports</button>
+                <button class="filter-btn" data-genre="Strategy">Strategy</button>
+                <button class="filter-btn" data-genre="Sandbox">Sandbox</button>
+                <button class="filter-btn" data-genre="Platformer">Platformer</button>
+                <button class="filter-btn" data-genre="Variety">Variety</button>
+            </div>
+        </div>
+
+        <div class="streamer-grid" id="streamer-grid">
+            <!-- Populated by JavaScript -->
+        </div>
+        <div id="grid-empty" style="display: none;">
+            <p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); padding: 2rem 0;">
+                No streamers found. Either nobody's signed up yet (awkward) or your filters are too specific. Try "All" and see who's about.
+            </p>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="join">
+        <div class="section-comment">// your turn</div>
+        <h2>STOP STREAMING<br>INTO THE VOID</h2>
+        <p>
+            It takes 60 seconds to create a profile. No email required. 
+            No data harvesting. Just you, your stream, and a shot at being seen.
+        </p>
+        <p class="hero-disclaimer">*Void-streaming is a valid lifestyle choice. We just think you deserve better.</p>
+        <a href="#" class="btn-primary" id="cta-btn" onclick="signInWithTwitch(); return false;">⚡ Sign In With Twitch</a>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-logo">nobodys<span>watching</span>.live</div>
+        <div class="footer-tagline">Where small streamers get seen. Eventually.</div>
+        <ul class="footer-links">
+            <li><a href="#">About</a></li>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Bluesky</a></li>
+        </ul>
+        <div class="footer-copy">© 2026 nobodyswatching.live. All rights reserved. No algorithms were harmed in the making of this site.</div>
+    </footer>
+
+    <script>
+        // =============================================
+        // SUPABASE INIT
+        // =============================================
+        const SUPABASE_URL = 'https://hnjfzfdraoqpvyopgldi.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuamZ6ZmRyYW9xcHZ5b3BnbGRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTkzNzAsImV4cCI6MjA5MDI5NTM3MH0.EchviZ7rgkmO7ixtFuwE8aEPMxu590beO_ww-u0wxxc';
+
+        const { createClient } = supabase;
+        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let allProfiles = [];
+        let currentFilter = 'all';
+
+        // =============================================
+        // AUTH FUNCTIONS
+        // =============================================
+        async function signInWithTwitch() {
+            const { data, error } = await sb.auth.signInWithOAuth({
+                provider: 'twitch',
+                options: {
+                    redirectTo: window.location.origin
+                }
+            });
+            if (error) {
+                console.error('Sign in error:', error.message);
+            }
+        }
+
+        async function signOut() {
+            const { error } = await sb.auth.signOut();
+            if (error) {
+                console.error('Sign out error:', error.message);
+            }
+            updateAuthUI(null);
+        }
+
+        function goToProfile() {
+            window.location.href = '/profile.html';
+        }
+
+        // =============================================
+        // AUTH UI
+        // =============================================
+        function updateAuthUI(session) {
+            const navAuthOut = document.getElementById('nav-auth-out');
+            const navAuthIn = document.getElementById('nav-auth-in');
+            const navAvatar = document.getElementById('nav-avatar');
+            const navUsername = document.getElementById('nav-username');
+            const heroCta = document.getElementById('hero-cta');
+            const ctaBtn = document.getElementById('cta-btn');
+
+            if (session) {
+                const user = session.user;
+                const meta = user.user_metadata || {};
+                const username = meta.user_name || meta.name || 'Streamer';
+                const avatar = meta.avatar_url || '';
+
+                navAuthOut.style.display = 'none';
+                navAuthIn.style.display = 'block';
+                navAvatar.src = avatar;
+                navAvatar.alt = username;
+                navUsername.textContent = username;
+
+                heroCta.textContent = '⚡ Edit Your Profile';
+                heroCta.onclick = function(e) { e.preventDefault(); goToProfile(); };
+                ctaBtn.textContent = '⚡ Edit Your Profile';
+                ctaBtn.onclick = function(e) { e.preventDefault(); goToProfile(); };
+            } else {
+                navAuthOut.style.display = 'block';
+                navAuthIn.style.display = 'none';
+
+                heroCta.textContent = '⚡ List Your Stream';
+                heroCta.onclick = function(e) { e.preventDefault(); signInWithTwitch(); };
+                ctaBtn.textContent = '⚡ Sign In With Twitch';
+                ctaBtn.onclick = function(e) { e.preventDefault(); signInWithTwitch(); };
+            }
+        }
+
+        // =============================================
+        // DATA FETCHING
+        // =============================================
+        async function fetchProfiles() {
+            const { data, error } = await sb
+                .from('profiles')
+                .select('*')
+                .order('is_live', { ascending: false })
+                .order('last_live_at', { ascending: false, nullsFirst: false });
+
+            if (error) {
+                console.error('Error fetching profiles:', error);
+                return [];
+            }
+            return data || [];
+        }
+
+        // =============================================
+        // RENDER: LIVE CAROUSEL
+        // =============================================
+        function renderLiveCarousel(profiles) {
+            const carousel = document.getElementById('live-carousel');
+            const emptyMsg = document.getElementById('live-empty');
+            const liveProfiles = profiles.filter(p => p.is_live);
+
+            if (liveProfiles.length === 0) {
+                carousel.style.display = 'none';
+                emptyMsg.style.display = 'block';
+                return;
+            }
+
+            carousel.style.display = 'flex';
+            emptyMsg.style.display = 'none';
+
+            carousel.innerHTML = liveProfiles.map(p => {
+                const streamUrl = p.twitch_url || p.youtube_url || p.kick_url || '#';
+                const platform = p.live_platform || (p.twitch_url ? 'twitch.tv' : p.youtube_url ? 'youtube.com' : 'kick.com');
+                const thumb = p.live_thumbnail_url;
+                const thumbHtml = thumb
+                    ? `<img src="${thumb}" alt="${p.username}">`
+                    : `<div class="placeholder-thumb">🎮</div>`;
+
+                return `
+                    <a href="${streamUrl}" target="_blank" rel="noopener" class="live-card">
+                        <div class="live-card-thumb">
+                            ${thumbHtml}
+                            <span class="live-badge">● Live</span>
+                            <span class="live-viewer-count">👁 ${p.live_viewer_count || 0} viewer${p.live_viewer_count !== 1 ? 's' : ''}</span>
+                        </div>
+                        <div class="live-card-info">
+                            <div class="live-card-name">${esc(p.username)}</div>
+                            <div class="live-card-game">${esc(p.live_game || 'Streaming')}</div>
+                            <div class="live-card-platform">${esc(platform)}</div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        // =============================================
+        // RENDER: STREAMER GRID
+        // =============================================
+        function renderStreamerGrid(profiles, genre) {
+            const grid = document.getElementById('streamer-grid');
+            const emptyMsg = document.getElementById('grid-empty');
+
+            let filtered = profiles;
+            if (genre && genre !== 'all') {
+                filtered = profiles.filter(p => p.genre === genre);
+            }
+
+            if (filtered.length === 0) {
+                grid.style.display = 'none';
+                emptyMsg.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            emptyMsg.style.display = 'none';
+
+            grid.innerHTML = filtered.map(p => {
+                const streamUrl = p.twitch_url || p.youtube_url || p.kick_url || '#';
+                const isLive = p.is_live;
+
+                // Meta line
+                let metaHtml = '';
+                if (isLive) {
+                    metaHtml = `<span class="streamer-live-dot"></span> Live Now`;
+                } else if (p.last_live_at) {
+                    metaHtml = `Last live ${timeAgo(p.last_live_at)}`;
+                } else {
+                    metaHtml = 'New streamer';
+                }
+                if (p.timezone) {
+                    metaHtml += ` · ${esc(p.timezone)}`;
+                }
+
+                // Games
+                const gamesHtml = (p.top_games || [])
+                    .map(g => `<span class="game-tag">${esc(g)}</span>`)
+                    .join('');
+
+                // Platforms
+                let platformsHtml = '';
+                if (p.twitch_url) platformsHtml += '<span class="platform-icon platform-twitch">Twitch</span>';
+                if (p.youtube_url) platformsHtml += '<span class="platform-icon platform-youtube">YouTube</span>';
+                if (p.kick_url) platformsHtml += '<span class="platform-icon platform-kick">Kick</span>';
+
+                // Avatar
+                const avatarHtml = p.avatar_url
+                    ? `<img src="${p.avatar_url}" alt="${esc(p.username)}">`
+                    : '🎮';
+
+                return `
+                    <a href="${streamUrl}" target="_blank" rel="noopener" class="streamer-card ${isLive ? 'is-live' : ''}">
+                        <div class="streamer-card-header">
+                            <div class="streamer-avatar">${avatarHtml}</div>
+                            <div>
+                                <div class="streamer-name">${esc(p.username)}</div>
+                                <div class="streamer-meta">${metaHtml}</div>
+                            </div>
+                        </div>
+                        ${p.bio ? `<div class="streamer-bio">${esc(p.bio)}</div>` : ''}
+                        ${gamesHtml ? `<div class="streamer-games">${gamesHtml}</div>` : ''}
+                        ${platformsHtml ? `<div class="streamer-platforms">${platformsHtml}</div>` : ''}
+                    </a>
+                `;
+            }).join('');
+        }
+
+        // =============================================
+        // RENDER: STATS BAR
+        // =============================================
+        function renderStats(profiles) {
+            const total = profiles.length;
+            const live = profiles.filter(p => p.is_live).length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-live').textContent = live;
+
+            // Fun stat notes
+            const totalNotes = [
+                'and counting',
+                'every one of them matters',
+                'we just launched, give us a minute',
+                'small but mighty',
+                'quality over quantity'
+            ];
+            const liveNotes = live === 0
+                ? ['somebody go live please', 'the void is strong today', 'crickets... for now']
+                : ['go say hello', 'they could use the company', 'legends, all of them'];
+
+            document.getElementById('stat-total-note').textContent =
+                total === 0 ? 'we just launched, give us a minute' : totalNotes[total % totalNotes.length];
+            document.getElementById('stat-live-note').textContent =
+                liveNotes[Math.floor(Math.random() * liveNotes.length)];
+        }
+
+        // =============================================
+        // HELPERS
+        // =============================================
+        function esc(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function timeAgo(dateStr) {
+            const now = new Date();
+            const then = new Date(dateStr);
+            const diffMs = now - then;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHrs = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHrs < 24) return `${diffHrs}hr${diffHrs !== 1 ? 's' : ''} ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return `${Math.floor(diffDays / 7)}w ago`;
+        }
+
+        // =============================================
+        // FILTER BUTTONS
+        // =============================================
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.genre;
+                renderStreamerGrid(allProfiles, currentFilter);
+            });
+        });
+
+        // =============================================
+        // INIT
+        // =============================================
+        async function init() {
+            // Auth
+            const { data: { session } } = await sb.auth.getSession();
+            updateAuthUI(session);
+
+            sb.auth.onAuthStateChange((event, session) => {
+                console.log('Auth event:', event);
+                updateAuthUI(session);
+            });
+
+            // Fetch and render all data
+            allProfiles = await fetchProfiles();
+            renderLiveCarousel(allProfiles);
+            renderStreamerGrid(allProfiles, currentFilter);
+            renderStats(allProfiles);
+        }
+
+        init();
+    </script>
+
+</body>
+</html>
