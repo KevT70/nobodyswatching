@@ -79,6 +79,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1rem;
             background: rgba(10, 10, 15, 0.85);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
@@ -905,15 +906,63 @@
         /* ========== RESPONSIVE ========== */
         @media (max-width: 768px) {
             nav {
-                padding: 1rem;
+                padding: 0.75rem 1rem;
+            }
+
+            .nav-logo {
+                font-size: 0.7rem;
             }
 
             .nav-links {
                 display: none;
             }
 
+            .nav-cta {
+                font-size: 0.6rem;
+                padding: 0.4rem 0.75rem;
+            }
+
+            .nav-username {
+                display: none;
+            }
+
+            .hero {
+                padding: 7rem 1.25rem 3rem;
+            }
+
             .hero h1 {
                 font-size: clamp(2.5rem, 10vw, 4rem);
+            }
+
+            .hero-sub {
+                font-size: 1rem;
+                padding: 0 0.5rem;
+            }
+
+            .hero-badge {
+                font-size: 0.6rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                width: 100%;
+                padding: 0 1rem;
+            }
+
+            .hero-buttons .btn-primary,
+            .hero-buttons .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .live-section,
+            .how-section,
+            .directory-section {
+                padding: 3rem 1.25rem;
+            }
+
+            .section-title {
+                font-size: 1.75rem;
             }
 
             .how-grid {
@@ -923,6 +972,7 @@
             .stats-bar {
                 flex-direction: column;
                 gap: 2rem;
+                padding: 3rem 1.25rem;
             }
 
             .directory-header {
@@ -945,6 +995,14 @@
 
             .live-card {
                 flex: 0 0 260px;
+            }
+
+            .cta-section {
+                padding: 4rem 1.25rem;
+            }
+
+            .cta-section h2 {
+                font-size: 1.75rem;
             }
         }
 
