@@ -143,6 +143,9 @@
             flex-shrink: 0;
         }
 
+        .nav-cta .cta-short { display: none; }
+        .nav-cta .cta-full { display: inline; }
+
         /* ========== SECTION COMMENTS ========== */
         .section-comment {
             font-family: var(--font-mono);
@@ -918,9 +921,12 @@
             }
 
             .nav-cta {
-                font-size: 0.6rem;
+                font-size: 0.65rem;
                 padding: 0.4rem 0.75rem;
             }
+
+            .nav-cta .cta-short { display: inline; }
+            .nav-cta .cta-full { display: none; }
 
             .nav-username {
                 display: none;
@@ -1035,7 +1041,7 @@
         </ul>
         <div class="nav-auth">
             <!-- Logged out state -->
-            <div id="nav-auth-out"><a href="#" class="nav-cta" onclick="signInWithTwitch(); return false;">Sign In With Twitch</a></div>
+            <div id="nav-auth-out"><a href="#" class="nav-cta" onclick="signInWithTwitch(); return false;"><span class="cta-full">Sign In With Twitch</span><span class="cta-short">Sign In</span></a></div>
             <!-- Logged in state (hidden by default) -->
             <div id="nav-auth-in" style="display: none;">
                 <div class="nav-user">
