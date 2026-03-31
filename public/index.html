@@ -526,6 +526,12 @@
             flex-shrink: 0;
         }
 
+        .filter-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
         .filter-select {
             font-family: var(--font-mono);
             font-size: 0.7rem;
@@ -555,6 +561,28 @@
         .filter-select option {
             background: var(--bg-card);
             color: var(--text-primary);
+        }
+
+        .btn-random {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-random:hover {
+            color: #fbbf24;
+            border-color: rgba(255, 215, 0, 0.4);
+            background: rgba(255, 215, 0, 0.08);
+            transform: translateY(-1px);
         }
 
         .filter-btn {
@@ -1058,6 +1086,14 @@
                 width: 100%;
             }
 
+            .filter-row {
+                width: 100%;
+            }
+
+            .filter-row .timezone-filter {
+                flex: 1;
+            }
+
             .streamer-grid {
                 grid-template-columns: 1fr;
             }
@@ -1241,27 +1277,30 @@
                     <button class="filter-btn" data-genre="Platformer">Platformer</button>
                     <button class="filter-btn" data-genre="Variety">Variety</button>
                 </div>
-                <div class="timezone-filter">
-                    <select class="filter-select" id="timezone-filter">
-                        <option value="all">All Timezones</option>
-                        <option value="UTC-10:00">UTC-10 Hawaii</option>
-                        <option value="UTC-09:00">UTC-9 Alaska</option>
-                        <option value="UTC-08:00">UTC-8 Pacific</option>
-                        <option value="UTC-07:00">UTC-7 Mountain</option>
-                        <option value="UTC-06:00">UTC-6 Central</option>
-                        <option value="UTC-05:00">UTC-5 Eastern</option>
-                        <option value="UTC-04:00">UTC-4 Atlantic</option>
-                        <option value="UTC-03:00">UTC-3 South America</option>
-                        <option value="UTC+00:00">UTC+0 UK / Ireland</option>
-                        <option value="UTC+01:00">UTC+1 Central Europe</option>
-                        <option value="UTC+02:00">UTC+2 Eastern Europe</option>
-                        <option value="UTC+03:00">UTC+3 Moscow / Istanbul</option>
-                        <option value="UTC+05:30">UTC+5:30 India</option>
-                        <option value="UTC+08:00">UTC+8 Singapore / Perth</option>
-                        <option value="UTC+09:00">UTC+9 Tokyo / Seoul</option>
-                        <option value="UTC+10:00">UTC+10 Sydney</option>
-                        <option value="UTC+12:00">UTC+12 New Zealand</option>
-                    </select>
+                <div class="filter-row">
+                    <div class="timezone-filter">
+                        <select class="filter-select" id="timezone-filter">
+                            <option value="all">All Timezones</option>
+                            <option value="UTC-10:00">UTC-10 Hawaii</option>
+                            <option value="UTC-09:00">UTC-9 Alaska</option>
+                            <option value="UTC-08:00">UTC-8 Pacific</option>
+                            <option value="UTC-07:00">UTC-7 Mountain</option>
+                            <option value="UTC-06:00">UTC-6 Central</option>
+                            <option value="UTC-05:00">UTC-5 Eastern</option>
+                            <option value="UTC-04:00">UTC-4 Atlantic</option>
+                            <option value="UTC-03:00">UTC-3 South America</option>
+                            <option value="UTC+00:00">UTC+0 UK / Ireland</option>
+                            <option value="UTC+01:00">UTC+1 Central Europe</option>
+                            <option value="UTC+02:00">UTC+2 Eastern Europe</option>
+                            <option value="UTC+03:00">UTC+3 Moscow / Istanbul</option>
+                            <option value="UTC+05:30">UTC+5:30 India</option>
+                            <option value="UTC+08:00">UTC+8 Singapore / Perth</option>
+                            <option value="UTC+09:00">UTC+9 Tokyo / Seoul</option>
+                            <option value="UTC+10:00">UTC+10 Sydney</option>
+                            <option value="UTC+12:00">UTC+12 New Zealand</option>
+                        </select>
+                    </div>
+                    <button class="btn-random" onclick="randomStreamer()" title="Discover a random streamer">🎲 Random</button>
                 </div>
             </div>
         </div>
@@ -1578,6 +1617,15 @@
             if (diffHrs < 24) return `${diffHrs}hr${diffHrs !== 1 ? 's' : ''} ago`;
             if (diffDays < 7) return `${diffDays}d ago`;
             return `${Math.floor(diffDays / 7)}w ago`;
+        }
+
+        // =============================================
+        // RANDOM STREAMER
+        // =============================================
+        function randomStreamer() {
+            if (allProfiles.length === 0) return;
+            const random = allProfiles[Math.floor(Math.random() * allProfiles.length)];
+            window.location.href = `/streamer.html?user=${encodeURIComponent(random.username)}`;
         }
 
         // =============================================
