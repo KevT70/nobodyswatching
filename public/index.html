@@ -621,6 +621,7 @@
             text-decoration: none;
             color: inherit;
             display: block;
+            overflow: hidden;
         }
 
         .streamer-card:hover {
@@ -730,6 +731,8 @@
             color: var(--text-secondary);
             line-height: 1.6;
             margin-bottom: 1rem;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         .streamer-games {
@@ -1096,6 +1099,17 @@
 
             .streamer-grid {
                 grid-template-columns: 1fr;
+                margin: 0 -0.25rem;
+            }
+
+            .streamer-card {
+                min-width: 0;
+            }
+
+            .game-tag {
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .live-card {
@@ -1335,7 +1349,7 @@
             <li><a href="/about.html">About</a></li>
             <li><a href="/privacy.html">Privacy</a></li>
             <li><a href="https://bsky.app/profile/xtaptapx.com" target="_blank" rel="noopener">Bluesky</a></li>
-            <li><a href="https://discord.gg/29JPRXPQ" target="_blank" rel="noopener">Discord</a></li>
+            <li><a href="https://discord.gg/MxD634NBsn" target="_blank" rel="noopener">Discord</a></li>
         </ul>
         <div class="footer-copy">© 2026 nobodyswatching.live. All rights reserved. No algorithms were harmed in the making of this site.</div>
     </footer>
