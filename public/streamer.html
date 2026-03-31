@@ -224,6 +224,46 @@
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-family: var(--font-mono);
+            font-size: 0.55rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .badge-founder {
+            background: rgba(255, 215, 0, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(255, 215, 0, 0.25);
+        }
+
+        .badge-tester {
+            background: rgba(14, 165, 165, 0.15);
+            color: var(--accent-bright);
+            border: 1px solid rgba(14, 165, 165, 0.25);
+        }
+
+        .badge-og {
+            background: rgba(168, 85, 247, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.25);
+        }
+
+        .badge-supporter {
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
         .profile-genres {
@@ -672,6 +712,20 @@
             return div.innerHTML;
         }
 
+        function renderBadges(badges) {
+            if (!badges || badges.length === 0) return '';
+            const badgeMap = {
+                'Founder': 'founder',
+                'Tester': 'tester',
+                'OG': 'og',
+                'Supporter': 'supporter'
+            };
+            return badges.map(b => {
+                const cls = badgeMap[b] || 'tester';
+                return `<span class="badge badge-${cls}">${esc(b)}</span>`;
+            }).join('');
+        }
+
         function timeAgo(dateStr) {
             const now = new Date();
             const then = new Date(dateStr);
@@ -714,7 +768,7 @@
             if (p.is_live) avatar.classList.add('is-live');
 
             // Name, genres, timezone
-            document.getElementById('p-name').textContent = p.username;
+            document.getElementById('p-name').innerHTML = esc(p.username) + ' ' + renderBadges(p.badges);
             const genresEl = document.getElementById('p-genres');
             if (p.genres && p.genres.length > 0) {
                 genresEl.innerHTML = p.genres
