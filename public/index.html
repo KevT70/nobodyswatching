@@ -431,10 +431,52 @@
         }
 
         .live-card-platform {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .live-card-platform a {
             font-family: var(--font-mono);
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            margin-top: 0.5rem;
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .live-card-platform a.plat-twitch {
+            background: rgba(145, 70, 255, 0.15);
+            color: var(--twitch);
+            border: 1px solid rgba(145, 70, 255, 0.25);
+        }
+
+        .live-card-platform a.plat-twitch:hover {
+            background: rgba(145, 70, 255, 0.3);
+        }
+
+        .live-card-platform a.plat-youtube {
+            background: rgba(255, 0, 0, 0.1);
+            color: var(--youtube);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+
+        .live-card-platform a.plat-youtube:hover {
+            background: rgba(255, 0, 0, 0.2);
+        }
+
+        .live-card-platform a.plat-kick {
+            background: rgba(83, 252, 24, 0.1);
+            color: var(--kick);
+            border: 1px solid rgba(83, 252, 24, 0.2);
+        }
+
+        .live-card-platform a.plat-kick:hover {
+            background: rgba(83, 252, 24, 0.2);
         }
 
         /* ========== HOW IT WORKS ========== */
@@ -1468,15 +1510,21 @@
             emptyMsg.style.display = 'none';
 
             carousel.innerHTML = liveProfiles.map(p => {
-                const streamUrl = p.twitch_url || p.youtube_url || p.kick_url || '#';
+                const profileUrl = `/streamer.html?user=${encodeURIComponent(p.username)}`;
                 const platform = p.live_platform || (p.twitch_url ? 'twitch.tv' : p.youtube_url ? 'youtube.com' : 'kick.com');
                 const thumb = p.live_thumbnail_url;
                 const thumbHtml = thumb
                     ? `<img src="${thumb}" alt="${p.username}">`
                     : `<div class="placeholder-thumb">🎮</div>`;
 
+                // Build platform pills
+                let pillsHtml = '';
+                if (p.twitch_url) pillsHtml += `<a href="${esc(p.twitch_url)}" target="_blank" rel="noopener" class="plat-twitch" onclick="event.stopPropagation()">▶ Twitch</a>`;
+                if (p.youtube_url) pillsHtml += `<a href="${esc(p.youtube_url)}" target="_blank" rel="noopener" class="plat-youtube" onclick="event.stopPropagation()">▶ YouTube</a>`;
+                if (p.kick_url) pillsHtml += `<a href="${esc(p.kick_url)}" target="_blank" rel="noopener" class="plat-kick" onclick="event.stopPropagation()">▶ Kick</a>`;
+
                 return `
-                    <a href="${streamUrl}" target="_blank" rel="noopener" class="live-card">
+                    <div class="live-card" onclick="window.location.href='${profileUrl}'" style="cursor:pointer">
                         <div class="live-card-thumb">
                             ${thumbHtml}
                             <span class="live-badge">● Live</span>
@@ -1485,9 +1533,9 @@
                         <div class="live-card-info">
                             <div class="live-card-name">${esc(p.username)} ${renderBadges(p.badges)}</div>
                             <div class="live-card-game">${esc(p.live_game || 'Streaming')}</div>
-                            <div class="live-card-platform">${esc(platform)}</div>
+                            <div class="live-card-platform">${pillsHtml}</div>
                         </div>
-                    </a>
+                    </div>
                 `;
             }).join('');
         }
