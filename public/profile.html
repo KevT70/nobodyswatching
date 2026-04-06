@@ -456,6 +456,7 @@
         .platform-prefix.twitch { color: var(--twitch); }
         .platform-prefix.youtube { color: var(--youtube); }
         .platform-prefix.kick { color: var(--kick); }
+        .platform-prefix.rumble { color: #85c742; }
 
         .platform-input {
             flex: 1;
@@ -868,6 +869,14 @@
                     <input type="url" class="platform-input" id="kick-url"
                         placeholder="https://kick.com/yourchannel">
                 </div>
+            </div>
+
+            <div class="form-group">
+                <div class="platform-input-group">
+                    <span class="platform-prefix rumble">Rumble</span>
+                    <input type="url" class="platform-input" id="rumble-url"
+                        placeholder="https://rumble.com/c/yourchannel">
+                </div>
                 <div class="form-hint">*At least one platform is required. More is better.</div>
             </div>
         </div>
@@ -950,9 +959,9 @@
             const meta = currentUser.user_metadata || {};
 
             // Update nav
-            document.getElementById('nav-avatar').src = meta.avatar_url || '';
-            document.getElementById('nav-avatar').alt = meta.user_name || '';
-            document.getElementById('nav-username').textContent = meta.user_name || 'Streamer';
+            document.getElementById('nav-avatar').src = meta.avatar_url || meta.picture || '';
+            document.getElementById('nav-avatar').alt = meta.user_name || meta.name || '';
+            document.getElementById('nav-username').textContent = meta.user_name || meta.name || 'Streamer';
 
             // Load existing profile from Supabase
             const { data: profile, error } = await sb
@@ -979,9 +988,9 @@
 
         function populateForm(profile, meta) {
             // Avatar and display name (from Twitch)
-            document.getElementById('form-avatar').src = profile.avatar_url || meta.avatar_url || '';
-            document.getElementById('form-display-name').textContent = profile.username || meta.user_name || 'Streamer';
-            document.getElementById('view-public-profile').href = `/streamer.html?user=${encodeURIComponent(profile.username || meta.user_name || '')}`;
+            document.getElementById('form-avatar').src = profile.avatar_url || meta.avatar_url || meta.picture || '';
+            document.getElementById('form-display-name').textContent = profile.username || meta.user_name || meta.name || 'Streamer';
+            document.getElementById('view-public-profile').href = `/streamer.html?user=${encodeURIComponent(profile.username || meta.user_name || meta.name || '')}`;
 
             // Bio
             const bioField = document.getElementById('bio');
@@ -1005,6 +1014,7 @@
             document.getElementById('twitch-url').value = profile.twitch_url || `https://twitch.tv/${profile.twitch_username || ''}`;
             document.getElementById('youtube-url').value = profile.youtube_url || '';
             document.getElementById('kick-url').value = profile.kick_url || '';
+            document.getElementById('rumble-url').value = profile.rumble_url || '';
         }
 
         // =============================================
@@ -1133,6 +1143,7 @@
                 twitch_username: twitchUsername,
                 youtube_url: document.getElementById('youtube-url').value.trim() || null,
                 kick_url: document.getElementById('kick-url').value.trim() || null,
+                rumble_url: document.getElementById('rumble-url').value.trim() || null,
                 updated_at: new Date().toISOString()
             };
 

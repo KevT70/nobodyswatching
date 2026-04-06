@@ -479,6 +479,16 @@
             background: rgba(83, 252, 24, 0.2);
         }
 
+        .live-card-platform a.plat-rumble {
+            background: rgba(133, 199, 66, 0.1);
+            color: #85c742;
+            border: 1px solid rgba(133, 199, 66, 0.2);
+        }
+
+        .live-card-platform a.plat-rumble:hover {
+            background: rgba(133, 199, 66, 0.2);
+        }
+
         /* ========== HOW IT WORKS ========== */
         .how-section {
             padding: 5rem 2rem;
@@ -829,6 +839,12 @@
             border: 1px solid rgba(83, 252, 24, 0.2);
         }
 
+        .platform-rumble {
+            background: rgba(133, 199, 66, 0.1);
+            color: #85c742;
+            border: 1px solid rgba(133, 199, 66, 0.2);
+        }
+
         /* ========== STATS BAR ========== */
         .stats-bar {
             display: flex;
@@ -960,6 +976,140 @@
             font-family: var(--font-mono);
             font-size: 0.65rem;
             color: var(--text-muted);
+        }
+
+        /* ========== SIGN IN MODAL ========== */
+        .signin-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .signin-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 420px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .signin-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.25rem;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .signin-close:hover { color: var(--text-primary); }
+
+        .signin-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .signin-sub {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.75rem;
+        }
+
+        .signin-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .signin-btn {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-family: var(--font-display);
+        }
+
+        .signin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .signin-twitch:hover {
+            border-color: var(--twitch);
+            background: rgba(145, 70, 255, 0.08);
+        }
+
+        .signin-google:hover {
+            border-color: #4285f4;
+            background: rgba(66, 133, 244, 0.08);
+        }
+
+        .signin-btn-icon {
+            font-size: 1.25rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .signin-twitch .signin-btn-icon {
+            background: rgba(145, 70, 255, 0.15);
+            color: var(--twitch);
+        }
+
+        .signin-google .signin-btn-icon {
+            background: rgba(66, 133, 244, 0.15);
+            color: #4285f4;
+        }
+
+        .signin-btn-text strong {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.1rem;
+        }
+
+        .signin-btn-text small {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .signin-disclaimer {
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 1.25rem;
         }
 
         /* ========== NAV USER MENU ========== */
@@ -1196,7 +1346,7 @@
         </ul>
         <div class="nav-auth">
             <!-- Logged out state -->
-            <div id="nav-auth-out"><a href="#" class="nav-cta" onclick="signInWithTwitch(); return false;"><span class="cta-full">Sign In With Twitch</span><span class="cta-short">Sign In</span></a></div>
+            <div id="nav-auth-out"><a href="#" class="nav-cta" onclick="openSignInModal(); return false;"><span class="cta-full">Sign In</span><span class="cta-short">Sign In</span></a></div>
             <!-- Logged in state (hidden by default) -->
             <div id="nav-auth-in" style="display: none;">
                 <div class="nav-user">
@@ -1227,7 +1377,7 @@
         </p>
         <p class="hero-disclaimer">*We know someone's watching. The name's ironic. Work with us here.</p>
         <div class="hero-buttons">
-            <a href="#" class="btn-primary" id="hero-cta" onclick="signInWithTwitch(); return false;">⚡ List Your Stream</a>
+            <a href="#" class="btn-primary" id="hero-cta" onclick="openSignInModal(); return false;">⚡ List Your Stream</a>
             <a href="#directory" class="btn-secondary">↓ Browse Streamers</a>
         </div>
         <div class="scroll-hint">↓ scroll</div>
@@ -1261,10 +1411,11 @@
         <div class="how-grid">
             <div class="how-card">
                 <div class="how-card-number">// 01</div>
-                <h3>Sign In With Twitch</h3>
+                <h3>Sign In</h3>
                 <p>
-                    One click. No forms, no email, no personal info harvesting. 
-                    We grab your username and avatar from Twitch and that's it. 
+                    One click. Sign in with your Twitch or Google account — 
+                    no forms, no email harvesting, no personal info. 
+                    We grab your username and avatar and that's it. 
                     We're not interested in your data — just your stream.
                 </p>
                 <div class="disclaimer">*Seriously, we don't even have a database field for your email.</div>
@@ -1380,8 +1531,35 @@
             No data harvesting. Just you, your stream, and a shot at being seen.
         </p>
         <p class="hero-disclaimer">*Void-streaming is a valid lifestyle choice. We just think you deserve better.</p>
-        <a href="#" class="btn-primary" id="cta-btn" onclick="signInWithTwitch(); return false;">⚡ Sign In With Twitch</a>
+        <a href="#" class="btn-primary" id="cta-btn" onclick="openSignInModal(); return false;">⚡ Sign In &amp; Get Listed</a>
     </section>
+
+    <!-- SIGN IN MODAL -->
+    <div class="signin-overlay" id="signin-modal" style="display: none;">
+        <div class="signin-modal">
+            <div class="signin-close" onclick="closeSignInModal()">×</div>
+            <div class="section-comment" style="text-align: center;">// choose your weapon</div>
+            <h3 class="signin-title">SIGN IN</h3>
+            <p class="signin-sub">Pick the platform you use most. No email required, no data harvesting. Just your username and avatar.</p>
+            <div class="signin-buttons">
+                <button class="signin-btn signin-twitch" onclick="signInWithTwitch()">
+                    <span class="signin-btn-icon">▶</span>
+                    <span class="signin-btn-text">
+                        <strong>Sign in with Twitch</strong>
+                        <small>For Twitch streamers</small>
+                    </span>
+                </button>
+                <button class="signin-btn signin-google" onclick="signInWithGoogle()">
+                    <span class="signin-btn-icon">▷</span>
+                    <span class="signin-btn-text">
+                        <strong>Sign in with Google</strong>
+                        <small>For YouTube streamers</small>
+                    </span>
+                </button>
+            </div>
+            <p class="signin-disclaimer">*Same result either way. We just need to know who you are.</p>
+        </div>
+    </div>
 
     <!-- FOOTER -->
     <footer>
@@ -1414,8 +1592,22 @@
         // AUTH FUNCTIONS
         // =============================================
         async function signInWithTwitch() {
+            closeSignInModal();
             const { data, error } = await sb.auth.signInWithOAuth({
                 provider: 'twitch',
+                options: {
+                    redirectTo: window.location.origin
+                }
+            });
+            if (error) {
+                console.error('Sign in error:', error.message);
+            }
+        }
+
+        async function signInWithGoogle() {
+            closeSignInModal();
+            const { data, error } = await sb.auth.signInWithOAuth({
+                provider: 'google',
                 options: {
                     redirectTo: window.location.origin
                 }
@@ -1438,6 +1630,25 @@
         }
 
         // =============================================
+        // SIGN IN MODAL
+        // =============================================
+        function openSignInModal() {
+            document.getElementById('signin-modal').style.display = 'flex';
+        }
+
+        function closeSignInModal() {
+            document.getElementById('signin-modal').style.display = 'none';
+        }
+
+        // Close modal on Escape or clicking overlay
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSignInModal();
+        });
+        document.getElementById('signin-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeSignInModal();
+        });
+
+        // =============================================
         // AUTH UI
         // =============================================
         function updateAuthUI(session) {
@@ -1452,7 +1663,7 @@
                 const user = session.user;
                 const meta = user.user_metadata || {};
                 const username = meta.user_name || meta.name || 'Streamer';
-                const avatar = meta.avatar_url || '';
+                const avatar = meta.avatar_url || meta.picture || '';
 
                 navAuthOut.style.display = 'none';
                 navAuthIn.style.display = 'block';
@@ -1469,9 +1680,9 @@
                 navAuthIn.style.display = 'none';
 
                 heroCta.textContent = '⚡ List Your Stream';
-                heroCta.onclick = function(e) { e.preventDefault(); signInWithTwitch(); };
-                ctaBtn.textContent = '⚡ Sign In With Twitch';
-                ctaBtn.onclick = function(e) { e.preventDefault(); signInWithTwitch(); };
+                heroCta.onclick = function(e) { e.preventDefault(); openSignInModal(); };
+                ctaBtn.textContent = '⚡ Sign In & Get Listed';
+                ctaBtn.onclick = function(e) { e.preventDefault(); openSignInModal(); };
             }
         }
 
@@ -1522,6 +1733,7 @@
                 if (p.twitch_url) pillsHtml += `<a href="${esc(p.twitch_url)}" target="_blank" rel="noopener" class="plat-twitch" onclick="event.stopPropagation()">▶ Twitch</a>`;
                 if (p.youtube_url) pillsHtml += `<a href="${esc(p.youtube_url)}" target="_blank" rel="noopener" class="plat-youtube" onclick="event.stopPropagation()">▶ YouTube</a>`;
                 if (p.kick_url) pillsHtml += `<a href="${esc(p.kick_url)}" target="_blank" rel="noopener" class="plat-kick" onclick="event.stopPropagation()">▶ Kick</a>`;
+                if (p.rumble_url) pillsHtml += `<a href="${esc(p.rumble_url)}" target="_blank" rel="noopener" class="plat-rumble" onclick="event.stopPropagation()">▶ Rumble</a>`;
 
                 return `
                     <div class="live-card" onclick="window.location.href='${profileUrl}'" style="cursor:pointer">
@@ -1591,6 +1803,7 @@
                 if (p.twitch_url) platformsHtml += '<span class="platform-icon platform-twitch">Twitch</span>';
                 if (p.youtube_url) platformsHtml += '<span class="platform-icon platform-youtube">YouTube</span>';
                 if (p.kick_url) platformsHtml += '<span class="platform-icon platform-kick">Kick</span>';
+                if (p.rumble_url) platformsHtml += '<span class="platform-icon platform-rumble">Rumble</span>';
 
                 // Avatar
                 const avatarHtml = p.avatar_url

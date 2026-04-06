@@ -399,6 +399,12 @@
             border: 1px solid rgba(83, 252, 24, 0.2);
         }
 
+        .platform-link-icon.rumble {
+            background: rgba(133, 199, 66, 0.1);
+            color: #85c742;
+            border: 1px solid rgba(133, 199, 66, 0.2);
+        }
+
         .platform-link-name {
             font-size: 0.9rem;
             font-weight: 500;
@@ -783,7 +789,7 @@
 
             // Status banner
             const bannerEl = document.getElementById('status-banner');
-            const primaryUrl = p.twitch_url || p.youtube_url || p.kick_url || '#';
+            const primaryUrl = p.twitch_url || p.youtube_url || p.kick_url || p.rumble_url || '#';
 
             if (p.is_live) {
                 bannerEl.innerHTML = `
@@ -877,6 +883,19 @@
                         <div>
                             <div class="platform-link-name">Kick</div>
                             <div class="platform-link-url">${esc(p.kick_url)}</div>
+                        </div>
+                        <span class="platform-link-arrow">→</span>
+                    </a>
+                `;
+            }
+
+            if (p.rumble_url) {
+                platformsHtml += `
+                    <a href="${esc(p.rumble_url)}" target="_blank" rel="noopener" class="platform-link">
+                        <span class="platform-link-icon rumble">Rumble</span>
+                        <div>
+                            <div class="platform-link-name">Rumble</div>
+                            <div class="platform-link-url">${esc(p.rumble_url)}</div>
                         </div>
                         <span class="platform-link-arrow">→</span>
                     </a>
