@@ -271,7 +271,7 @@
     <div class="page-content">
         <div class="section-comment">// the boring but important bit</div>
         <h1 class="page-title">PRIVACY</h1>
-        <p class="page-subtitle">Last updated: March 2026. Written in plain English because legal jargon helps nobody.</p>
+        <p class="page-subtitle">Last updated: April 2026. Written in plain English because legal jargon helps nobody.</p>
 
         <div class="content-block">
             <h2>// the short version</h2>
@@ -285,7 +285,7 @@
 
         <div class="content-block">
             <h2>// what we store</h2>
-            <p>When you sign in with Twitch and create a profile, we store:</p>
+            <p>When you sign in (with Twitch or Google) and create a profile, we store:</p>
             <table class="data-table">
                 <thead>
                     <tr>
@@ -296,12 +296,12 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Twitch username</td>
+                        <td>Username (from Twitch or Google)</td>
                         <td class="yes">Yes</td>
                         <td>Your display name in the directory</td>
                     </tr>
                     <tr>
-                        <td>Twitch avatar URL</td>
+                        <td>Avatar URL</td>
                         <td class="yes">Yes</td>
                         <td>Your profile picture</td>
                     </tr>
@@ -328,7 +328,7 @@
                     <tr>
                         <td>Live status &amp; viewer count</td>
                         <td class="yes">Yes</td>
-                        <td>Updated automatically via Twitch API</td>
+                        <td>Updated automatically via Twitch, Kick &amp; YouTube APIs</td>
                     </tr>
                     <tr>
                         <td>Email address</td>
@@ -355,16 +355,46 @@
         </div>
 
         <div class="content-block">
-            <h2>// twitch oauth</h2>
+            <h2>// signing in</h2>
             <p>
-                When you sign in, we use Twitch's OAuth system. This means you log in 
-                directly with Twitch — we never see or store your Twitch password. 
-                Twitch sends us your public username and avatar, and that's all we use.
+                You can sign in with either <strong>Twitch</strong> or <strong>Google</strong>. 
+                Both use OAuth, which means you log in directly with that provider — 
+                we never see or store your password.
             </p>
             <p>
-                You can revoke our access at any time by going to your 
-                <a href="https://www.twitch.tv/settings/connections" target="_blank" rel="noopener">Twitch Connections settings</a> 
-                and removing NobodysWatching.
+                Whichever provider you use, we only keep your public username and avatar. 
+                If you sign in with Google, we don't store your Gmail address, your contacts, 
+                your calendar, or anything else from your Google account.
+            </p>
+            <p>
+                You can revoke our access at any time:
+            </p>
+            <p>
+                • <a href="https://www.twitch.tv/settings/connections" target="_blank" rel="noopener">Twitch Connections settings</a> — remove NobodysWatching<br>
+                • <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account permissions</a> — remove NobodysWatching.live
+            </p>
+        </div>
+
+        <div class="content-block">
+            <h2>// youtube api services</h2>
+            <p>
+                We use the <a href="https://developers.google.com/youtube/terms/api-services-terms-of-service" target="_blank" rel="noopener">YouTube API Services</a> 
+                to check whether streamers who've linked their YouTube channel are currently live. 
+                This is read-only — we only check public live status data on channels that streamers 
+                have explicitly linked to their NobodysWatching profile. We do not access your watch history, 
+                subscriptions, playlists, uploaded videos, comments, or any private YouTube data.
+            </p>
+            <p>
+                By using NobodysWatching.live, you are also agreeing to be bound by the 
+                <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener">YouTube Terms of Service</a>.
+            </p>
+            <p>
+                Google's privacy practices are described in the 
+                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>.
+            </p>
+            <p>
+                You can revoke our access to your Google account at any time via the 
+                <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener">Google security settings</a>.
             </p>
         </div>
 
@@ -373,10 +403,17 @@
             <p>
                 The site is hosted on <a href="https://www.netlify.com" target="_blank" rel="noopener">Netlify</a> 
                 and our database is on <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a>. 
-                Both are reputable services with their own privacy policies. 
-                We use the <a href="https://dev.twitch.tv" target="_blank" rel="noopener">Twitch API</a> 
-                to check live status. We don't use Google Analytics, Facebook Pixel, 
-                or any other tracking tools.
+                Both are reputable services with their own privacy policies.
+            </p>
+            <p>
+                To check live status across platforms, we use the 
+                <a href="https://dev.twitch.tv" target="_blank" rel="noopener">Twitch API</a>, the 
+                <a href="https://developers.google.com/youtube/v3" target="_blank" rel="noopener">YouTube Data API</a>, 
+                and Kick's public channel API. These calls are made server-side using only 
+                the public channel identifiers that streamers have explicitly added to their profile.
+            </p>
+            <p>
+                We don't use Google Analytics, Facebook Pixel, or any other tracking tools.
             </p>
             <p>
                 Fonts are loaded from Google Fonts, which may log basic request data 
