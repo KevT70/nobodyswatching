@@ -223,11 +223,120 @@
             color: var(--text-muted);
         }
 
+        /* ========== STREAMER PACK ========== */
+        .pack-section {
+            margin-top: 3rem;
+            padding-top: 3rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .pack-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .pack-item-header {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent-bright);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .pack-panel-preview {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .pack-panel-preview img {
+            width: 200px;
+            height: auto;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .pack-panel-info {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .pack-panel-info p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+        .pack-download-btn {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: #fff;
+            background: var(--accent);
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .pack-download-btn:hover {
+            background: var(--accent-bright);
+            transform: translateY(-1px);
+        }
+
+        .pack-copyable {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .pack-text {
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .pack-copy-btn {
+            flex-shrink: 0;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--accent-bright);
+            background: transparent;
+            border: 1px solid rgba(14, 165, 165, 0.3);
+            padding: 0.4rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+
+        .pack-copy-btn:hover {
+            background: rgba(14, 165, 165, 0.1);
+            border-color: var(--accent-bright);
+        }
+
         @media (max-width: 768px) {
             nav { padding: 1rem; }
             .nav-links { display: none; }
             .page-content { padding: 6rem 1.25rem 2rem; }
             .page-title { font-size: 2rem; }
+            .pack-panel-preview { flex-direction: column; }
+            .pack-panel-preview img { width: 100%; max-width: 300px; }
         }
     </style>
 </head>
@@ -272,7 +381,7 @@
                 and a way for viewers to find them.
             </p>
             <p>
-                Sign in with Twitch, fill out a quick profile, and you're listed. 
+                Sign in with Twitch or Google, fill out a quick profile, and you're listed. 
                 When you go live, you appear in the carousel at the top of the page. 
                 When you're offline, you're still in the directory. Either way, 
                 someone who's never heard of you might find you — and that's 
@@ -318,6 +427,73 @@
                 Nobody's watching? Not for long.
             </p>
         </div>
+
+        <!-- STREAMER PACK -->
+        <div class="pack-section">
+            <div class="section-comment">// spread the word</div>
+            <h2 class="page-title" style="font-size: 1.75rem; margin-bottom: 0.5rem;">STREAMER PACK</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.7;">
+                Want to help promote NobodysWatching on your channel? 
+                Grab the panel image, copy-paste the text, and you're done. 
+                Every link helps a small streamer get found.
+            </p>
+            <p class="disclaimer" style="margin-bottom: 2rem;">*We'd appreciate it. But no pressure. We're not an algorithm — we don't do guilt trips.</p>
+
+            <!-- Panel Image -->
+            <div class="pack-item">
+                <div class="pack-item-header">// twitch panel image</div>
+                <div class="pack-panel-preview">
+                    <img src="/twitch-panel.png" alt="NobodysWatching Twitch Panel">
+                    <div class="pack-panel-info">
+                        <p>320×100px — standard Twitch panel size. Dark theme, matches most channel layouts. Right-click to save, or use the download button.</p>
+                        <a href="/twitch-panel.png" download="nobodyswatching-panel.png" class="pack-download-btn">↓ Download Panel</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Description -->
+            <div class="pack-item">
+                <div class="pack-item-header">// panel description text</div>
+                <div class="pack-copyable">
+                    <div>
+                        <div class="pack-text" id="pack-panel-text">I built a free directory for small streamers who deserve an audience. No follower requirements. No algorithm. No data harvesting. Just a place where every streamer gets listed equally — Twitch, YouTube, Kick, Rumble. If you're a streamer and you're tired of being invisible, sign up. It's free, takes 60 seconds, and it always will be.
+
+🔗 https://nobodyswatching.live
+
+*The name's ironic. We hope.*</div>
+                        <button class="pack-copy-btn" onclick="copyText('pack-panel-text', this)">Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Command -->
+            <div class="pack-item">
+                <div class="pack-item-header">// chat bot command</div>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.75rem;">
+                    Add this as a <strong>!nobodyswatching</strong> command in Nightbot, StreamElements, or your preferred bot.
+                </p>
+                <div class="pack-copyable">
+                    <div>
+                        <div class="pack-text" id="pack-command-text">Check out NobodysWatching.live — a free directory for small streamers. No algorithm, no gatekeeping, no follower minimums. Find me there → https://nobodyswatching.live</div>
+                        <button class="pack-copy-btn" onclick="copyText('pack-command-text', this)">Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media Blurb -->
+            <div class="pack-item">
+                <div class="pack-item-header">// social media bio</div>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.75rem;">
+                    Paste this in your Twitch bio, Bluesky, Twitter/X, Discord about, or wherever you link your stuff.
+                </p>
+                <div class="pack-copyable">
+                    <div>
+                        <div class="pack-text" id="pack-social-short">📺 Listed on NobodysWatching.live — a free directory for small streamers. No algorithms, just people. Find me there!</div>
+                        <button class="pack-copy-btn" onclick="copyText('pack-social-short', this)">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <footer>
@@ -331,6 +507,33 @@
         </ul>
         <div class="footer-copy">© 2026 nobodyswatching.live. All rights reserved. No algorithms were harmed in the making of this site.</div>
     </footer>
+
+    <script>
+        function copyText(elementId, btn) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const original = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.color = '#fbbf24';
+                btn.style.borderColor = 'rgba(255, 215, 0, 0.4)';
+                setTimeout(() => {
+                    btn.textContent = original;
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                }, 2000);
+            }).catch(() => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+            });
+        }
+    </script>
 
 </body>
 </html>
