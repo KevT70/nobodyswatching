@@ -314,11 +314,26 @@
 
         .live-carousel {
             display: flex;
-            gap: 1.25rem;
-            overflow-x: auto;
+            gap: 0;
+            overflow: hidden;
             padding: 1rem 0 2rem;
-            scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
+        }
+
+        .live-carousel-inner {
+            display: flex;
+            gap: 1.25rem;
+            animation: carousel-scroll 30s linear infinite;
+            width: max-content;
+        }
+
+        .live-carousel-inner:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes carousel-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
 
         .live-carousel::-webkit-scrollbar {
@@ -1720,7 +1735,7 @@
             carousel.style.display = 'flex';
             emptyMsg.style.display = 'none';
 
-            carousel.innerHTML = liveProfiles.map(p => {
+            const cardsHtml = liveProfiles.map(p => {
                 const profileUrl = `/streamer.html?user=${encodeURIComponent(p.username)}`;
                 const platform = p.live_platform || (p.twitch_url ? 'twitch.tv' : p.youtube_url ? 'youtube.com' : 'kick.com');
                 const thumb = p.live_thumbnail_url;
@@ -1750,6 +1765,18 @@
                     </div>
                 `;
             }).join('');
+
+            // If more than 2 live, duplicate cards for seamless infinite scroll
+            if (liveProfiles.length > 2) {
+                carousel.innerHTML = `<div class="live-carousel-inner">${cardsHtml}${cardsHtml}</div>`;
+                // Adjust speed based on number of cards (more cards = slower)
+                const inner = carousel.querySelector('.live-carousel-inner');
+                const duration = liveProfiles.length * 8;
+                inner.style.animationDuration = `${duration}s`;
+            } else {
+                // Too few cards to scroll — just display them static
+                carousel.innerHTML = cardsHtml;
+            }
         }
 
         // =============================================
