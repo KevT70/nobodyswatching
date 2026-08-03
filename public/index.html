@@ -318,6 +318,12 @@
             overflow: hidden;
             padding: 1rem 0 2rem;
             -webkit-overflow-scrolling: touch;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .live-carousel.dragging {
+            cursor: grabbing;
         }
 
         .live-carousel-inner {
@@ -325,6 +331,10 @@
             gap: 1.25rem;
             animation: carousel-scroll 30s linear infinite;
             width: max-content;
+        }
+
+        .live-carousel-inner.paused {
+            animation-play-state: paused;
         }
 
         .live-carousel-inner:hover {
@@ -1780,6 +1790,118 @@
         }
 
         // =============================================
+        // CAROUSEL DRAG / SWIPE
+        // =============================================
+        function initCarouselDrag() {
+            const carousel = document.getElementById('live-carousel');
+            const inner = carousel.querySelector('.live-carousel-inner');
+            if (!inner) return;
+
+            let isDragging = false;
+            let startX = 0;
+            let scrollOffset = 0;
+            let currentTranslate = 0;
+            let resumeTimer = null;
+
+            function getTranslateX() {
+                const style = window.getComputedStyle(inner);
+                const matrix = new DOMMatrix(style.transform);
+                return matrix.m41;
+            }
+
+            function pauseAutoScroll() {
+                currentTranslate = getTranslateX();
+                inner.classList.add('paused');
+                inner.style.animation = 'none';
+                inner.style.transform = `translateX(${currentTranslate}px)`;
+                clearTimeout(resumeTimer);
+            }
+
+            function resumeAutoScroll() {
+                clearTimeout(resumeTimer);
+                resumeTimer = setTimeout(() => {
+                    if (isDragging) return;
+                    const totalWidth = inner.scrollWidth / 2;
+                    // Normalise position to be within the first half
+                    let pos = currentTranslate % totalWidth;
+                    if (pos > 0) pos -= totalWidth;
+
+                    const remaining = (Math.abs(pos) / totalWidth);
+                    const fullDuration = parseFloat(inner.dataset.duration || 30);
+                    const remainingDuration = fullDuration * (1 - remaining);
+
+                    inner.style.animation = 'none';
+                    inner.style.transform = `translateX(${pos}px)`;
+
+                    // Force reflow
+                    inner.offsetHeight;
+
+                    inner.style.animation = `carousel-scroll ${fullDuration}s linear infinite`;
+                    inner.style.animationDelay = `-${fullDuration * remaining}s`;
+                    inner.classList.remove('paused');
+                }, 3000);
+            }
+
+            function onDragStart(x) {
+                isDragging = true;
+                startX = x;
+                pauseAutoScroll();
+                scrollOffset = currentTranslate;
+                carousel.classList.add('dragging');
+            }
+
+            function onDragMove(x) {
+                if (!isDragging) return;
+                const diff = x - startX;
+                currentTranslate = scrollOffset + diff;
+
+                // Wrap around
+                const totalWidth = inner.scrollWidth / 2;
+                if (currentTranslate > 0) currentTranslate -= totalWidth;
+                if (currentTranslate < -totalWidth) currentTranslate += totalWidth;
+
+                inner.style.transform = `translateX(${currentTranslate}px)`;
+            }
+
+            function onDragEnd() {
+                if (!isDragging) return;
+                isDragging = false;
+                carousel.classList.remove('dragging');
+                resumeAutoScroll();
+            }
+
+            // Mouse events
+            carousel.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                onDragStart(e.clientX);
+            });
+            window.addEventListener('mousemove', (e) => onDragMove(e.clientX));
+            window.addEventListener('mouseup', onDragEnd);
+
+            // Touch events
+            carousel.addEventListener('touchstart', (e) => {
+                onDragStart(e.touches[0].clientX);
+            }, { passive: true });
+            carousel.addEventListener('touchmove', (e) => {
+                onDragMove(e.touches[0].clientX);
+            }, { passive: true });
+            carousel.addEventListener('touchend', onDragEnd);
+
+            // Prevent click navigation when dragging
+            carousel.addEventListener('click', (e) => {
+                if (Math.abs(scrollOffset - currentTranslate) > 5) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
+
+            // Store duration for resume calculation
+            inner.dataset.duration = inner.style.animationDuration 
+                ? parseFloat(inner.style.animationDuration) 
+                : 30;
+        }
+
+        // =============================================
         // RENDER: STREAMER GRID
         // =============================================
         function renderStreamerGrid(profiles, genre, timezone) {
@@ -1964,6 +2086,7 @@
             // Fetch and render all data
             allProfiles = await fetchProfiles();
             renderLiveCarousel(allProfiles);
+            initCarouselDrag();
             renderStreamerGrid(allProfiles, currentFilter, currentTimezone);
             renderStats(allProfiles);
         }
