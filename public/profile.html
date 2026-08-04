@@ -808,6 +808,43 @@
                 </select>
                 <div class="form-hint">*Helps viewers find streamers in their time zone.</div>
             </div>
+
+            <div class="form-group">
+                <label class="form-label" for="language">Stream Language</label>
+                <select class="form-select" id="language">
+                    <option value="">Select your language...</option>
+                    <option value="English">English</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="Portuguese">Portuguese</option>
+                    <option value="French">French</option>
+                    <option value="German">German</option>
+                    <option value="Italian">Italian</option>
+                    <option value="Dutch">Dutch</option>
+                    <option value="Polish">Polish</option>
+                    <option value="Russian">Russian</option>
+                    <option value="Ukrainian">Ukrainian</option>
+                    <option value="Turkish">Turkish</option>
+                    <option value="Arabic">Arabic</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Japanese">Japanese</option>
+                    <option value="Korean">Korean</option>
+                    <option value="Chinese">Chinese</option>
+                    <option value="Thai">Thai</option>
+                    <option value="Vietnamese">Vietnamese</option>
+                    <option value="Indonesian">Indonesian</option>
+                    <option value="Filipino">Filipino</option>
+                    <option value="Swedish">Swedish</option>
+                    <option value="Norwegian">Norwegian</option>
+                    <option value="Danish">Danish</option>
+                    <option value="Finnish">Finnish</option>
+                    <option value="Czech">Czech</option>
+                    <option value="Hungarian">Hungarian</option>
+                    <option value="Romanian">Romanian</option>
+                    <option value="Greek">Greek</option>
+                    <option value="Other">Other</option>
+                </select>
+                <div class="form-hint">*The language you stream in. Helps international viewers find you.</div>
+            </div>
         </div>
 
         <!-- Games Section -->
@@ -1020,6 +1057,7 @@
 
             // Timezone
             document.getElementById('timezone').value = profile.timezone || '';
+            document.getElementById('language').value = profile.language || '';
 
             // Genres (checkboxes)
             const selectedGenres = profile.genres || [];
@@ -1159,6 +1197,7 @@
             const updates = {
                 bio: document.getElementById('bio').value.trim() || null,
                 timezone: document.getElementById('timezone').value || 'UTC',
+                language: document.getElementById('language').value || null,
                 genres: selectedGenres,
                 top_games: games,
                 twitch_url: twitchUrl,

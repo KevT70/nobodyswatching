@@ -697,6 +697,7 @@
                 <div id="p-name" class="profile-name"></div>
                 <div id="p-genres" class="profile-genres"></div>
                 <div id="p-timezone" class="profile-timezone"></div>
+                <div id="p-language" class="profile-timezone"></div>
             </div>
         </div>
 
@@ -823,6 +824,7 @@
                     .join('');
             }
             document.getElementById('p-timezone').textContent = p.timezone ? `🕐 ${p.timezone}` : '';
+            document.getElementById('p-language').textContent = p.language ? `🌐 ${p.language}` : '';
 
             // Status banner
             const bannerEl = document.getElementById('status-banner');
