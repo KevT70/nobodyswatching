@@ -312,6 +312,133 @@
             margin: 0 auto;
         }
 
+        /* ========== SPOTLIGHT ========== */
+        .spotlight-card {
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spotlight-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at 20% 50%, rgba(14, 165, 165, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .spotlight-card:hover {
+            border-color: var(--accent-bright);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(14, 165, 165, 0.1);
+        }
+
+        .spotlight-thumb {
+            width: 140px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .spotlight-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .spotlight-thumb .live-badge {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            font-size: 0.6rem;
+        }
+
+        .spotlight-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .spotlight-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.25rem;
+        }
+
+        .spotlight-game {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-bright);
+            margin-bottom: 0.25rem;
+        }
+
+        .spotlight-viewers {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .spotlight-label {
+            font-family: var(--font-mono);
+            font-size: 0.55rem;
+            color: #fbbf24;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            padding: 0.15rem 0.5rem;
+            border-radius: 3px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .spotlight-platform {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .spotlight-platform a {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        @media (max-width: 768px) {
+            .spotlight-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .spotlight-thumb { width: 100%; height: 160px; }
+            .spotlight-name { justify-content: center; }
+            .spotlight-platform { justify-content: center; }
+        }
+
         .live-carousel {
             display: flex;
             gap: 0;
@@ -1433,6 +1560,12 @@
             Be the one who changes that.
         </p>
 
+        <!-- Spotlight -->
+        <div id="spotlight-section" style="display: none;">
+            <div class="section-comment" style="margin-bottom: 0.5rem;">// spotlight — go make their day</div>
+            <div id="spotlight-card"></div>
+        </div>
+
         <div class="live-carousel" id="live-carousel">
             <!-- Populated by JavaScript -->
         </div>
@@ -1762,11 +1895,58 @@
         function renderLiveCarousel(profiles) {
             const carousel = document.getElementById('live-carousel');
             const emptyMsg = document.getElementById('live-empty');
-            const liveProfiles = profiles.filter(p => p.is_live);
+            const spotlightSection = document.getElementById('spotlight-section');
+            const spotlightCard = document.getElementById('spotlight-card');
 
+            const VIEWER_CAP = 75; // Hide from carousel above this
+            const allLive = profiles.filter(p => p.is_live);
+            const liveProfiles = allLive.filter(p => (p.live_viewer_count || 0) <= VIEWER_CAP);
+
+            // === SPOTLIGHT: lowest viewer count ===
+            if (allLive.length > 0) {
+                const sorted = [...allLive].sort((a, b) => (a.live_viewer_count || 0) - (b.live_viewer_count || 0));
+                const star = sorted[0];
+                const profileUrl = `/streamer.html?user=${encodeURIComponent(star.username)}`;
+                const thumb = star.live_thumbnail_url;
+                const thumbHtml = thumb
+                    ? `<img src="${thumb}" alt="${star.username}">`
+                    : `<div class="placeholder-thumb" style="display:flex;align-items:center;justify-content:center;font-size:2rem;background:var(--bg-secondary);width:100%;height:100%;">🎮</div>`;
+
+                let pillsHtml = '';
+                if (star.twitch_url) pillsHtml += `<a href="${esc(star.twitch_url)}" target="_blank" rel="noopener" class="plat-twitch" onclick="event.stopPropagation()">▶ Twitch</a>`;
+                if (star.youtube_url) pillsHtml += `<a href="${esc(star.youtube_url)}" target="_blank" rel="noopener" class="plat-youtube" onclick="event.stopPropagation()">▶ YouTube</a>`;
+                if (star.kick_url) pillsHtml += `<a href="${esc(star.kick_url)}" target="_blank" rel="noopener" class="plat-kick" onclick="event.stopPropagation()">▶ Kick</a>`;
+                if (star.rumble_url) pillsHtml += `<a href="${esc(star.rumble_url)}" target="_blank" rel="noopener" class="plat-rumble" onclick="event.stopPropagation()">▶ Rumble</a>`;
+                if (star.tiktok_url) pillsHtml += `<a href="${esc(star.tiktok_url)}" target="_blank" rel="noopener" class="plat-tiktok" onclick="event.stopPropagation()">▶ TikTok</a>`;
+
+                spotlightCard.innerHTML = `
+                    <div class="spotlight-card" onclick="window.location.href='${profileUrl}'">
+                        <div class="spotlight-thumb">
+                            ${thumbHtml}
+                            <span class="live-badge">● Live</span>
+                        </div>
+                        <div class="spotlight-info">
+                            <span class="spotlight-label">⭐ Spotlight</span>
+                            <div class="spotlight-name">${esc(star.username)} ${renderBadges(star.badges)}</div>
+                            <div class="spotlight-game">${esc(star.live_game || 'Streaming')}</div>
+                            <div class="spotlight-viewers">👁 ${star.live_viewer_count || 0} viewer${star.live_viewer_count !== 1 ? 's' : ''} — be the one who changes that</div>
+                            <div class="spotlight-platform">${pillsHtml}</div>
+                        </div>
+                    </div>
+                `;
+                spotlightSection.style.display = 'block';
+            } else {
+                spotlightSection.style.display = 'none';
+            }
+
+            // === CAROUSEL: remaining live streamers under cap ===
             if (liveProfiles.length === 0) {
                 carousel.style.display = 'none';
-                emptyMsg.style.display = 'block';
+                if (allLive.length === 0) {
+                    emptyMsg.style.display = 'block';
+                } else {
+                    emptyMsg.style.display = 'none';
+                }
                 return;
             }
 

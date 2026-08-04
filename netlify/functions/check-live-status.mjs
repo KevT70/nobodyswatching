@@ -51,6 +51,13 @@ async function checkTwitchLive(usernames, clientId, accessToken) {
 
     const liveMap = new Map();
     for (const stream of allStreams) {
+        // Skip reruns — only show genuinely live streams
+        if (stream.type && stream.type !== 'live') continue;
+
+        // Also skip if tagged as rerun
+        const tags = stream.tags || [];
+        if (tags.some(t => t.toLowerCase() === 'rerun' || t.toLowerCase() === 'rebroadcast')) continue;
+
         const thumbUrl = stream.thumbnail_url
             ? stream.thumbnail_url.replace('{width}', '440').replace('{height}', '248')
             : null;
