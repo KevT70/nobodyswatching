@@ -25,6 +25,8 @@ The drag logic itself needed updating too - it previously assumed content was al
 ## [2026-04-08] - Additional Functionality added from feedback
 
 ### Added
+- Added search bar so that the user can search for a game rather than a Genre i.e. Minecraft
+
 - Added Language options for the Streamer profile. You can write your BIO in any language you wish and now find streamers in any language simply by selecting it on the front page.
 
 - Expanded genres (profile.html + index.html) - 12 new categories added: Roguelike, Simulation, MMORPG, Fighting, Puzzle, Retro, Art, Music, Just Chatting, Makers & Crafting, Cooking, and IRL. Both the profile checkboxes and the homepage filter buttons are updated. Existing profiles keep their current genres - the new options just appear alongside them.
