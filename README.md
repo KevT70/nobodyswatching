@@ -126,6 +126,7 @@ The `profiles` table in Supabase:
 | live_platform | TEXT | Which platform they're live on |
 | last_live_at | TIMESTAMP | Last time they were detected live |
 | badges | TEXT[] | e.g. {"Founder", "OG"} |
+| language | TEXT | Streamers preferred language |
 | created_at | TIMESTAMP | Auto-set on insert |
 | updated_at | TIMESTAMP | Auto-updated |
 
