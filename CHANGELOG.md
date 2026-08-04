@@ -25,6 +25,8 @@ The drag logic itself needed updating too - it previously assumed content was al
 ## [2026-04-08] - Additional Functionality added from feedback
 
 ### Added
+- Added Language options for the Streamer profile. You can write your BIO in any language you wish and now find streamers in any language simply by selecting it on the front page.
+
 - Expanded genres (profile.html + index.html) - 12 new categories added: Roguelike, Simulation, MMORPG, Fighting, Puzzle, Retro, Art, Music, Just Chatting, Makers & Crafting, Cooking, and IRL. Both the profile checkboxes and the homepage filter buttons are updated. Existing profiles keep their current genres - the new options just appear alongside them.
 
 - Random re-roll button (streamer.html) - A "🎲 Discover Another Streamer" button sits below the share section on every streamer profile page. Clicking it loads a random different streamer (it excludes the one you're currently viewing). Gold hover effect matching the Random button on the homepage. No more navigating back to the directory to re-roll.
