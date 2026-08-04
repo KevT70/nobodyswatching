@@ -757,8 +757,27 @@
             <img id="form-avatar" src="" alt="" class="profile-avatar-large">
             <div class="profile-header-info">
                 <h2 id="form-display-name"></h2>
-                <p>Pulled from Twitch. Looking good.</p>
+                <p id="form-header-sub">Looking good.</p>
                 <a href="#" id="view-public-profile" style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent-bright); text-decoration: none; display: inline-block; margin-top: 0.35rem;">↗ View public profile</a>
+            </div>
+        </div>
+
+        <!-- Display Name & Avatar -->
+        <div class="form-section">
+            <div class="form-section-title">// 00 — Your Identity</div>
+
+            <div class="form-group">
+                <label class="form-label" for="display-username">Display Name</label>
+                <input type="text" class="form-input" id="display-username" maxlength="30"
+                    placeholder="How you want to appear on the site">
+                <div class="form-hint">*Signed in with Google? Your YouTube channel name might not match your Google account name — fix it here.</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="display-avatar">Avatar URL</label>
+                <input type="url" class="form-input" id="display-avatar"
+                    placeholder="https://... link to an image">
+                <div class="form-hint">*Paste a direct image link — your YouTube channel photo, Twitch avatar, whatever you like.</div>
             </div>
         </div>
 
@@ -1086,10 +1105,35 @@
         }
 
         function populateForm(profile, meta) {
-            // Avatar and display name (from Twitch)
-            document.getElementById('form-avatar').src = profile.avatar_url || meta.avatar_url || meta.picture || '';
-            document.getElementById('form-display-name').textContent = profile.username || meta.user_name || meta.name || 'Streamer';
-            document.getElementById('view-public-profile').href = `/streamer.html?user=${encodeURIComponent(profile.username || meta.user_name || meta.name || '')}`;
+            const resolvedUsername = profile.username || meta.user_name || meta.name || 'Streamer';
+            const resolvedAvatar = profile.avatar_url || meta.avatar_url || meta.picture || '';
+
+            // Avatar and display name preview
+            document.getElementById('form-avatar').src = resolvedAvatar;
+            document.getElementById('form-display-name').textContent = resolvedUsername;
+            document.getElementById('view-public-profile').href = `/streamer.html?user=${encodeURIComponent(resolvedUsername)}`;
+
+            const provider = currentUser.app_metadata?.provider;
+            const subText = provider === 'google'
+                ? 'Pulled from your Google account — edit below if it doesn\'t match your channel.'
+                : 'Pulled from Twitch. Looking good.';
+            document.getElementById('form-header-sub').textContent = subText;
+
+            // Editable identity fields
+            const usernameInput = document.getElementById('display-username');
+            const avatarInput = document.getElementById('display-avatar');
+            usernameInput.value = resolvedUsername;
+            avatarInput.value = resolvedAvatar;
+
+            // Live-update the preview as they type
+            usernameInput.addEventListener('input', () => {
+                document.getElementById('form-display-name').textContent = usernameInput.value || 'Streamer';
+            });
+            avatarInput.addEventListener('input', () => {
+                if (avatarInput.value) {
+                    document.getElementById('form-avatar').src = avatarInput.value;
+                }
+            });
 
             // Bio
             const bioField = document.getElementById('bio');
@@ -1219,6 +1263,18 @@
         // =============================================
         async function saveProfile() {
             const saveBtn = document.getElementById('save-btn');
+
+            // Basic validation on the new editable fields
+            const newUsername = document.getElementById('display-username').value.trim();
+            if (!newUsername) {
+                showToast('Display name can\'t be empty.', 'error');
+                return;
+            }
+            if (newUsername.length > 30) {
+                showToast('Display name is too long — 30 characters max.', 'error');
+                return;
+            }
+
             saveBtn.disabled = true;
             saveBtn.textContent = '⏳ Saving...';
 
@@ -1237,6 +1293,8 @@
             });
 
             const updates = {
+                username: newUsername,
+                avatar_url: document.getElementById('display-avatar').value.trim() || null,
                 bio: document.getElementById('bio').value.trim() || null,
                 timezone: document.getElementById('timezone').value || 'UTC',
                 language: document.getElementById('language').value || null,
