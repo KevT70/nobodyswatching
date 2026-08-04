@@ -778,6 +778,33 @@
             align-items: flex-end;
         }
 
+        .search-box {
+            width: 100%;
+            max-width: 340px;
+        }
+
+        .search-box input {
+            width: 100%;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+        }
+
         .timezone-filter {
             flex-shrink: 0;
         }
@@ -1491,6 +1518,10 @@
                 width: 100%;
             }
 
+            .search-box {
+                max-width: 100%;
+            }
+
             .filter-select {
                 width: 100%;
             }
@@ -1694,6 +1725,9 @@
                 <h2 class="section-title">FIND A STREAMER</h2>
             </div>
             <div class="filter-controls">
+                <div class="search-box">
+                    <input type="text" id="game-search" placeholder="🔍 Search for a game — e.g. Minecraft, Valorant..." autocomplete="off">
+                </div>
                 <div class="filters" id="filters">
                     <button class="filter-btn active" data-genre="all">All</button>
                     <button class="filter-btn" data-genre="FPS">FPS</button>
@@ -1786,7 +1820,7 @@
             <!-- Populated by JavaScript -->
         </div>
         <div id="grid-empty" style="display: none;">
-            <p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); padding: 2rem 0;">
+            <p id="grid-empty-text" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); padding: 2rem 0;">
                 No streamers found. Either nobody's signed up yet (awkward) or your filters are too specific. Try "All" and see who's about.
             </p>
         </div>
@@ -2212,7 +2246,7 @@
         // =============================================
         // RENDER: STREAMER GRID
         // =============================================
-        function renderStreamerGrid(profiles, genre, timezone, language) {
+        function renderStreamerGrid(profiles, genre, timezone, language, searchTerm) {
             const grid = document.getElementById('streamer-grid');
             const emptyMsg = document.getElementById('grid-empty');
 
@@ -2226,10 +2260,23 @@
             if (language && language !== 'all') {
                 filtered = filtered.filter(p => p.language === language);
             }
+            if (searchTerm && searchTerm.trim()) {
+                const term = searchTerm.trim().toLowerCase();
+                filtered = filtered.filter(p => {
+                    const games = (p.top_games || []).map(g => g.toLowerCase());
+                    return games.some(g => g.includes(term));
+                });
+            }
 
             if (filtered.length === 0) {
                 grid.style.display = 'none';
                 emptyMsg.style.display = 'block';
+                const emptyText = document.getElementById('grid-empty-text');
+                if (searchTerm && searchTerm.trim()) {
+                    emptyText.innerHTML = `Nobody's found playing "<strong>${esc(searchTerm.trim())}</strong>" right now. Maybe you'll be the first to list it?`;
+                } else {
+                    emptyText.textContent = `No streamers found. Either nobody's signed up yet (awkward) or your filters are too specific. Try "All" and see who's about.`;
+                }
                 return;
             }
 
@@ -2375,21 +2422,32 @@
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentFilter = btn.dataset.genre;
-                renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage);
+                renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch);
             });
         });
 
         // Timezone dropdown
         document.getElementById('timezone-filter').addEventListener('change', (e) => {
             currentTimezone = e.target.value;
-            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage);
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch);
         });
 
         // Language dropdown
         let currentLanguage = 'all';
         document.getElementById('language-filter').addEventListener('change', (e) => {
             currentLanguage = e.target.value;
-            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage);
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch);
+        });
+
+        // Game search box (debounced)
+        let currentSearch = '';
+        let searchDebounce = null;
+        document.getElementById('game-search').addEventListener('input', (e) => {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(() => {
+                currentSearch = e.target.value;
+                renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch);
+            }, 250);
         });
 
         // =============================================
@@ -2409,7 +2467,7 @@
             allProfiles = await fetchProfiles();
             renderLiveCarousel(allProfiles);
             initCarouselDrag();
-            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage);
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch);
             renderStats(allProfiles);
         }
 
