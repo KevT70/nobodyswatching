@@ -1033,16 +1033,46 @@
             document.getElementById('nav-username').textContent = meta.user_name || meta.name || 'Streamer';
 
             // Load existing profile from Supabase
-            const { data: profile, error } = await sb
+            let { data: profile, error } = await sb
                 .from('profiles')
                 .select('*')
                 .eq('id', currentUser.id)
-                .single();
+                .maybeSingle();
 
             if (error) {
                 console.error('Error loading profile:', error);
                 showToast('Failed to load profile. Please try again.', 'error');
                 return;
+            }
+
+            // No profile row found — likely deleted a previous one, or the
+            // auto-create trigger didn't fire (e.g. re-signing in after deletion).
+            // Create a fresh one on the fly using their auth metadata.
+            if (!profile) {
+                const fallbackUsername = meta.user_name || meta.name || meta.full_name || 'Streamer';
+                const fallbackAvatar = meta.avatar_url || meta.picture || '';
+                const isTwitch = currentUser.app_metadata?.provider === 'twitch';
+
+                const { data: newProfile, error: createError } = await sb
+                    .from('profiles')
+                    .insert({
+                        id: currentUser.id,
+                        username: fallbackUsername,
+                        avatar_url: fallbackAvatar,
+                        twitch_username: isTwitch ? fallbackUsername : '',
+                        twitch_url: isTwitch ? `https://twitch.tv/${fallbackUsername}` : ''
+                    })
+                    .select('*')
+                    .single();
+
+                if (createError) {
+                    console.error('Error creating profile:', createError);
+                    showToast('Failed to load profile. Please try again.', 'error');
+                    return;
+                }
+
+                profile = newProfile;
+                showToast("Welcome back! We've set up a fresh profile for you.", 'success');
             }
 
             currentProfile = profile;
