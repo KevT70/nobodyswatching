@@ -2263,8 +2263,9 @@
             if (searchTerm && searchTerm.trim()) {
                 const term = searchTerm.trim().toLowerCase();
                 filtered = filtered.filter(p => {
-                    const games = (p.top_games || []).map(g => g.toLowerCase());
-                    return games.some(g => g.includes(term));
+                    const topGames = (p.top_games || []).map(g => g.toLowerCase());
+                    const liveGame = (p.live_game || '').toLowerCase();
+                    return topGames.some(g => g.includes(term)) || liveGame.includes(term);
                 });
             }
 
