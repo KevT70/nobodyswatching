@@ -1523,6 +1523,18 @@
                     <button class="filter-btn" data-genre="Strategy">Strategy</button>
                     <button class="filter-btn" data-genre="Sandbox">Sandbox</button>
                     <button class="filter-btn" data-genre="Platformer">Platformer</button>
+                    <button class="filter-btn" data-genre="Roguelike">Roguelike</button>
+                    <button class="filter-btn" data-genre="Simulation">Simulation</button>
+                    <button class="filter-btn" data-genre="MMORPG">MMORPG</button>
+                    <button class="filter-btn" data-genre="Fighting">Fighting</button>
+                    <button class="filter-btn" data-genre="Puzzle">Puzzle</button>
+                    <button class="filter-btn" data-genre="Retro">Retro</button>
+                    <button class="filter-btn" data-genre="Art">Art</button>
+                    <button class="filter-btn" data-genre="Music">Music</button>
+                    <button class="filter-btn" data-genre="Just Chatting">Just Chatting</button>
+                    <button class="filter-btn" data-genre="Makers & Crafting">Makers & Crafting</button>
+                    <button class="filter-btn" data-genre="Cooking">Cooking</button>
+                    <button class="filter-btn" data-genre="IRL">IRL</button>
                     <button class="filter-btn" data-genre="Variety">Variety</button>
                 </div>
                 <div class="filter-row">
@@ -1986,7 +1998,7 @@
                                 <div class="streamer-meta">${metaHtml}</div>
                             </div>
                         </div>
-                        ${p.bio ? `<div class="streamer-bio">${esc(p.bio)}</div>` : ''}
+                        ${p.bio ? `<div class="streamer-bio">${esc(p.bio).replace(/\n/g, '<br>')}</div>` : ''}
                         ${gamesHtml ? `<div class="streamer-games">${gamesHtml}</div>` : ''}
                         ${platformsHtml ? `<div class="streamer-platforms">${platformsHtml}</div>` : ''}
                     </a>

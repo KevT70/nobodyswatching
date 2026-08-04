@@ -479,6 +479,32 @@
         }
 
         /* ========== MEMBER SINCE ========== */
+        .reroll-section {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .btn-reroll {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .btn-reroll:hover {
+            color: #fbbf24;
+            border-color: rgba(255, 215, 0, 0.4);
+            background: rgba(255, 215, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
         .member-since {
             font-family: var(--font-mono);
             font-size: 0.65rem;
@@ -698,6 +724,11 @@
             </div>
         </div>
 
+        <!-- Random Re-roll -->
+        <div class="reroll-section">
+            <button class="btn-reroll" onclick="randomStreamer()">🎲 Discover Another Streamer</button>
+        </div>
+
         <!-- Member Since -->
         <div id="p-member" class="member-since"></div>
     </div>
@@ -835,7 +866,7 @@
             // Bio
             const bioEl = document.getElementById('p-bio');
             if (p.bio) {
-                bioEl.textContent = p.bio;
+                bioEl.innerHTML = esc(p.bio).replace(/\n/g, '<br>');
             } else {
                 bioEl.textContent = 'This streamer hasn\'t written a bio yet. Mysterious.';
                 bioEl.style.fontStyle = 'italic';
@@ -937,6 +968,19 @@
         // =============================================
         // COPY SHARE URL
         // =============================================
+        async function randomStreamer() {
+            const { data: profiles, error } = await sb
+                .from('profiles')
+                .select('username')
+                .neq('username', new URLSearchParams(window.location.search).get('user'));
+            if (error || !profiles || profiles.length === 0) {
+                window.location.href = '/';
+                return;
+            }
+            const random = profiles[Math.floor(Math.random() * profiles.length)];
+            window.location.href = `/streamer.html?user=${encodeURIComponent(random.username)}`;
+        }
+
         async function copyShareUrl() {
             const input = document.getElementById('share-url-input');
             const btn = document.querySelector('.share-copy-btn');
