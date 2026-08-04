@@ -411,6 +411,12 @@
             border: 1px solid rgba(255, 0, 80, 0.2);
         }
 
+        .platform-link-icon.velora {
+            background: rgba(217, 119, 6, 0.12);
+            color: #f0b429;
+            border: 1px solid rgba(217, 119, 6, 0.25);
+        }
+
         .platform-link-name {
             font-size: 0.9rem;
             font-weight: 500;
@@ -456,6 +462,21 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
         }
+
+        .btn-watch.plat-twitch { background: var(--twitch); }
+        .btn-watch.plat-twitch:hover { background: #7c3aed; box-shadow: 0 8px 24px rgba(145, 70, 255, 0.3); }
+
+        .btn-watch.plat-youtube { background: var(--youtube); }
+        .btn-watch.plat-youtube:hover { background: #dc2626; box-shadow: 0 8px 24px rgba(255, 0, 0, 0.3); }
+
+        .btn-watch.plat-kick { background: var(--kick); color: #0a0a0f; }
+        .btn-watch.plat-kick:hover { background: #3ecc10; box-shadow: 0 8px 24px rgba(83, 252, 24, 0.3); }
+
+        .btn-watch.plat-rumble { background: #85c742; }
+        .btn-watch.plat-rumble:hover { background: #6ba832; box-shadow: 0 8px 24px rgba(133, 199, 66, 0.3); }
+
+        .btn-watch.plat-tiktok { background: #ff0050; }
+        .btn-watch.plat-tiktok:hover { background: #d40041; box-shadow: 0 8px 24px rgba(255, 0, 80, 0.3); }
 
         .btn-channel {
             display: inline-flex;
@@ -828,7 +849,27 @@
 
             // Status banner
             const bannerEl = document.getElementById('status-banner');
-            const primaryUrl = p.twitch_url || p.youtube_url || p.kick_url || p.rumble_url || p.tiktok_url || '#';
+            const primaryUrl = p.twitch_url || p.youtube_url || p.kick_url || p.rumble_url || p.tiktok_url || p.velora_url || '#';
+
+            // Work out which URL + colour class matches where they're actually live
+            let watchUrl = primaryUrl;
+            let watchClass = 'plat-twitch';
+            if (p.is_live && p.live_platform) {
+                if (p.live_platform === 'twitch.tv' && p.twitch_url) {
+                    watchUrl = p.twitch_url; watchClass = 'plat-twitch';
+                } else if (p.live_platform === 'youtube.com' && p.youtube_url) {
+                    watchUrl = p.youtube_url; watchClass = 'plat-youtube';
+                } else if (p.live_platform === 'kick.com' && p.kick_url) {
+                    watchUrl = p.kick_url; watchClass = 'plat-kick';
+                }
+            } else {
+                // Fallback: colour based on whichever URL is primary
+                if (p.twitch_url) watchClass = 'plat-twitch';
+                else if (p.youtube_url) watchClass = 'plat-youtube';
+                else if (p.kick_url) watchClass = 'plat-kick';
+                else if (p.rumble_url) watchClass = 'plat-rumble';
+                else if (p.tiktok_url) watchClass = 'plat-tiktok';
+            }
 
             if (p.is_live) {
                 bannerEl.innerHTML = `
@@ -840,7 +881,7 @@
                                 <div class="live-banner-meta">${p.live_viewer_count || 0} viewer${p.live_viewer_count !== 1 ? 's' : ''} watching${p.live_platform ? ' on ' + esc(p.live_platform) : ''}</div>
                             </div>
                         </div>
-                        <a href="${esc(primaryUrl)}" target="_blank" rel="noopener" class="btn-watch">▶ Watch Now</a>
+                        <a href="${esc(watchUrl)}" target="_blank" rel="noopener" class="btn-watch ${watchClass}">▶ Watch Now</a>
                     </div>
                 `;
             } else {
@@ -859,7 +900,7 @@
             const thumbContainer = document.getElementById('stream-thumb-container');
             if (p.is_live && p.live_thumbnail_url) {
                 thumbContainer.innerHTML = `
-                    <a href="${esc(primaryUrl)}" target="_blank" rel="noopener" class="stream-thumbnail">
+                    <a href="${esc(watchUrl)}" target="_blank" rel="noopener" class="stream-thumbnail">
                         <img src="${esc(p.live_thumbnail_url)}" alt="${esc(p.username)} live stream">
                     </a>
                 `;
@@ -948,6 +989,19 @@
                         <div>
                             <div class="platform-link-name">TikTok</div>
                             <div class="platform-link-url">${esc(p.tiktok_url)}</div>
+                        </div>
+                        <span class="platform-link-arrow">→</span>
+                    </a>
+                `;
+            }
+
+            if (p.velora_url) {
+                platformsHtml += `
+                    <a href="${esc(p.velora_url)}" target="_blank" rel="noopener" class="platform-link">
+                        <span class="platform-link-icon velora">Velora</span>
+                        <div>
+                            <div class="platform-link-name">Velora</div>
+                            <div class="platform-link-url">${esc(p.velora_url)}</div>
                         </div>
                         <span class="platform-link-arrow">→</span>
                     </a>

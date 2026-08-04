@@ -458,6 +458,7 @@
         .platform-prefix.kick { color: var(--kick); }
         .platform-prefix.rumble { color: #85c742; }
         .platform-prefix.tiktok { color: #ff0050; }
+        .platform-prefix.velora { color: #a78bfa; }
 
         .platform-input {
             flex: 1;
@@ -865,6 +866,8 @@
                     <label class="genre-checkbox"><input type="checkbox" value="Sandbox"><span>Sandbox</span></label>
                     <label class="genre-checkbox"><input type="checkbox" value="Platformer"><span>Platformer</span></label>
                     <label class="genre-checkbox"><input type="checkbox" value="Roguelike"><span>Roguelike</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Story Games"><span>Story Games</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Rhythm Games"><span>Rhythm Games</span></label>
                     <label class="genre-checkbox"><input type="checkbox" value="Simulation"><span>Simulation</span></label>
                     <label class="genre-checkbox"><input type="checkbox" value="MMORPG"><span>MMORPG</span></label>
                     <label class="genre-checkbox"><input type="checkbox" value="Fighting"><span>Fighting</span></label>
@@ -934,6 +937,14 @@
                     <span class="platform-prefix tiktok">TikTok</span>
                     <input type="url" class="platform-input" id="tiktok-url"
                         placeholder="https://tiktok.com/@yourusername">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="platform-input-group">
+                    <span class="platform-prefix velora">Velora</span>
+                    <input type="url" class="platform-input" id="velora-url"
+                        placeholder="https://velora.tv/yourchannel">
                 </div>
                 <div class="form-hint">*At least one platform is required. More is better.</div>
             </div>
@@ -1075,6 +1086,7 @@
             document.getElementById('kick-url').value = profile.kick_url || '';
             document.getElementById('rumble-url').value = profile.rumble_url || '';
             document.getElementById('tiktok-url').value = profile.tiktok_url || '';
+            document.getElementById('velora-url').value = profile.velora_url || '';
         }
 
         // =============================================
@@ -1206,6 +1218,7 @@
                 kick_url: document.getElementById('kick-url').value.trim() || null,
                 rumble_url: document.getElementById('rumble-url').value.trim() || null,
                 tiktok_url: document.getElementById('tiktok-url').value.trim() || null,
+                velora_url: document.getElementById('velora-url').value.trim() || null,
                 updated_at: new Date().toISOString()
             };
 

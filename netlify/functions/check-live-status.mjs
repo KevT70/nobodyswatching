@@ -51,12 +51,8 @@ async function checkTwitchLive(usernames, clientId, accessToken) {
 
     const liveMap = new Map();
     for (const stream of allStreams) {
-        // Skip reruns — only show genuinely live streams
-        if (stream.type && stream.type !== 'live') continue;
-
-        // Also skip if tagged as rerun
-        const tags = stream.tags || [];
-        if (tags.some(t => t.toLowerCase() === 'rerun' || t.toLowerCase() === 'rebroadcast')) continue;
+        const isRerun = (stream.type && stream.type !== 'live') ||
+            (stream.tags || []).some(t => t.toLowerCase() === 'rerun' || t.toLowerCase() === 'rebroadcast');
 
         const thumbUrl = stream.thumbnail_url
             ? stream.thumbnail_url.replace('{width}', '440').replace('{height}', '248')
@@ -65,7 +61,8 @@ async function checkTwitchLive(usernames, clientId, accessToken) {
             game: stream.game_name || null,
             viewers: stream.viewer_count || 0,
             thumbnail: thumbUrl,
-            platform: 'twitch.tv'
+            platform: 'twitch.tv',
+            isRerun: isRerun
         });
     }
     return liveMap;
@@ -282,6 +279,7 @@ export default async function handler() {
                     .from('profiles')
                     .update({
                         is_live: true,
+                        is_rerun: liveData.isRerun || false,
                         live_game: liveData.game,
                         live_viewer_count: liveData.viewers,
                         live_thumbnail_url: liveData.thumbnail,
@@ -294,6 +292,7 @@ export default async function handler() {
                     .from('profiles')
                     .update({
                         is_live: false,
+                        is_rerun: false,
                         live_game: null,
                         live_viewer_count: 0,
                         live_thumbnail_url: null,

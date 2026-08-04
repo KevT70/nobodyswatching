@@ -328,6 +328,14 @@
             overflow: hidden;
         }
 
+        .spotlight-card.is-rerun {
+            border-color: var(--border);
+        }
+
+        .spotlight-card.is-rerun:hover {
+            border-color: var(--text-muted);
+        }
+
         .spotlight-card::before {
             content: '';
             position: absolute;
@@ -1086,6 +1094,12 @@
             border: 1px solid rgba(255, 0, 80, 0.2);
         }
 
+        .platform-velora {
+            background: rgba(217, 119, 6, 0.12);
+            color: #f0b429;
+            border: 1px solid rgba(217, 119, 6, 0.25);
+        }
+
         /* ========== STATS BAR ========== */
         .stats-bar {
             display: flex;
@@ -1741,6 +1755,8 @@
                     <button class="filter-btn" data-genre="Sandbox">Sandbox</button>
                     <button class="filter-btn" data-genre="Platformer">Platformer</button>
                     <button class="filter-btn" data-genre="Roguelike">Roguelike</button>
+                    <button class="filter-btn" data-genre="Story Games">Story Games</button>
+                    <button class="filter-btn" data-genre="Rhythm Games">Rhythm Games</button>
                     <button class="filter-btn" data-genre="Simulation">Simulation</button>
                     <button class="filter-btn" data-genre="MMORPG">MMORPG</button>
                     <button class="filter-btn" data-genre="Fighting">Fighting</button>
@@ -2018,12 +2034,23 @@
 
             const VIEWER_CAP = 75; // Hide from carousel above this
             const allLive = profiles.filter(p => p.is_live);
-            const liveProfiles = allLive.filter(p => (p.live_viewer_count || 0) <= VIEWER_CAP);
+            const genuinelyLive = allLive.filter(p => !p.is_rerun);
+            const reruns = allLive.filter(p => p.is_rerun);
+            const liveProfiles = genuinelyLive.filter(p => (p.live_viewer_count || 0) <= VIEWER_CAP);
 
-            // === SPOTLIGHT: lowest viewer count ===
-            if (allLive.length > 0) {
-                const sorted = [...allLive].sort((a, b) => (a.live_viewer_count || 0) - (b.live_viewer_count || 0));
-                const star = sorted[0];
+            // === SPOTLIGHT ===
+            // Prefer a genuinely live streamer with the fewest viewers.
+            // If nobody's genuinely live, fall back to the rerun with the fewest viewers.
+            let star = null;
+            let isRerunSpotlight = false;
+            if (genuinelyLive.length > 0) {
+                star = [...genuinelyLive].sort((a, b) => (a.live_viewer_count || 0) - (b.live_viewer_count || 0))[0];
+            } else if (reruns.length > 0) {
+                star = [...reruns].sort((a, b) => (a.live_viewer_count || 0) - (b.live_viewer_count || 0))[0];
+                isRerunSpotlight = true;
+            }
+
+            if (star) {
                 const profileUrl = `/streamer.html?user=${encodeURIComponent(star.username)}`;
                 const thumb = star.live_thumbnail_url;
                 const thumbHtml = thumb
@@ -2037,17 +2064,23 @@
                 if (star.rumble_url) pillsHtml += `<a href="${esc(star.rumble_url)}" target="_blank" rel="noopener" class="plat-rumble" onclick="event.stopPropagation()">▶ Rumble</a>`;
                 if (star.tiktok_url) pillsHtml += `<a href="${esc(star.tiktok_url)}" target="_blank" rel="noopener" class="plat-tiktok" onclick="event.stopPropagation()">▶ TikTok</a>`;
 
+                const badgeLabel = isRerunSpotlight ? '↻ Rerun' : '● Live';
+                const spotlightLabel = isRerunSpotlight ? '↻ Nothing live — here\'s a rerun' : '⭐ Spotlight';
+                const captionText = isRerunSpotlight
+                    ? `👁 ${star.live_viewer_count || 0} viewer${star.live_viewer_count !== 1 ? 's' : ''} — replaying old content, but still worth a look`
+                    : `👁 ${star.live_viewer_count || 0} viewer${star.live_viewer_count !== 1 ? 's' : ''} — be the one who changes that`;
+
                 spotlightCard.innerHTML = `
-                    <div class="spotlight-card" onclick="window.location.href='${profileUrl}'">
+                    <div class="spotlight-card ${isRerunSpotlight ? 'is-rerun' : ''}" onclick="window.location.href='${profileUrl}'">
                         <div class="spotlight-thumb">
                             ${thumbHtml}
-                            <span class="live-badge">● Live</span>
+                            <span class="live-badge">${badgeLabel}</span>
                         </div>
                         <div class="spotlight-info">
-                            <span class="spotlight-label">⭐ Spotlight</span>
+                            <span class="spotlight-label">${spotlightLabel}</span>
                             <div class="spotlight-name">${esc(star.username)} ${renderBadges(star.badges)}</div>
                             <div class="spotlight-game">${esc(star.live_game || 'Streaming')}</div>
-                            <div class="spotlight-viewers">👁 ${star.live_viewer_count || 0} viewer${star.live_viewer_count !== 1 ? 's' : ''} — be the one who changes that</div>
+                            <div class="spotlight-viewers">${captionText}</div>
                             <div class="spotlight-platform">${pillsHtml}</div>
                         </div>
                     </div>
@@ -2057,7 +2090,7 @@
                 spotlightSection.style.display = 'none';
             }
 
-            // === CAROUSEL: remaining live streamers under cap ===
+            // === CAROUSEL: genuinely live streamers under the viewer cap ===
             if (liveProfiles.length === 0) {
                 carousel.style.display = 'none';
                 if (allLive.length === 0) {
@@ -2291,7 +2324,7 @@
                 // Meta line
                 let metaHtml = '';
                 if (isLive) {
-                    metaHtml = `<span class="streamer-live-dot"></span> Live Now`;
+                    metaHtml = `<span class="streamer-live-dot"></span> Live Now · 👁 ${p.live_viewer_count || 0} viewer${p.live_viewer_count !== 1 ? 's' : ''}`;
                 } else if (p.last_live_at) {
                     metaHtml = `Last live ${timeAgo(p.last_live_at)}`;
                 } else {
@@ -2316,6 +2349,7 @@
                 if (p.kick_url) platformsHtml += '<span class="platform-icon platform-kick">Kick</span>';
                 if (p.rumble_url) platformsHtml += '<span class="platform-icon platform-rumble">Rumble</span>';
                 if (p.tiktok_url) platformsHtml += '<span class="platform-icon platform-tiktok">TikTok</span>';
+                if (p.velora_url) platformsHtml += '<span class="platform-icon platform-velora">Velora</span>';
 
                 // Avatar
                 const avatarHtml = p.avatar_url
