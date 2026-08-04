@@ -514,6 +514,16 @@
             background: rgba(133, 199, 66, 0.2);
         }
 
+        .live-card-platform a.plat-tiktok {
+            background: rgba(255, 0, 80, 0.1);
+            color: #ff0050;
+            border: 1px solid rgba(255, 0, 80, 0.2);
+        }
+
+        .live-card-platform a.plat-tiktok:hover {
+            background: rgba(255, 0, 80, 0.2);
+        }
+
         /* ========== HOW IT WORKS ========== */
         .how-section {
             padding: 5rem 2rem;
@@ -868,6 +878,12 @@
             background: rgba(133, 199, 66, 0.1);
             color: #85c742;
             border: 1px solid rgba(133, 199, 66, 0.2);
+        }
+
+        .platform-tiktok {
+            background: rgba(255, 0, 80, 0.1);
+            color: #ff0050;
+            border: 1px solid rgba(255, 0, 80, 0.2);
         }
 
         /* ========== STATS BAR ========== */
@@ -1759,6 +1775,7 @@
                 if (p.youtube_url) pillsHtml += `<a href="${esc(p.youtube_url)}" target="_blank" rel="noopener" class="plat-youtube" onclick="event.stopPropagation()">▶ YouTube</a>`;
                 if (p.kick_url) pillsHtml += `<a href="${esc(p.kick_url)}" target="_blank" rel="noopener" class="plat-kick" onclick="event.stopPropagation()">▶ Kick</a>`;
                 if (p.rumble_url) pillsHtml += `<a href="${esc(p.rumble_url)}" target="_blank" rel="noopener" class="plat-rumble" onclick="event.stopPropagation()">▶ Rumble</a>`;
+                if (p.tiktok_url) pillsHtml += `<a href="${esc(p.tiktok_url)}" target="_blank" rel="noopener" class="plat-tiktok" onclick="event.stopPropagation()">▶ TikTok</a>`;
 
                 return `
                     <div class="live-card" onclick="window.location.href='${profileUrl}'" style="cursor:pointer">
@@ -1953,6 +1970,7 @@
                 if (p.youtube_url) platformsHtml += '<span class="platform-icon platform-youtube">YouTube</span>';
                 if (p.kick_url) platformsHtml += '<span class="platform-icon platform-kick">Kick</span>';
                 if (p.rumble_url) platformsHtml += '<span class="platform-icon platform-rumble">Rumble</span>';
+                if (p.tiktok_url) platformsHtml += '<span class="platform-icon platform-tiktok">TikTok</span>';
 
                 // Avatar
                 const avatarHtml = p.avatar_url

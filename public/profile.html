@@ -457,6 +457,7 @@
         .platform-prefix.youtube { color: var(--youtube); }
         .platform-prefix.kick { color: var(--kick); }
         .platform-prefix.rumble { color: #85c742; }
+        .platform-prefix.tiktok { color: #ff0050; }
 
         .platform-input {
             flex: 1;
@@ -877,6 +878,14 @@
                     <input type="url" class="platform-input" id="rumble-url"
                         placeholder="https://rumble.com/c/yourchannel">
                 </div>
+            </div>
+
+            <div class="form-group">
+                <div class="platform-input-group">
+                    <span class="platform-prefix tiktok">TikTok</span>
+                    <input type="url" class="platform-input" id="tiktok-url"
+                        placeholder="https://tiktok.com/@yourusername">
+                </div>
                 <div class="form-hint">*At least one platform is required. More is better.</div>
             </div>
         </div>
@@ -1015,6 +1024,7 @@
             document.getElementById('youtube-url').value = profile.youtube_url || '';
             document.getElementById('kick-url').value = profile.kick_url || '';
             document.getElementById('rumble-url').value = profile.rumble_url || '';
+            document.getElementById('tiktok-url').value = profile.tiktok_url || '';
         }
 
         // =============================================
@@ -1144,6 +1154,7 @@
                 youtube_url: document.getElementById('youtube-url').value.trim() || null,
                 kick_url: document.getElementById('kick-url').value.trim() || null,
                 rumble_url: document.getElementById('rumble-url').value.trim() || null,
+                tiktok_url: document.getElementById('tiktok-url').value.trim() || null,
                 updated_at: new Date().toISOString()
             };
 
