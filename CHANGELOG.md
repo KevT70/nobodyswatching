@@ -25,6 +25,14 @@ The drag logic itself needed updating too - it previously assumed content was al
 ## [2026-04-08] - Additional Functionality added from feedback
 
 ### Added
+ - #11 - Rerun fallback spotlight. The polling function no longer discards reruns entirely - it tags them with is_rerun: true instead. The carousel still excludes reruns completely (never shown there). But the spotlight now has smart fallback logic: if anyone's genuinely live, spotlight picks the lowest-viewer genuine streamer as before. If nobody is genuinely live, it falls back to the rerun with the fewest viewers, with a clearly different label (↻ Nothing live - here's a rerun), a muted grey border instead of teal, and honest copy explaining it's replaying old content. Nobody gets misled into thinking a rerun is a live stream.
+
+ - #12 - Watch Now button colour. Now dynamically matches whichever platform they're actually live on - purple for Twitch, red for YouTube, kick-green for Kick. If they're offline, it colours based on their primary linked platform instead.
+
+ - #13 - Genres and platforms. Added Story Games and Rhythm Games to both the profile checkboxes and homepage filters. Added Velora as new platform link fields, following the same pattern as Rumble/TikTok.
+
+ - #14 - Viewer count on directory cards. Live streamers now show 👁 X viewers in their card meta line on the main directory grid, regardless of whether they're under the 75-viewer carousel cap. So a streamer with 200 viewers still shows their live status and count on their card, they just won't appear in the carousel itself.
+
 - Added search bar so that the user can search for a game rather than a Genre i.e. Minecraft
 
 - Added Language options for the Streamer profile. You can write your BIO in any language you wish and now find streamers in any language simply by selecting it on the front page.
