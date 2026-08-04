@@ -429,6 +429,41 @@
             transition: all 0.2s;
         }
 
+        .spotlight-platform a.plat-twitch {
+            background: rgba(145, 70, 255, 0.15);
+            color: var(--twitch);
+            border: 1px solid rgba(145, 70, 255, 0.25);
+        }
+        .spotlight-platform a.plat-twitch:hover { background: rgba(145, 70, 255, 0.3); }
+
+        .spotlight-platform a.plat-youtube {
+            background: rgba(255, 0, 0, 0.1);
+            color: var(--youtube);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+        .spotlight-platform a.plat-youtube:hover { background: rgba(255, 0, 0, 0.2); }
+
+        .spotlight-platform a.plat-kick {
+            background: rgba(83, 252, 24, 0.1);
+            color: var(--kick);
+            border: 1px solid rgba(83, 252, 24, 0.2);
+        }
+        .spotlight-platform a.plat-kick:hover { background: rgba(83, 252, 24, 0.2); }
+
+        .spotlight-platform a.plat-rumble {
+            background: rgba(133, 199, 66, 0.1);
+            color: #85c742;
+            border: 1px solid rgba(133, 199, 66, 0.2);
+        }
+        .spotlight-platform a.plat-rumble:hover { background: rgba(133, 199, 66, 0.2); }
+
+        .spotlight-platform a.plat-tiktok {
+            background: rgba(255, 0, 80, 0.1);
+            color: #ff0050;
+            border: 1px solid rgba(255, 0, 80, 0.2);
+        }
+        .spotlight-platform a.plat-tiktok:hover { background: rgba(255, 0, 80, 0.2); }
+
         @media (max-width: 768px) {
             .spotlight-card {
                 flex-direction: column;
@@ -458,6 +493,10 @@
             gap: 1.25rem;
             animation: carousel-scroll 30s linear infinite;
             width: max-content;
+        }
+
+        .live-carousel-inner.no-scroll-anim {
+            animation: none;
         }
 
         .live-carousel-inner.paused {
@@ -554,12 +593,15 @@
             position: absolute;
             bottom: 10px;
             right: 10px;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.85);
             color: var(--text-primary);
             font-family: var(--font-mono);
             font-size: 0.65rem;
-            padding: 0.2rem 0.5rem;
+            padding: 0.25rem 0.55rem;
             border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            z-index: 2;
         }
 
         .live-card-info {
@@ -737,6 +779,10 @@
         }
 
         .timezone-filter {
+            flex-shrink: 0;
+        }
+
+        .language-filter {
             flex-shrink: 0;
         }
 
@@ -1457,6 +1503,10 @@
                 flex: 1;
             }
 
+            .filter-row .language-filter {
+                flex: 1;
+            }
+
             .streamer-grid {
                 grid-template-columns: 1fr;
                 margin: 0 -0.25rem;
@@ -1691,6 +1741,40 @@
                             <option value="UTC+09:00">UTC+9 Tokyo / Seoul</option>
                             <option value="UTC+10:00">UTC+10 Sydney</option>
                             <option value="UTC+12:00">UTC+12 New Zealand</option>
+                        </select>
+                    </div>
+                    <div class="language-filter">
+                        <select class="filter-select" id="language-filter">
+                            <option value="all">All Languages</option>
+                            <option value="English">English</option>
+                            <option value="Spanish">Spanish</option>
+                            <option value="Portuguese">Portuguese</option>
+                            <option value="French">French</option>
+                            <option value="German">German</option>
+                            <option value="Italian">Italian</option>
+                            <option value="Dutch">Dutch</option>
+                            <option value="Polish">Polish</option>
+                            <option value="Russian">Russian</option>
+                            <option value="Ukrainian">Ukrainian</option>
+                            <option value="Turkish">Turkish</option>
+                            <option value="Arabic">Arabic</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Japanese">Japanese</option>
+                            <option value="Korean">Korean</option>
+                            <option value="Chinese">Chinese</option>
+                            <option value="Thai">Thai</option>
+                            <option value="Vietnamese">Vietnamese</option>
+                            <option value="Indonesian">Indonesian</option>
+                            <option value="Filipino">Filipino</option>
+                            <option value="Swedish">Swedish</option>
+                            <option value="Norwegian">Norwegian</option>
+                            <option value="Danish">Danish</option>
+                            <option value="Finnish">Finnish</option>
+                            <option value="Czech">Czech</option>
+                            <option value="Hungarian">Hungarian</option>
+                            <option value="Romanian">Romanian</option>
+                            <option value="Greek">Greek</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
                     <button class="btn-random" onclick="randomStreamer()" title="Discover a random streamer">🎲 Random</button>
@@ -1985,16 +2069,16 @@
                 `;
             }).join('');
 
-            // If more than 2 live, duplicate cards for seamless infinite scroll
+            // Always wrap in inner container so swipe/drag works regardless of count.
+            // Only duplicate + animate when there are enough cards to loop seamlessly.
             if (liveProfiles.length > 2) {
                 carousel.innerHTML = `<div class="live-carousel-inner">${cardsHtml}${cardsHtml}</div>`;
-                // Adjust speed based on number of cards (more cards = slower)
                 const inner = carousel.querySelector('.live-carousel-inner');
                 const duration = liveProfiles.length * 8;
                 inner.style.animationDuration = `${duration}s`;
             } else {
-                // Too few cards to scroll — just display them static
-                carousel.innerHTML = cardsHtml;
+                // Too few cards to loop — no animation, but still scrollable/swipeable
+                carousel.innerHTML = `<div class="live-carousel-inner no-scroll-anim">${cardsHtml}</div>`;
             }
         }
 
@@ -2011,11 +2095,19 @@
             let scrollOffset = 0;
             let currentTranslate = 0;
             let resumeTimer = null;
+            const isDuplicated = !inner.classList.contains('no-scroll-anim');
 
             function getTranslateX() {
                 const style = window.getComputedStyle(inner);
                 const matrix = new DOMMatrix(style.transform);
                 return matrix.m41;
+            }
+
+            function getMaxDrag() {
+                // How far left the content can go before its right edge hits the container's right edge
+                const containerWidth = carousel.offsetWidth;
+                const contentWidth = inner.scrollWidth;
+                return Math.min(0, containerWidth - contentWidth);
             }
 
             function pauseAutoScroll() {
@@ -2027,6 +2119,7 @@
             }
 
             function resumeAutoScroll() {
+                if (!isDuplicated) return; // Nothing to resume — no loop animation for small sets
                 clearTimeout(resumeTimer);
                 resumeTimer = setTimeout(() => {
                     if (isDragging) return;
@@ -2037,7 +2130,6 @@
 
                     const remaining = (Math.abs(pos) / totalWidth);
                     const fullDuration = parseFloat(inner.dataset.duration || 30);
-                    const remainingDuration = fullDuration * (1 - remaining);
 
                     inner.style.animation = 'none';
                     inner.style.transform = `translateX(${pos}px)`;
@@ -2064,10 +2156,17 @@
                 const diff = x - startX;
                 currentTranslate = scrollOffset + diff;
 
-                // Wrap around
-                const totalWidth = inner.scrollWidth / 2;
-                if (currentTranslate > 0) currentTranslate -= totalWidth;
-                if (currentTranslate < -totalWidth) currentTranslate += totalWidth;
+                if (isDuplicated) {
+                    // Wrap around seamlessly within the duplicated set
+                    const totalWidth = inner.scrollWidth / 2;
+                    if (currentTranslate > 0) currentTranslate -= totalWidth;
+                    if (currentTranslate < -totalWidth) currentTranslate += totalWidth;
+                } else {
+                    // Clamp so you can't drag past the first or last card
+                    const maxDrag = getMaxDrag();
+                    if (currentTranslate > 0) currentTranslate = 0;
+                    if (currentTranslate < maxDrag) currentTranslate = maxDrag;
+                }
 
                 inner.style.transform = `translateX(${currentTranslate}px)`;
             }
@@ -2113,7 +2212,7 @@
         // =============================================
         // RENDER: STREAMER GRID
         // =============================================
-        function renderStreamerGrid(profiles, genre, timezone) {
+        function renderStreamerGrid(profiles, genre, timezone, language) {
             const grid = document.getElementById('streamer-grid');
             const emptyMsg = document.getElementById('grid-empty');
 
@@ -2123,6 +2222,9 @@
             }
             if (timezone && timezone !== 'all') {
                 filtered = filtered.filter(p => p.timezone === timezone);
+            }
+            if (language && language !== 'all') {
+                filtered = filtered.filter(p => p.language === language);
             }
 
             if (filtered.length === 0) {
@@ -2149,6 +2251,9 @@
                 }
                 if (p.timezone) {
                     metaHtml += ` · ${esc(p.timezone)}`;
+                }
+                if (p.language && p.language !== 'English') {
+                    metaHtml += ` · 🌐 ${esc(p.language)}`;
                 }
 
                 // Games
@@ -2270,14 +2375,21 @@
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentFilter = btn.dataset.genre;
-                renderStreamerGrid(allProfiles, currentFilter, currentTimezone);
+                renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage);
             });
         });
 
         // Timezone dropdown
         document.getElementById('timezone-filter').addEventListener('change', (e) => {
             currentTimezone = e.target.value;
-            renderStreamerGrid(allProfiles, currentFilter, currentTimezone);
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage);
+        });
+
+        // Language dropdown
+        let currentLanguage = 'all';
+        document.getElementById('language-filter').addEventListener('change', (e) => {
+            currentLanguage = e.target.value;
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage);
         });
 
         // =============================================
@@ -2297,7 +2409,7 @@
             allProfiles = await fetchProfiles();
             renderLiveCarousel(allProfiles);
             initCarouselDrag();
-            renderStreamerGrid(allProfiles, currentFilter, currentTimezone);
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage);
             renderStats(allProfiles);
         }
 
