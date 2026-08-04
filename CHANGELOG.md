@@ -7,6 +7,8 @@ All notable changes to NobodysWatching.live are documented here.
 ## [2026-04-08] - BUG FIXES
 
 ### Bug Fixes
+- Updated link to Bluesky from x_TapTap_x profile, to appropriate nobodyswatching.live profile
+
 - The bug: With 3+ live streamers, cards get duplicated and wrapped in a .live-carousel-inner div for the seamless auto-scroll loop. But with 2 or fewer, the code skipped that wrapper entirely - no inner div, no scroll mechanism, cards just sat static and cramped. Worse, our drag/swipe script specifically looks for .live-carousel-inner to attach to, so with no wrapper present, it silently did nothing. You were stuck.
 - The fix:
 The inner wrapper is now always created, regardless of streamer count
