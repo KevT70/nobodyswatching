@@ -4,6 +4,23 @@ All notable changes to NobodysWatching.live are documented here.
 
 ---
 
+## [2026-04-08] — Additional Functionality added from feedback
+
+### Added
+- Expanded genres (profile.html + index.html) — 12 new categories added: Roguelike, Simulation, MMORPG, Fighting, Puzzle, Retro, Art, Music, Just Chatting, Makers & Crafting, Cooking, and IRL. Both the profile checkboxes and the homepage filter buttons are updated. Existing profiles keep their current genres — the new options just appear alongside them.
+
+- Random re-roll button (streamer.html) — A "🎲 Discover Another Streamer" button sits below the share section on every streamer profile page. Clicking it loads a random different streamer (it excludes the one you're currently viewing). Gold hover effect matching the Random button on the homepage. No more navigating back to the directory to re-roll.
+
+- Bio line breaks (index.html + streamer.html) — Newlines in bios now render as <br> tags on both the directory cards and the streamer profile page. The text is still escaped first via esc() so there's no HTML injection risk — we escape everything, then convert \n to <br>. The profile form already uses a textarea, so people can just hit Enter to add line breaks.
+
+- Spotlight section (index.html) — When anyone's live, the streamer with the fewest viewers gets a prominent "⭐ Spotlight" card above the carousel. It's got a teal-bordered card with a subtle glow, their thumbnail, username, badges, game, viewer count, and platform pills. The tagline underneath says "👁 X viewers — be the one who changes that". On mobile it stacks vertically. This directly addresses feedback #9 — it grabs attention better than the carousel alone and gives the smallest streamers the biggest visibility.
+
+- Viewer cap on carousel (index.html) — Streamers with more than 75 viewers are hidden from the live carousel. They're still on the site, still in the directory, still have their profile page — they just don't take up carousel space that could go to someone smaller. 75 felt right as a starting point — high enough that growing streamers don't feel punished, low enough to keep the carousel true to its mission. Easy to adjust the VIEWER_CAP constant if you want to change it later.
+
+- Rerun filter (check-live-status.mjs) — The polling function now skips Twitch streams where type is anything other than "live" (catches reruns at the API level), and also checks tags for "rerun" or "rebroadcast" as a belt-and-braces measure. So rerun channels won't appear in the live carousel anymore.
+  
+---
+
 ## [2026-04-08] — TikTok Platform Support
 
 ### Added
