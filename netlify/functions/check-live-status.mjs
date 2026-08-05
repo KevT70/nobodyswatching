@@ -196,9 +196,6 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
             const rawText = await response.text();
             const videoId = findLiveVideoId(rawText);
 
-            // Temporary diagnostic logging — remove once we've confirmed this works reliably
-            console.log(`YouTube InnerTube check for ${identifier}: channelId=${channelId}, videoId=${videoId || 'none'}`);
-
             if (!videoId) continue; // Not live
 
             // Free oEmbed call for title + thumbnail — no API key, no quota
