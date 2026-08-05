@@ -83,54 +83,111 @@ async function checkKickLive(usernames) {
 }
 
 // =============================================
-// YOUTUBE — free redirect-based live detection.
+// YOUTUBE — InnerTube-based live detection.
 //
-// YouTube's /channel/{id}/live and /@handle/live URLs automatically
-// redirect to the current live video if the channel is streaming.
-// Checking that redirect costs ZERO API quota — it's a plain HTTP
-// request, not a Data API call. We then use YouTube's free oEmbed
-// endpoint (no key needed) for the title and thumbnail. The optional
-// API key is only used for a single cheap videos.list call (1 unit,
-// not the 100-unit search.list) to fetch viewer count — and only for
-// channels we've already confirmed are live, not all of them.
+// This uses YouTube's own internal "InnerTube" API — the same one
+// youtube.com's web player calls under the hood, and the technique
+// used by tools like yt-dlp. It uses a public WEB-client key that's
+// baked into every YouTube page load, so it isn't subject to the
+// Developer API's 10,000-unit daily quota at all.
+//
+// We still use the official (cheap, 1-unit) channels.list call to
+// resolve @handles to a channel ID — that was never the expensive
+// part, only search.list (100 units) was, and we no longer use it.
 // =============================================
+const INNERTUBE_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
+const INNERTUBE_CONTEXT = {
+    client: {
+        clientName: 'WEB',
+        clientVersion: '2.20240101.00.00'
+    }
+};
+
+async function resolveYouTubeChannelId(identifier, type, apiKey) {
+    if (type === 'channel_id') return identifier;
+    if (!apiKey) return null;
+    try {
+        const res = await fetch(
+            `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(identifier)}&key=${apiKey}`
+        );
+        if (!res.ok) {
+            console.error(`YouTube handle resolve returned ${res.status} for ${identifier}`);
+            return null;
+        }
+        const data = await res.json();
+        return data.items?.[0]?.id || null;
+    } catch (err) {
+        console.error(`YouTube handle resolve failed for ${identifier}:`, err.message);
+        return null;
+    }
+}
+
+// Recursively search an InnerTube JSON response for a video node that's
+// carrying a "LIVE" badge — resilient to YouTube shuffling exact paths
+// around, since we don't depend on a fixed structure.
+function findLiveVideoId(node, depth = 0) {
+    if (!node || typeof node !== 'object' || depth > 25) return null;
+
+    if (Array.isArray(node)) {
+        for (const item of node) {
+            const found = findLiveVideoId(item, depth + 1);
+            if (found) return found;
+        }
+        return null;
+    }
+
+    if (typeof node.videoId === 'string' && node.videoId.length === 11) {
+        const serialized = JSON.stringify(node);
+        if (serialized.includes('"style":"LIVE"') || serialized.includes('LIVE_NOW') || serialized.includes('"text":"LIVE"')) {
+            return node.videoId;
+        }
+    }
+
+    for (const key of Object.keys(node)) {
+        const found = findLiveVideoId(node[key], depth + 1);
+        if (found) return found;
+    }
+    return null;
+}
+
 async function checkYouTubeLive(channelIdentifiers, apiKey) {
     const liveMap = new Map();
 
     for (const { identifier, type } of channelIdentifiers) {
         try {
-            const liveUrl = type === 'handle'
-                ? `https://www.youtube.com/@${identifier}/live`
-                : `https://www.youtube.com/channel/${identifier}/live`;
-
-            const response = await fetch(liveUrl, {
-                redirect: 'follow',
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Language': 'en-US,en;q=0.9'
-                }
-            });
-
-            if (!response.ok && response.status !== 404) {
-                console.error(`YouTube /live check returned ${response.status} for ${identifier}`);
+            const channelId = await resolveYouTubeChannelId(identifier, type, apiKey);
+            if (!channelId) {
+                console.log(`YouTube check for ${identifier}: could not resolve channel ID, skipping`);
                 continue;
             }
 
-            // YouTube doesn't issue an HTTP redirect for /@handle/live — it serves
-            // the page directly with a 200. When the channel IS live, the page's
-            // canonical/og:url tags point at the specific watch?v=... URL for the
-            // live video. When it's not live, those tags stay generic. So we read
-            // the HTML and look for that video ID rather than trusting response.url.
-            const html = await response.text();
-            const canonicalMatch = html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})"/);
-            const ogUrlMatch = html.match(/<meta property="og:url" content="https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})"/);
-            const videoId = (canonicalMatch && canonicalMatch[1]) || (ogUrlMatch && ogUrlMatch[1]) || null;
+            const response = await fetch(`https://www.youtube.com/youtubei/v1/browse?key=${INNERTUBE_KEY}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Origin': 'https://www.youtube.com',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+                },
+                body: JSON.stringify({
+                    context: INNERTUBE_CONTEXT,
+                    browseId: channelId
+                })
+            });
+
+            if (!response.ok) {
+                const bodySnippet = await response.text().catch(() => '');
+                console.error(`YouTube InnerTube browse returned ${response.status} for ${identifier}: ${bodySnippet.slice(0, 200)}`);
+                continue;
+            }
+
+            const data = await response.json();
+            const videoId = findLiveVideoId(data);
 
             // Temporary diagnostic logging — remove once we've confirmed this works reliably
-            console.log(`YouTube check for ${identifier} (${type}): status ${response.status}, htmlLength=${html.length}, canonicalMatch=${canonicalMatch ? canonicalMatch[1] : 'none'}, ogUrlMatch=${ogUrlMatch ? ogUrlMatch[1] : 'none'}`);
+            const rawText = JSON.stringify(data);
+            console.log(`YouTube InnerTube check for ${identifier}: channelId=${channelId}, responseLength=${rawText.length}, containsLIVE=${rawText.includes('LIVE')}, videoId=${videoId || 'none'}`);
 
-            if (!videoId) continue; // Not live — no live video ID found in the page
+            if (!videoId) continue; // Not live
 
             // Free oEmbed call for title + thumbnail — no API key, no quota
             let title = null;
