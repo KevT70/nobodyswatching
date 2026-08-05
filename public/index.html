@@ -437,41 +437,6 @@
             transition: all 0.2s;
         }
 
-        .spotlight-platform a.plat-twitch {
-            background: rgba(145, 70, 255, 0.15);
-            color: var(--twitch);
-            border: 1px solid rgba(145, 70, 255, 0.25);
-        }
-        .spotlight-platform a.plat-twitch:hover { background: rgba(145, 70, 255, 0.3); }
-
-        .spotlight-platform a.plat-youtube {
-            background: rgba(255, 0, 0, 0.1);
-            color: var(--youtube);
-            border: 1px solid rgba(255, 0, 0, 0.2);
-        }
-        .spotlight-platform a.plat-youtube:hover { background: rgba(255, 0, 0, 0.2); }
-
-        .spotlight-platform a.plat-kick {
-            background: rgba(83, 252, 24, 0.1);
-            color: var(--kick);
-            border: 1px solid rgba(83, 252, 24, 0.2);
-        }
-        .spotlight-platform a.plat-kick:hover { background: rgba(83, 252, 24, 0.2); }
-
-        .spotlight-platform a.plat-rumble {
-            background: rgba(133, 199, 66, 0.1);
-            color: #85c742;
-            border: 1px solid rgba(133, 199, 66, 0.2);
-        }
-        .spotlight-platform a.plat-rumble:hover { background: rgba(133, 199, 66, 0.2); }
-
-        .spotlight-platform a.plat-tiktok {
-            background: rgba(255, 0, 80, 0.1);
-            color: #ff0050;
-            border: 1px solid rgba(255, 0, 80, 0.2);
-        }
-        .spotlight-platform a.plat-tiktok:hover { background: rgba(255, 0, 80, 0.2); }
-
         @media (max-width: 768px) {
             .spotlight-card {
                 flex-direction: column;
@@ -649,56 +614,6 @@
             letter-spacing: 0.05em;
             text-decoration: none;
             transition: all 0.2s;
-        }
-
-        .live-card-platform a.plat-twitch {
-            background: rgba(145, 70, 255, 0.15);
-            color: var(--twitch);
-            border: 1px solid rgba(145, 70, 255, 0.25);
-        }
-
-        .live-card-platform a.plat-twitch:hover {
-            background: rgba(145, 70, 255, 0.3);
-        }
-
-        .live-card-platform a.plat-youtube {
-            background: rgba(255, 0, 0, 0.1);
-            color: var(--youtube);
-            border: 1px solid rgba(255, 0, 0, 0.2);
-        }
-
-        .live-card-platform a.plat-youtube:hover {
-            background: rgba(255, 0, 0, 0.2);
-        }
-
-        .live-card-platform a.plat-kick {
-            background: rgba(83, 252, 24, 0.1);
-            color: var(--kick);
-            border: 1px solid rgba(83, 252, 24, 0.2);
-        }
-
-        .live-card-platform a.plat-kick:hover {
-            background: rgba(83, 252, 24, 0.2);
-        }
-
-        .live-card-platform a.plat-rumble {
-            background: rgba(133, 199, 66, 0.1);
-            color: #85c742;
-            border: 1px solid rgba(133, 199, 66, 0.2);
-        }
-
-        .live-card-platform a.plat-rumble:hover {
-            background: rgba(133, 199, 66, 0.2);
-        }
-
-        .live-card-platform a.plat-tiktok {
-            background: rgba(255, 0, 80, 0.1);
-            color: #ff0050;
-            border: 1px solid rgba(255, 0, 80, 0.2);
-        }
-
-        .live-card-platform a.plat-tiktok:hover {
-            background: rgba(255, 0, 80, 0.2);
         }
 
         /* ========== HOW IT WORKS ========== */
@@ -1052,52 +967,46 @@
         .streamer-platforms {
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
-        .platform-icon {
+        /* ========== UNIFIED PLATFORM PILL (live/offline aware) ========== */
+        .plat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             font-family: var(--font-mono);
-            font-size: 0.6rem;
-            padding: 0.25rem 0.6rem;
-            border-radius: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-size: 0.65rem;
             font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            text-decoration: none;
+            transition: all 0.2s;
+            white-space: nowrap;
         }
 
-        .platform-twitch {
-            background: rgba(145, 70, 255, 0.15);
-            color: var(--twitch);
-            border: 1px solid rgba(145, 70, 255, 0.25);
+        .plat-pill-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            flex-shrink: 0;
         }
 
-        .platform-youtube {
-            background: rgba(255, 0, 0, 0.1);
-            color: var(--youtube);
-            border: 1px solid rgba(255, 0, 0, 0.2);
+        .plat-pill-offline {
+            background: var(--bg-card);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
         }
 
-        .platform-kick {
-            background: rgba(83, 252, 24, 0.1);
-            color: var(--kick);
-            border: 1px solid rgba(83, 252, 24, 0.2);
+        .plat-pill-offline:hover {
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
         }
 
-        .platform-rumble {
-            background: rgba(133, 199, 66, 0.1);
-            color: #85c742;
-            border: 1px solid rgba(133, 199, 66, 0.2);
-        }
-
-        .platform-tiktok {
-            background: rgba(255, 0, 80, 0.1);
-            color: #ff0050;
-            border: 1px solid rgba(255, 0, 80, 0.2);
-        }
-
-        .platform-velora {
-            background: rgba(217, 119, 6, 0.12);
-            color: #f0b429;
-            border: 1px solid rgba(217, 119, 6, 0.25);
+        .plat-pill-live:hover {
+            filter: brightness(1.15);
+            transform: translateY(-1px);
         }
 
         /* ========== STATS BAR ========== */
@@ -2053,7 +1962,7 @@
         async function fetchProfiles() {
             const { data, error } = await sb
                 .from('profiles')
-                .select('username, avatar_url, bio, timezone, language, genres, top_games, twitch_url, youtube_url, kick_url, rumble_url, tiktok_url, velora_url, is_live, is_rerun, live_game, live_viewer_count, live_thumbnail_url, live_platform, last_live_at, badges')
+                .select('username, avatar_url, bio, timezone, language, genres, top_games, twitch_url, youtube_url, kick_url, rumble_url, tiktok_url, velora_url, is_live, is_rerun, live_game, live_viewer_count, live_thumbnail_url, live_platform, live_platforms, last_live_at, badges')
                 .order('is_live', { ascending: false })
                 .order('last_live_at', { ascending: false, nullsFirst: false });
 
@@ -2098,12 +2007,7 @@
                     ? `<img src="${thumb}" alt="${star.username}">`
                     : `<div class="placeholder-thumb" style="display:flex;align-items:center;justify-content:center;font-size:2rem;background:var(--bg-secondary);width:100%;height:100%;">🎮</div>`;
 
-                let pillsHtml = '';
-                if (star.twitch_url) pillsHtml += `<a href="${esc(star.twitch_url)}" target="_blank" rel="noopener" class="plat-twitch" onclick="event.stopPropagation()">▶ Twitch</a>`;
-                if (star.youtube_url) pillsHtml += `<a href="${esc(star.youtube_url)}" target="_blank" rel="noopener" class="plat-youtube" onclick="event.stopPropagation()">▶ YouTube</a>`;
-                if (star.kick_url) pillsHtml += `<a href="${esc(star.kick_url)}" target="_blank" rel="noopener" class="plat-kick" onclick="event.stopPropagation()">▶ Kick</a>`;
-                if (star.rumble_url) pillsHtml += `<a href="${esc(star.rumble_url)}" target="_blank" rel="noopener" class="plat-rumble" onclick="event.stopPropagation()">▶ Rumble</a>`;
-                if (star.tiktok_url) pillsHtml += `<a href="${esc(star.tiktok_url)}" target="_blank" rel="noopener" class="plat-tiktok" onclick="event.stopPropagation()">▶ TikTok</a>`;
+                const pillsHtml = renderAllPlatformPills(star);
 
                 const badgeLabel = isRerunSpotlight ? '↻ Rerun' : '● Live';
                 const spotlightLabel = isRerunSpotlight ? '↻ Nothing live — here\'s a rerun' : '⭐ Spotlight';
@@ -2154,12 +2058,7 @@
                     : `<div class="placeholder-thumb">🎮</div>`;
 
                 // Build platform pills
-                let pillsHtml = '';
-                if (p.twitch_url) pillsHtml += `<a href="${esc(p.twitch_url)}" target="_blank" rel="noopener" class="plat-twitch" onclick="event.stopPropagation()">▶ Twitch</a>`;
-                if (p.youtube_url) pillsHtml += `<a href="${esc(p.youtube_url)}" target="_blank" rel="noopener" class="plat-youtube" onclick="event.stopPropagation()">▶ YouTube</a>`;
-                if (p.kick_url) pillsHtml += `<a href="${esc(p.kick_url)}" target="_blank" rel="noopener" class="plat-kick" onclick="event.stopPropagation()">▶ Kick</a>`;
-                if (p.rumble_url) pillsHtml += `<a href="${esc(p.rumble_url)}" target="_blank" rel="noopener" class="plat-rumble" onclick="event.stopPropagation()">▶ Rumble</a>`;
-                if (p.tiktok_url) pillsHtml += `<a href="${esc(p.tiktok_url)}" target="_blank" rel="noopener" class="plat-tiktok" onclick="event.stopPropagation()">▶ TikTok</a>`;
+                const pillsHtml = renderAllPlatformPills(p);
 
                 return `
                     <div class="live-card" onclick="window.location.href='${profileUrl}'" style="cursor:pointer">
@@ -2384,13 +2283,7 @@
                     .join('');
 
                 // Platforms
-                let platformsHtml = '';
-                if (p.twitch_url) platformsHtml += '<span class="platform-icon platform-twitch">Twitch</span>';
-                if (p.youtube_url) platformsHtml += '<span class="platform-icon platform-youtube">YouTube</span>';
-                if (p.kick_url) platformsHtml += '<span class="platform-icon platform-kick">Kick</span>';
-                if (p.rumble_url) platformsHtml += '<span class="platform-icon platform-rumble">Rumble</span>';
-                if (p.tiktok_url) platformsHtml += '<span class="platform-icon platform-tiktok">TikTok</span>';
-                if (p.velora_url) platformsHtml += '<span class="platform-icon platform-velora">Velora</span>';
+                const platformsHtml = renderAllPlatformPills(p);
 
                 // Avatar
                 const avatarHtml = p.avatar_url
@@ -2398,7 +2291,7 @@
                     : '🎮';
 
                 return `
-                    <a href="${profileUrl}" class="streamer-card ${isLive ? 'is-live' : ''}">
+                    <div onclick="window.location.href='${profileUrl}'" class="streamer-card ${isLive ? 'is-live' : ''}" style="cursor:pointer">
                         <div class="streamer-card-header">
                             <div class="streamer-avatar">${avatarHtml}</div>
                             <div>
@@ -2409,7 +2302,7 @@
                         ${p.bio ? `<div class="streamer-bio">${esc(p.bio).replace(/\n/g, '<br>')}</div>` : ''}
                         ${gamesHtml ? `<div class="streamer-games">${gamesHtml}</div>` : ''}
                         ${platformsHtml ? `<div class="streamer-platforms">${platformsHtml}</div>` : ''}
-                    </a>
+                    </div>
                 `;
             }).join('');
         }
@@ -2450,6 +2343,36 @@
             const div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
+        }
+
+        // =============================================
+        // PLATFORM PILL — shows live/offline state consistently
+        // across grid cards, carousel cards, and the spotlight
+        // =============================================
+        const PLATFORM_META = {
+            twitch: { label: 'Twitch', url: 'twitch_url', liveKey: 'twitch.tv', color: '#9146ff', textOnColor: '#fff' },
+            youtube: { label: 'YouTube', url: 'youtube_url', liveKey: 'youtube.com', color: '#ff0000', textOnColor: '#fff' },
+            kick: { label: 'Kick', url: 'kick_url', liveKey: 'kick.com', color: '#53fc18', textOnColor: '#0a0a0f' },
+            rumble: { label: 'Rumble', url: 'rumble_url', liveKey: null, color: '#85c742', textOnColor: '#0a0a0f' },
+            tiktok: { label: 'TikTok', url: 'tiktok_url', liveKey: null, color: '#ff0050', textOnColor: '#fff' },
+            velora: { label: 'Velora', url: 'velora_url', liveKey: null, color: '#f0b429', textOnColor: '#3a2a04' }
+        };
+
+        function renderPlatformPill(profile, platformKey) {
+            const meta = PLATFORM_META[platformKey];
+            const url = profile[meta.url];
+            if (!url) return '';
+
+            const isLive = meta.liveKey && (profile.live_platforms || []).includes(meta.liveKey);
+
+            if (isLive) {
+                return `<a href="${esc(url)}" target="_blank" rel="noopener" class="plat-pill plat-pill-live" style="background:${meta.color};color:${meta.textOnColor};" onclick="event.stopPropagation()"><span class="plat-pill-dot" style="background:${meta.textOnColor};"></span>${meta.label}</a>`;
+            }
+            return `<a href="${esc(url)}" target="_blank" rel="noopener" class="plat-pill plat-pill-offline" onclick="event.stopPropagation()"><span class="plat-pill-dot"></span>${meta.label}</a>`;
+        }
+
+        function renderAllPlatformPills(profile) {
+            return Object.keys(PLATFORM_META).map(key => renderPlatformPill(profile, key)).join('');
         }
 
         function renderBadges(badges) {

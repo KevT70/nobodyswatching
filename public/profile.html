@@ -1099,6 +1099,18 @@
             </div>
         </div>
 
+        <!-- Preferred Platform -->
+        <div class="form-section">
+            <div class="form-section-title">// 03 — When You're Multi-Streaming</div>
+            <div class="form-group">
+                <label class="form-label" for="preferred-platform">Preferred Platform</label>
+                <select class="form-select" id="preferred-platform">
+                    <option value="">No preference — use default order</option>
+                </select>
+                <div class="form-hint">*If you stream to more than one platform at once, this is the one we'll feature front and centre. We'll still show the others too.</div>
+            </div>
+        </div>
+
         <!-- Actions -->
         <div class="form-actions">
             <button class="btn-primary" id="save-btn" onclick="saveProfile()">💾 Save Profile</button>
@@ -1234,6 +1246,36 @@
             document.getElementById('profile-form').style.display = 'block';
         }
 
+        // =============================================
+        // PREFERRED PLATFORM — only offer platforms we can
+        // actually confirm live status for (Twitch/YouTube/Kick)
+        // =============================================
+        function refreshPreferredPlatformOptions(initialValue) {
+            const select = document.getElementById('preferred-platform');
+            const current = initialValue !== undefined ? initialValue : select.value;
+
+            const candidates = [
+                { key: 'twitch', label: 'Twitch', urlId: 'twitch-url' },
+                { key: 'youtube', label: 'YouTube', urlId: 'youtube-url' },
+                { key: 'kick', label: 'Kick', urlId: 'kick-url' }
+            ];
+
+            select.innerHTML = '<option value="">No preference — use default order</option>';
+            candidates.forEach(c => {
+                const hasUrl = document.getElementById(c.urlId).value.trim();
+                if (hasUrl) {
+                    const opt = document.createElement('option');
+                    opt.value = c.key;
+                    opt.textContent = c.label;
+                    select.appendChild(opt);
+                }
+            });
+
+            // Restore selection if it's still a valid option
+            const stillValid = [...select.options].some(o => o.value === current);
+            select.value = stillValid ? (current || '') : '';
+        }
+
         function populateForm(profile, meta) {
             const resolvedUsername = profile.username || meta.user_name || meta.name || 'Streamer';
             const resolvedAvatar = profile.avatar_url || meta.avatar_url || meta.picture || '';
@@ -1288,6 +1330,12 @@
             document.getElementById('twitch-url').value = profile.twitch_url || `https://twitch.tv/${profile.twitch_username || ''}`;
             document.getElementById('youtube-url').value = profile.youtube_url || '';
             document.getElementById('kick-url').value = profile.kick_url || '';
+
+            // Preferred platform — only meaningful for platforms we can detect live status on
+            refreshPreferredPlatformOptions(profile.preferred_platform);
+            ['twitch-url', 'youtube-url', 'kick-url'].forEach(id => {
+                document.getElementById(id).addEventListener('input', () => refreshPreferredPlatformOptions());
+            });
             document.getElementById('rumble-url').value = profile.rumble_url || '';
             document.getElementById('tiktok-url').value = profile.tiktok_url || '';
             document.getElementById('velora-url').value = profile.velora_url || '';
@@ -1437,6 +1485,7 @@
                 rumble_url: document.getElementById('rumble-url').value.trim() || null,
                 tiktok_url: document.getElementById('tiktok-url').value.trim() || null,
                 velora_url: document.getElementById('velora-url').value.trim() || null,
+                preferred_platform: document.getElementById('preferred-platform').value || null,
                 updated_at: new Date().toISOString()
             };
 

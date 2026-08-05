@@ -203,7 +203,7 @@ export default async function handler() {
         // 1. Get all profiles
         const { data: profiles, error: fetchError } = await supabase
             .from('profiles')
-            .select('id, twitch_username, kick_url, youtube_url, is_live');
+            .select('id, twitch_username, kick_url, youtube_url, is_live, preferred_platform');
 
         if (fetchError) {
             console.error('Supabase fetch error:', fetchError);
@@ -245,45 +245,60 @@ export default async function handler() {
 
         console.log(`Live: ${twitchLive.size} Twitch, ${kickLive.size} Kick, ${youtubeLive.size} YouTube`);
 
-        // 4. Build combined live status per profile
-        // Priority: Twitch > Kick > YouTube
-        const updates = profiles.map(profile => {
-            let liveData = null;
+        // 4. Build combined live status per profile.
+        // A streamer can be live on more than one platform at once — we track
+        // ALL of them, then pick a "primary" one for the main Watch Now button:
+        // their preferred_platform if it's currently live, otherwise the
+        // fallback priority order: Twitch > Kick > YouTube.
+        const PLATFORM_KEY_MAP = {
+            twitch: 'twitch.tv',
+            kick: 'kick.com',
+            youtube: 'youtube.com'
+        };
 
-            // Check Twitch
+        const updates = profiles.map(profile => {
+            // Collect every platform this profile is currently live on
+            const liveEntries = []; // [{ key: 'twitch.tv', data: {...} }, ...]
+
             if (profile.twitch_username) {
                 const tStream = twitchLive.get(profile.twitch_username.toLowerCase());
-                if (tStream) liveData = tStream;
+                if (tStream) liveEntries.push({ key: 'twitch.tv', data: tStream });
+            }
+            const kickUser = extractKickUsername(profile.kick_url);
+            if (kickUser) {
+                const kStream = kickLive.get(kickUser.toLowerCase());
+                if (kStream) liveEntries.push({ key: 'kick.com', data: kStream });
+            }
+            const ytInfo = extractYouTubeIdentifier(profile.youtube_url);
+            if (ytInfo) {
+                const yStream = youtubeLive.get(ytInfo.identifier.toLowerCase());
+                if (yStream) liveEntries.push({ key: 'youtube.com', data: yStream });
             }
 
-            // Check Kick (only if not already live on Twitch)
-            if (!liveData) {
-                const kickUser = extractKickUsername(profile.kick_url);
-                if (kickUser) {
-                    const kStream = kickLive.get(kickUser.toLowerCase());
-                    if (kStream) liveData = kStream;
+            if (liveEntries.length > 0) {
+                // Try the streamer's preferred platform first, if it's live right now
+                const preferredKey = PLATFORM_KEY_MAP[profile.preferred_platform];
+                let primary = preferredKey
+                    ? liveEntries.find(e => e.key === preferredKey)
+                    : null;
+
+                // Fall back to fixed priority order: Twitch > Kick > YouTube
+                if (!primary) {
+                    primary = liveEntries.find(e => e.key === 'twitch.tv')
+                        || liveEntries.find(e => e.key === 'kick.com')
+                        || liveEntries.find(e => e.key === 'youtube.com');
                 }
-            }
 
-            // Check YouTube (only if not already live elsewhere)
-            if (!liveData) {
-                const ytInfo = extractYouTubeIdentifier(profile.youtube_url);
-                if (ytInfo) {
-                    const yStream = youtubeLive.get(ytInfo.identifier.toLowerCase());
-                    if (yStream) liveData = yStream;
-                }
-            }
-
-            if (liveData) {
                 return supabase
                     .from('profiles')
                     .update({
                         is_live: true,
-                        is_rerun: liveData.isRerun || false,
-                        live_game: liveData.game,
-                        live_viewer_count: liveData.viewers,
-                        live_thumbnail_url: liveData.thumbnail,
-                        live_platform: liveData.platform,
+                        is_rerun: primary.data.isRerun || false,
+                        live_game: primary.data.game,
+                        live_viewer_count: primary.data.viewers,
+                        live_thumbnail_url: primary.data.thumbnail,
+                        live_platform: primary.key,
+                        live_platforms: liveEntries.map(e => e.key),
                         last_live_at: new Date().toISOString()
                     })
                     .eq('id', profile.id);
@@ -296,7 +311,8 @@ export default async function handler() {
                         live_game: null,
                         live_viewer_count: 0,
                         live_thumbnail_url: null,
-                        live_platform: null
+                        live_platform: null,
+                        live_platforms: []
                     })
                     .eq('id', profile.id);
             }

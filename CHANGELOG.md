@@ -4,6 +4,23 @@ All notable changes to NobodysWatching.live are documented here.
 
 ---
 
+## [2026-05-08] - Additional Functionality added from feedback
+
+### Added
+- What I've fixed: changed the select('*') to only pull the ~20 columns the homepage actually renders (username, bio, platform links, live status, etc.) instead of everything including unused fields. Small optimisation, but it reduces the payload size and read cost on every single visit.
+
+- VTuber added to both the profile checkboxes and the homepage genre filter.
+
+- Profile form has a new "Preferred Platform" dropdown that only shows platforms they've actually linked (updates live as they type URLs), so someone like TheJiggyJoe could set YouTube as preferred even though Twitch normally wins by default.
+
+- Streamer page shows the "Also live on" band exactly like the mockup — nested inside the same red-tinted live banner card, dot-plus-pill styling, only appears when someone's genuinely multi-streaming.
+
+- Directory and carousel cards now use a single shared pill-rendering system across the board — spotlight, carousel, and grid all call the same helper. Live platforms get solid colour fills with a dot; linked-but-offline platforms get the muted outline treatment with a muted dot, exactly matching what we mocked up together. As a bonus, the directory grid cards' platform badges are now actually clickable too, they were static, non-clickable spans before this, so this is a genuine upgrade for every streamer, not just multi-streamers.
+
+- Cleaned up all the old, now-unused CSS from the previous single-pill system so the stylesheet doesn't carry dead weight.
+
+---
+
 ## [2026-04-08] - BUG FIXES
 
 ### Bug Fixes
@@ -21,15 +38,6 @@ The drag logic itself needed updating too - it previously assumed content was al
 
 - The bug: Viewer count badge contrast 
 - The fix: Bumped the background opacity from 0.75 to 0.85, added a subtle border and drop shadow, and gave it z-index: 2 so it always sits clearly above the thumbnail image regardless of how busy or dark the game footage is behind it.
-
----
-
-## [2026-05-08] - Additional Functionality added from feedback
-
-### Added
-- What I've fixed: changed the select('*') to only pull the ~20 columns the homepage actually renders (username, bio, platform links, live status, etc.) instead of everything including unused fields. Small optimisation, but it reduces the payload size and read cost on every single visit.
-
-- VTuber added to both the profile checkboxes and the homepage genre filter.
 
 ---
 

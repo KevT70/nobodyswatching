@@ -472,6 +472,54 @@
         .btn-watch.plat-kick { background: var(--kick); color: #0a0a0f; }
         .btn-watch.plat-kick:hover { background: #3ecc10; box-shadow: 0 8px 24px rgba(83, 252, 24, 0.3); }
 
+        .also-live-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            width: 100%;
+            margin-top: 0.85rem;
+            padding-top: 0.85rem;
+            border-top: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .also-live-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .also-live-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .also-live-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .also-live-pill.plat-twitch { background: var(--twitch); color: #fff; }
+        .also-live-pill.plat-twitch:hover { background: #7c3aed; }
+
+        .also-live-pill.plat-youtube { background: var(--youtube); color: #fff; }
+        .also-live-pill.plat-youtube:hover { background: #dc2626; }
+
+        .also-live-pill.plat-kick { background: var(--kick); color: #0a0a0f; }
+        .also-live-pill.plat-kick:hover { background: #3ecc10; }
+
         .btn-watch.plat-rumble { background: #85c742; }
         .btn-watch.plat-rumble:hover { background: #6ba832; box-shadow: 0 8px 24px rgba(133, 199, 66, 0.3); }
 
@@ -912,6 +960,29 @@
             }
 
             if (p.is_live) {
+                // Build "Also live on" pills for every OTHER platform they're currently live on
+                const platformMeta = {
+                    'twitch.tv': { label: 'Twitch', url: p.twitch_url, cls: 'plat-twitch' },
+                    'youtube.com': { label: 'YouTube', url: p.youtube_url, cls: 'plat-youtube' },
+                    'kick.com': { label: 'Kick', url: p.kick_url, cls: 'plat-kick' }
+                };
+                const otherLive = (p.live_platforms || [])
+                    .filter(key => key !== p.live_platform && platformMeta[key] && platformMeta[key].url);
+
+                let alsoLiveHtml = '';
+                if (otherLive.length > 0) {
+                    const pills = otherLive.map(key => {
+                        const m = platformMeta[key];
+                        return `<a href="${esc(m.url)}" target="_blank" rel="noopener" class="also-live-pill ${m.cls}"><span class="also-live-dot"></span>${m.label}</a>`;
+                    }).join('');
+                    alsoLiveHtml = `
+                        <div class="also-live-row">
+                            <span class="also-live-label">Also live on</span>
+                            ${pills}
+                        </div>
+                    `;
+                }
+
                 bannerEl.innerHTML = `
                     <div class="live-banner">
                         <div class="live-banner-info">
@@ -922,6 +993,7 @@
                             </div>
                         </div>
                         <a href="${esc(watchUrl)}" target="_blank" rel="noopener" class="btn-watch ${watchClass}">▶ Watch Now</a>
+                        ${alsoLiveHtml}
                     </div>
                 `;
             } else {
