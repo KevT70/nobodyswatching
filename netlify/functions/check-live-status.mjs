@@ -117,15 +117,20 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
                 continue;
             }
 
-            const finalUrl = response.url || '';
-            const videoMatch = finalUrl.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+            // YouTube doesn't issue an HTTP redirect for /@handle/live — it serves
+            // the page directly with a 200. When the channel IS live, the page's
+            // canonical/og:url tags point at the specific watch?v=... URL for the
+            // live video. When it's not live, those tags stay generic. So we read
+            // the HTML and look for that video ID rather than trusting response.url.
+            const html = await response.text();
+            const canonicalMatch = html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})"/);
+            const ogUrlMatch = html.match(/<meta property="og:url" content="https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})"/);
+            const videoId = (canonicalMatch && canonicalMatch[1]) || (ogUrlMatch && ogUrlMatch[1]) || null;
 
             // Temporary diagnostic logging — remove once we've confirmed this works reliably
-            console.log(`YouTube check for ${identifier} (${type}): requested ${liveUrl} -> status ${response.status}, redirected=${response.redirected}, finalUrl=${finalUrl}, videoMatch=${videoMatch ? videoMatch[1] : 'none'}`);
+            console.log(`YouTube check for ${identifier} (${type}): status ${response.status}, htmlLength=${html.length}, canonicalMatch=${canonicalMatch ? canonicalMatch[1] : 'none'}, ogUrlMatch=${ogUrlMatch ? ogUrlMatch[1] : 'none'}`);
 
-            if (!videoMatch) continue; // Not live — redirect stayed on the channel page
-
-            const videoId = videoMatch[1];
+            if (!videoId) continue; // Not live — no live video ID found in the page
 
             // Free oEmbed call for title + thumbnail — no API key, no quota
             let title = null;
