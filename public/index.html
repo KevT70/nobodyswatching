@@ -923,7 +923,8 @@
             font-size: 0.65rem;
             color: var(--text-muted);
             display: flex;
-            gap: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.35rem 0.75rem;
             align-items: center;
         }
 
@@ -2264,7 +2265,8 @@
                 // Meta line
                 let metaHtml = '';
                 if (isLive) {
-                    metaHtml = `<span class="streamer-live-dot"></span> Live Now · 👁 ${p.live_viewer_count || 0} viewer${p.live_viewer_count !== 1 ? 's' : ''}`;
+                    const gameText = p.live_game ? ` — ${esc(p.live_game)}` : '';
+                    metaHtml = `<span class="streamer-live-dot"></span> Live Now${gameText} · 👁 ${p.live_viewer_count || 0} viewer${p.live_viewer_count !== 1 ? 's' : ''}`;
                 } else if (p.last_live_at) {
                     metaHtml = `Last live ${timeAgo(p.last_live_at)}`;
                 } else {
