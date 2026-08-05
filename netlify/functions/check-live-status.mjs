@@ -123,14 +123,18 @@ async function resolveYouTubeChannelId(identifier, type, apiKey, cachedChannelId
     }
 }
 
-// Search the raw InnerTube response TEXT for a live-badge marker, then
-// find the nearest videoId to it. This is deliberately loose about
-// exact JSON structure (fields aren't always siblings in the same
-// object) but related fields do end up serialized near each other,
-// so proximity in the raw text is a more forgiving signal than an
-// exact object-shape match.
+// Search the raw InnerTube response TEXT for the specific "currently live"
+// thumbnail badge marker, then find the nearest videoId to it.
+//
+// Confirmed via production diagnostics (2026-08-05): the exact marker
+// YouTube uses for a genuinely-live-right-now video is
+// "badgeStyle":"THUMBNAIL_OVERLAY_BADGE_STYLE_LIVE". Looser patterns
+// like a bare "LIVE" or "style":"LIVE" produce false positives — they
+// also match things like "LIVESTREAM ARCHIVE" (a past stream that's
+// now just a VOD) and generic liveBadgeText fields unrelated to
+// current live status.
 function findLiveVideoId(rawText) {
-    const liveMarkerMatch = rawText.match(/"style":"LIVE"|LIVE_NOW/);
+    const liveMarkerMatch = rawText.match(/"badgeStyle":"THUMBNAIL_OVERLAY_BADGE_STYLE_LIVE"/);
     if (!liveMarkerMatch) return null;
 
     const liveIndex = liveMarkerMatch.index;
@@ -191,27 +195,8 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
             const rawText = await response.text();
             const videoId = findLiveVideoId(rawText);
 
-            // Deep diagnostic round: "LIVE" appears in lots of unrelated InnerTube
-            // strings (chat labels, offline-status text, UI copy), so we've been
-            // guessing at the wrong marker. This dumps real context so we can see
-            // what's actually there instead of guessing again.
-            if (!videoId && identifier.toLowerCase() === 'thejiggyjoe21') {
-                const allLiveMatches = [...rawText.matchAll(/LIVE/g)].slice(0, 8);
-                console.log(`YouTube DEEP DEBUG for ${identifier}: found ${allLiveMatches.length} "LIVE" occurrences (showing up to 8)`);
-                allLiveMatches.forEach((m, i) => {
-                    const start = Math.max(0, m.index - 80);
-                    const end = Math.min(rawText.length, m.index + 80);
-                    console.log(`  [${i}] ...${rawText.slice(start, end)}...`);
-                });
-                // Check for other known InnerTube live-signal patterns
-                console.log(`  liveBroadcastContent: ${rawText.includes('"liveBroadcastContent"')}`);
-                console.log(`  isLiveNow: ${rawText.includes('isLiveNow')}`);
-                console.log(`  watching now: ${rawText.includes('watching')}`);
-                console.log(`  thumbnailOverlayTimeStatusRenderer: ${rawText.includes('thumbnailOverlayTimeStatusRenderer')}`);
-            }
-
             // Temporary diagnostic logging — remove once we've confirmed this works reliably
-            console.log(`YouTube InnerTube check for ${identifier}: channelId=${channelId}, responseLength=${rawText.length}, containsLIVE=${rawText.includes('LIVE')}, videoId=${videoId || 'none'}`);
+            console.log(`YouTube InnerTube check for ${identifier}: channelId=${channelId}, videoId=${videoId || 'none'}`);
 
             if (!videoId) continue; // Not live
 
