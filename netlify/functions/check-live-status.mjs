@@ -69,109 +69,94 @@ async function checkTwitchLive(usernames, clientId, accessToken) {
 }
 
 // =============================================
-// KICK (unofficial API — no auth required)
+// KICK — live detection disabled.
+//
+// Kick's WAF actively blocks requests from this API endpoint
+// ("Request blocked by security policy"), and that's not something
+// we can reliably work around from a serverless function. Kick
+// stays a supported platform LINK on profiles — same as Rumble,
+// TikTok, and Velora — but we don't attempt to detect live status
+// on it for now. Revisit if Kick ever ships an official API.
 // =============================================
 async function checkKickLive(usernames) {
-    const liveMap = new Map();
-
-    for (const username of usernames) {
-        try {
-            const response = await fetch(`https://kick.com/api/v2/channels/${encodeURIComponent(username)}`, {
-                headers: { 'Accept': 'application/json' }
-            });
-
-            if (!response.ok) {
-                const bodySnippet = await response.text().catch(() => '');
-                console.error(`Kick returned ${response.status} for ${username}: ${bodySnippet.slice(0, 200)}`);
-                continue;
-            }
-
-            const data = await response.json();
-
-            if (data.livestream && data.livestream.is_live) {
-                liveMap.set(username.toLowerCase(), {
-                    game: data.livestream.categories?.[0]?.name || null,
-                    viewers: data.livestream.viewer_count || 0,
-                    thumbnail: data.livestream.thumbnail?.url || null,
-                    platform: 'kick.com'
-                });
-            }
-        } catch (err) {
-            console.error(`Kick check failed for ${username}:`, err.message);
-        }
-    }
-
-    return liveMap;
+    return new Map();
 }
 
 // =============================================
-// YOUTUBE (requires YOUTUBE_API_KEY env var)
+// YOUTUBE — free redirect-based live detection.
+//
+// YouTube's /channel/{id}/live and /@handle/live URLs automatically
+// redirect to the current live video if the channel is streaming.
+// Checking that redirect costs ZERO API quota — it's a plain HTTP
+// request, not a Data API call. We then use YouTube's free oEmbed
+// endpoint (no key needed) for the title and thumbnail. The optional
+// API key is only used for a single cheap videos.list call (1 unit,
+// not the 100-unit search.list) to fetch viewer count — and only for
+// channels we've already confirmed are live, not all of them.
 // =============================================
 async function checkYouTubeLive(channelIdentifiers, apiKey) {
-    if (!apiKey) {
-        console.error('YOUTUBE_API_KEY is not set — skipping all YouTube checks');
-        return new Map();
-    }
     const liveMap = new Map();
 
     for (const { identifier, type } of channelIdentifiers) {
         try {
-            let channelId = identifier;
+            const liveUrl = type === 'handle'
+                ? `https://www.youtube.com/@${identifier}/live`
+                : `https://www.youtube.com/channel/${identifier}/live`;
 
-            // If it's a handle (@username), resolve to channel ID first
-            if (type === 'handle') {
-                const searchRes = await fetch(
-                    `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(identifier)}&key=${apiKey}`
-                );
-                if (!searchRes.ok) {
-                    const bodySnippet = await searchRes.text().catch(() => '');
-                    console.error(`YouTube handle lookup returned ${searchRes.status} for ${identifier}: ${bodySnippet.slice(0, 200)}`);
-                    continue;
-                }
-                const searchData = await searchRes.json();
-                if (!searchData.items || searchData.items.length === 0) {
-                    console.error(`YouTube handle lookup found no channel for ${identifier}`);
-                    continue;
-                }
-                channelId = searchData.items[0].id;
-            }
+            const response = await fetch(liveUrl, { redirect: 'follow' });
 
-            // Search for live streams from this channel
-            const response = await fetch(
-                `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=live&type=video&key=${apiKey}`
-            );
-            if (!response.ok) {
-                const bodySnippet = await response.text().catch(() => '');
-                console.error(`YouTube live search returned ${response.status} for ${identifier}: ${bodySnippet.slice(0, 200)}`);
+            if (!response.ok && response.status !== 404) {
+                console.error(`YouTube /live check returned ${response.status} for ${identifier}`);
                 continue;
             }
 
-            const data = await response.json();
+            const finalUrl = response.url || '';
+            const videoMatch = finalUrl.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
 
-            if (data.items && data.items.length > 0) {
-                const liveVideo = data.items[0];
+            if (!videoMatch) continue; // Not live — redirect stayed on the channel page
 
-                // Get viewer count
-                let viewers = 0;
+            const videoId = videoMatch[1];
+
+            // Free oEmbed call for title + thumbnail — no API key, no quota
+            let title = null;
+            let thumbnail = null;
+            try {
+                const oembedRes = await fetch(
+                    `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
+                );
+                if (oembedRes.ok) {
+                    const oembedData = await oembedRes.json();
+                    title = oembedData.title || null;
+                    thumbnail = oembedData.thumbnail_url || null;
+                }
+            } catch (e) { /* title/thumbnail are nice-to-have */ }
+
+            // Cheap, targeted Data API call (1 unit) for viewer count only —
+            // only runs for channels we already know are live right now.
+            let viewers = 0;
+            if (apiKey) {
                 try {
                     const statsRes = await fetch(
-                        `https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${liveVideo.id.videoId}&key=${apiKey}`
+                        `https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${videoId}&key=${apiKey}`
                     );
                     if (statsRes.ok) {
                         const statsData = await statsRes.json();
                         viewers = parseInt(statsData.items?.[0]?.liveStreamingDetails?.concurrentViewers || '0');
+                    } else {
+                        const bodySnippet = await statsRes.text().catch(() => '');
+                        console.error(`YouTube viewer count lookup returned ${statsRes.status} for ${identifier}: ${bodySnippet.slice(0, 200)}`);
                     }
-                } catch (e) { /* viewer count is nice-to-have */ }
-
-                const thumbUrl = liveVideo.snippet.thumbnails?.medium?.url || null;
-
-                liveMap.set(identifier.toLowerCase(), {
-                    game: liveVideo.snippet.title || null,
-                    viewers: viewers,
-                    thumbnail: thumbUrl,
-                    platform: 'youtube.com'
-                });
+                } catch (e) {
+                    console.error(`YouTube viewer count fetch failed for ${identifier}:`, e.message);
+                }
             }
+
+            liveMap.set(identifier.toLowerCase(), {
+                game: title,
+                viewers: viewers,
+                thumbnail: thumbnail,
+                platform: 'youtube.com'
+            });
         } catch (err) {
             console.error(`YouTube check failed for ${identifier}:`, err.message);
         }
