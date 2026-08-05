@@ -875,10 +875,10 @@
 
         @keyframes avatar-live-pulse {
             0%, 100% {
-                box-shadow: 0 0 8px var(--live-glow);
+                box-shadow: 0 0 6px 1px rgba(239, 68, 68, 0.35);
             }
             50% {
-                box-shadow: 0 0 18px 4px var(--live-glow);
+                box-shadow: 0 0 24px 6px rgba(239, 68, 68, 0.75);
             }
         }
 
@@ -931,10 +931,7 @@
             font-family: var(--font-mono);
             font-size: 0.65rem;
             color: var(--text-muted);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.35rem 0.75rem;
-            align-items: center;
+            line-height: 1.6;
         }
 
         .streamer-bio {
