@@ -138,18 +138,19 @@ function findLiveVideoId(rawText) {
     if (!liveMarkerMatch) return null;
 
     const liveIndex = liveMarkerMatch.index;
-    const windowStart = Math.max(0, liveIndex - 4000);
-    const windowEnd = Math.min(rawText.length, liveIndex + 4000);
-    const window = rawText.slice(windowStart, windowEnd);
-    const liveIndexInWindow = liveIndex - windowStart;
 
-    const videoIdMatches = [...window.matchAll(/"videoId":\s*"([a-zA-Z0-9_-]{11})"/g)];
+    // Search the WHOLE document for videoId occurrences and pick whichever
+    // is closest to the live marker, rather than guessing a window size.
+    // These responses are pretty-printed and can be large (up to ~1MB),
+    // but a full-document regex scan is still cheap for a job that only
+    // runs once every 3 minutes.
+    const videoIdMatches = [...rawText.matchAll(/"videoId":\s*"([a-zA-Z0-9_-]{11})"/g)];
     if (videoIdMatches.length === 0) return null;
 
     let closest = null;
     let closestDist = Infinity;
     for (const m of videoIdMatches) {
-        const dist = Math.abs(m.index - liveIndexInWindow);
+        const dist = Math.abs(m.index - liveIndex);
         if (dist < closestDist) {
             closestDist = dist;
             closest = m[1];
