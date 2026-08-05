@@ -870,7 +870,16 @@
 
         .streamer-card.is-live .streamer-avatar {
             border-color: var(--live-red);
-            box-shadow: 0 0 12px var(--live-glow);
+            animation: avatar-live-pulse 2.4s ease-in-out infinite;
+        }
+
+        @keyframes avatar-live-pulse {
+            0%, 100% {
+                box-shadow: 0 0 8px var(--live-glow);
+            }
+            50% {
+                box-shadow: 0 0 18px 4px var(--live-glow);
+            }
         }
 
         .streamer-name {
@@ -926,15 +935,6 @@
             flex-wrap: wrap;
             gap: 0.35rem 0.75rem;
             align-items: center;
-        }
-
-        .streamer-live-dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            background: var(--live-red);
-            border-radius: 50%;
-            animation: liveGlow 2s ease-in-out infinite;
         }
 
         .streamer-bio {
@@ -2266,7 +2266,7 @@
                 let metaHtml = '';
                 if (isLive) {
                     const gameText = p.live_game ? ` — ${esc(p.live_game)}` : '';
-                    metaHtml = `<span class="streamer-live-dot"></span> Live Now${gameText} · 👁 ${p.live_viewer_count || 0} viewer${p.live_viewer_count !== 1 ? 's' : ''}`;
+                    metaHtml = `<span style="color: var(--live-red);">Live Now</span>${gameText} · 👁 ${p.live_viewer_count || 0} viewer${p.live_viewer_count !== 1 ? 's' : ''}`;
                 } else if (p.last_live_at) {
                     metaHtml = `Last live ${timeAgo(p.last_live_at)}`;
                 } else {
