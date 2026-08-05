@@ -191,6 +191,25 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
             const rawText = await response.text();
             const videoId = findLiveVideoId(rawText);
 
+            // Deep diagnostic round: "LIVE" appears in lots of unrelated InnerTube
+            // strings (chat labels, offline-status text, UI copy), so we've been
+            // guessing at the wrong marker. This dumps real context so we can see
+            // what's actually there instead of guessing again.
+            if (!videoId && identifier.toLowerCase() === 'thejiggyjoe21') {
+                const allLiveMatches = [...rawText.matchAll(/LIVE/g)].slice(0, 8);
+                console.log(`YouTube DEEP DEBUG for ${identifier}: found ${allLiveMatches.length} "LIVE" occurrences (showing up to 8)`);
+                allLiveMatches.forEach((m, i) => {
+                    const start = Math.max(0, m.index - 80);
+                    const end = Math.min(rawText.length, m.index + 80);
+                    console.log(`  [${i}] ...${rawText.slice(start, end)}...`);
+                });
+                // Check for other known InnerTube live-signal patterns
+                console.log(`  liveBroadcastContent: ${rawText.includes('"liveBroadcastContent"')}`);
+                console.log(`  isLiveNow: ${rawText.includes('isLiveNow')}`);
+                console.log(`  watching now: ${rawText.includes('watching')}`);
+                console.log(`  thumbnailOverlayTimeStatusRenderer: ${rawText.includes('thumbnailOverlayTimeStatusRenderer')}`);
+            }
+
             // Temporary diagnostic logging — remove once we've confirmed this works reliably
             console.log(`YouTube InnerTube check for ${identifier}: channelId=${channelId}, responseLength=${rawText.length}, containsLIVE=${rawText.includes('LIVE')}, videoId=${videoId || 'none'}`);
 
