@@ -652,6 +652,95 @@
             color: var(--text-muted);
         }
 
+        /* ========== DISCORD NUDGE MODAL ========== */
+        .discord-nudge-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .discord-nudge-card {
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 420px;
+            width: 100%;
+            position: relative;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .discord-nudge-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.25rem;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .discord-nudge-close:hover { color: var(--text-primary); }
+
+        .discord-nudge-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .discord-nudge-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .discord-nudge-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .discord-nudge-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            background: #5865F2;
+            color: #fff;
+            padding: 0.85rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .discord-nudge-btn:hover {
+            background: #4752c4;
+            transform: translateY(-2px);
+        }
+
+        .discord-nudge-skip {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .discord-nudge-skip:hover { color: var(--text-secondary); }
+
         .modal .form-input {
             margin-bottom: 1.25rem;
         }
@@ -708,6 +797,46 @@
             .profile-header { flex-direction: column; text-align: center; }
             .form-actions { flex-direction: column; }
         }
+        /* ========== FLOATING FEEDBACK BUTTON ========== */
+        .feedback-fab {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #5865F2;
+            color: #fff;
+            padding: 0.75rem 1.1rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 8px 24px rgba(88, 101, 242, 0.35);
+            transition: all 0.2s;
+        }
+
+        .feedback-fab:hover {
+            background: #4752c4;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(88, 101, 242, 0.45);
+        }
+
+        @media (max-width: 640px) {
+            .feedback-fab {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.7rem;
+            }
+            .feedback-fab-text {
+                display: none;
+            }
+        }
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1324,8 +1453,31 @@
                 showToast('Something went wrong. Give it another go.', 'error');
             } else {
                 showToast('Profile saved. Looking good.', 'success');
+                maybeShowDiscordNudge();
             }
         }
+
+        // =============================================
+        // DISCORD NUDGE — show once, after first successful save
+        // =============================================
+        function maybeShowDiscordNudge() {
+            if (localStorage.getItem('nw_seen_discord_nudge')) return;
+            localStorage.setItem('nw_seen_discord_nudge', 'true');
+            setTimeout(() => {
+                document.getElementById('discord-nudge-modal').style.display = 'flex';
+            }, 900); // let the save toast register first
+        }
+
+        function closeDiscordNudge() {
+            document.getElementById('discord-nudge-modal').style.display = 'none';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeDiscordNudge();
+        });
+        document.getElementById('discord-nudge-modal')?.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeDiscordNudge();
+        });
 
         // =============================================
         // TOAST
@@ -1403,6 +1555,29 @@
         // =============================================
         init();
     </script>
+
+    <!-- DISCORD NUDGE MODAL -->
+    <div class="discord-nudge-overlay" id="discord-nudge-modal" style="display: none;">
+        <div class="discord-nudge-card">
+            <div class="discord-nudge-close" onclick="closeDiscordNudge()">×</div>
+            <div class="discord-nudge-icon">🎉</div>
+            <h3 class="discord-nudge-title">You're in!</h3>
+            <p class="discord-nudge-text">
+                Your profile is live in the directory. One more thing while you're here:
+                got a bug to report, a feature idea, or just want to chat with other small streamers?
+                The Discord is the fastest way to reach me, way faster than Reddit comments.
+            </p>
+            <a href="https://discord.gg/MxD634NBsn" target="_blank" rel="noopener" class="discord-nudge-btn" onclick="closeDiscordNudge()">
+                💬 Join the Discord
+            </a>
+            <p class="discord-nudge-skip" onclick="closeDiscordNudge()">Maybe later</p>
+        </div>
+    </div>
+
+    <!-- FLOATING FEEDBACK BUTTON -->
+    <a href="https://discord.gg/MxD634NBsn" target="_blank" rel="noopener" class="feedback-fab" title="Found a bug or got an idea? Join the Discord">
+        💬 <span class="feedback-fab-text">Feedback</span>
+    </a>
 
 </body>
 </html>

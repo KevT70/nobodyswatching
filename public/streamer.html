@@ -670,6 +670,46 @@
             .profile-name { font-size: 1.5rem; }
             .live-banner, .offline-banner { flex-direction: column; text-align: center; }
         }
+        /* ========== FLOATING FEEDBACK BUTTON ========== */
+        .feedback-fab {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #5865F2;
+            color: #fff;
+            padding: 0.75rem 1.1rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 8px 24px rgba(88, 101, 242, 0.35);
+            transition: all 0.2s;
+        }
+
+        .feedback-fab:hover {
+            background: #4752c4;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(88, 101, 242, 0.45);
+        }
+
+        @media (max-width: 640px) {
+            .feedback-fab {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.7rem;
+            }
+            .feedback-fab-text {
+                display: none;
+            }
+        }
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1089,6 +1129,11 @@
 
         init();
     </script>
+
+    <!-- FLOATING FEEDBACK BUTTON -->
+    <a href="https://discord.gg/MxD634NBsn" target="_blank" rel="noopener" class="feedback-fab" title="Found a bug or got an idea? Join the Discord">
+        💬 <span class="feedback-fab-text">Feedback</span>
+    </a>
 
 </body>
 </html>
