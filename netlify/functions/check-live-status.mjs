@@ -236,7 +236,8 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
                 game: title,
                 viewers: viewers,
                 thumbnail: thumbnail,
-                platform: 'youtube.com'
+                platform: 'youtube.com',
+                videoUrl: `https://www.youtube.com/watch?v=${videoId}`
             });
         } catch (err) {
             console.error(`YouTube check failed for ${identifier}:`, err.message);
@@ -397,6 +398,11 @@ export default async function handler() {
                         || liveEntries.find(e => e.key === 'youtube.com');
                 }
 
+                // Store the direct YouTube watch URL independently of whether
+                // YouTube ended up being the "primary" platform — the "Also
+                // live on" pills need this too when YouTube isn't primary.
+                const ytEntry = liveEntries.find(e => e.key === 'youtube.com');
+
                 return supabase
                     .from('profiles')
                     .update({
@@ -407,6 +413,7 @@ export default async function handler() {
                         live_thumbnail_url: primary.data.thumbnail,
                         live_platform: primary.key,
                         live_platforms: liveEntries.map(e => e.key),
+                        youtube_live_video_url: ytEntry ? ytEntry.data.videoUrl : null,
                         last_live_at: new Date().toISOString()
                     })
                     .eq('id', profile.id);
@@ -420,7 +427,8 @@ export default async function handler() {
                         live_viewer_count: 0,
                         live_thumbnail_url: null,
                         live_platform: null,
-                        live_platforms: []
+                        live_platforms: [],
+                        youtube_live_video_url: null
                     })
                     .eq('id', profile.id);
             }

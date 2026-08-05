@@ -946,7 +946,10 @@
                 if (p.live_platform === 'twitch.tv' && p.twitch_url) {
                     watchUrl = p.twitch_url; watchClass = 'plat-twitch';
                 } else if (p.live_platform === 'youtube.com' && p.youtube_url) {
-                    watchUrl = p.youtube_url; watchClass = 'plat-youtube';
+                    // YouTube's channel link doesn't auto-show a live stream
+                    // like Twitch's does — send viewers straight to the video.
+                    watchUrl = p.youtube_live_video_url || p.youtube_url;
+                    watchClass = 'plat-youtube';
                 } else if (p.live_platform === 'kick.com' && p.kick_url) {
                     watchUrl = p.kick_url; watchClass = 'plat-kick';
                 }
@@ -963,7 +966,7 @@
                 // Build "Also live on" pills for every OTHER platform they're currently live on
                 const platformMeta = {
                     'twitch.tv': { label: 'Twitch', url: p.twitch_url, cls: 'plat-twitch' },
-                    'youtube.com': { label: 'YouTube', url: p.youtube_url, cls: 'plat-youtube' },
+                    'youtube.com': { label: 'YouTube', url: p.youtube_live_video_url || p.youtube_url, cls: 'plat-youtube' },
                     'kick.com': { label: 'Kick', url: p.kick_url, cls: 'plat-kick' }
                 };
                 const otherLive = (p.live_platforms || [])

@@ -1962,7 +1962,7 @@
         async function fetchProfiles() {
             const { data, error } = await sb
                 .from('profiles')
-                .select('username, avatar_url, bio, timezone, language, genres, top_games, twitch_url, youtube_url, kick_url, rumble_url, tiktok_url, velora_url, is_live, is_rerun, live_game, live_viewer_count, live_thumbnail_url, live_platform, live_platforms, last_live_at, badges')
+                .select('username, avatar_url, bio, timezone, language, genres, top_games, twitch_url, youtube_url, kick_url, rumble_url, tiktok_url, velora_url, is_live, is_rerun, live_game, live_viewer_count, live_thumbnail_url, live_platform, live_platforms, youtube_live_video_url, last_live_at, badges')
                 .order('is_live', { ascending: false })
                 .order('last_live_at', { ascending: false, nullsFirst: false });
 
@@ -2365,10 +2365,17 @@
 
             const isLive = meta.liveKey && (profile.live_platforms || []).includes(meta.liveKey);
 
+            // YouTube's channel link never auto-shows a live stream the way
+            // Twitch's does — so when they're live, send viewers straight to
+            // the specific video instead of their general channel page.
+            const clickUrl = (isLive && platformKey === 'youtube' && profile.youtube_live_video_url)
+                ? profile.youtube_live_video_url
+                : url;
+
             if (isLive) {
-                return `<a href="${esc(url)}" target="_blank" rel="noopener" class="plat-pill plat-pill-live" style="background:${meta.color};color:${meta.textOnColor};" onclick="event.stopPropagation()"><span class="plat-pill-dot" style="background:${meta.textOnColor};"></span>${meta.label}</a>`;
+                return `<a href="${esc(clickUrl)}" target="_blank" rel="noopener" class="plat-pill plat-pill-live" style="background:${meta.color};color:${meta.textOnColor};" onclick="event.stopPropagation()"><span class="plat-pill-dot" style="background:${meta.textOnColor};"></span>${meta.label}</a>`;
             }
-            return `<a href="${esc(url)}" target="_blank" rel="noopener" class="plat-pill plat-pill-offline" onclick="event.stopPropagation()"><span class="plat-pill-dot"></span>${meta.label}</a>`;
+            return `<a href="${esc(clickUrl)}" target="_blank" rel="noopener" class="plat-pill plat-pill-offline" onclick="event.stopPropagation()"><span class="plat-pill-dot"></span>${meta.label}</a>`;
         }
 
         function renderAllPlatformPills(profile) {
