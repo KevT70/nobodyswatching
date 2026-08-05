@@ -10,6 +10,10 @@ All notable changes to NobodysWatching.live are documented here.
 - Amended to remove Kick Live Status checking as this is being blocked by the API. Changing YouTube approach to use the free redirect-based live detection as we're burning through API credits now that numbers have increased.
 
 ### Added
+- Here's what changed:
+Username and badges are now on separate lines. Previously they shared one flex row that could wrap unpredictably (which is exactly what caused the "OG" badge to sometimes float onto its own awkward line, like you saw with mancavehawkeye's card).
+
+Badges now have a dedicated row with a reserved min-height. Whether a streamer has zero badges, one, or five, that row always takes up the same vertical space — invisible when empty, populated when there are badges to show. This keeps every card's header the same height regardless of badge count, so avatars and content line up cleanly across the whole grid.
 - Gap 1 - display bug. Directory grid cards for live streamers currently just say "Live Now · 12 viewers" - no game name at all, even though we track it (live_game) and already show it prominently on the carousel and spotlight cards. So if someone's browsing the main directory and a streamer's live, you literally can't see what they're playing without clicking into their profile. That's a real oversight and an easy fix.
 
 Gap 1 fixed. Two changes:

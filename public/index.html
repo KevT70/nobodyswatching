@@ -885,10 +885,15 @@
         .streamer-name {
             font-weight: 700;
             font-size: 1rem;
+        }
+
+        .streamer-badges {
             display: flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.35rem;
             flex-wrap: wrap;
+            min-height: 1.05rem;
+            margin: 0.3rem 0;
         }
 
         .badge {
@@ -2294,7 +2299,8 @@
                         <div class="streamer-card-header">
                             <div class="streamer-avatar">${avatarHtml}</div>
                             <div>
-                                <div class="streamer-name">${esc(p.username)} ${renderBadges(p.badges)}</div>
+                                <div class="streamer-name">${esc(p.username)}</div>
+                                <div class="streamer-badges">${renderBadges(p.badges)}</div>
                                 <div class="streamer-meta">${metaHtml}</div>
                             </div>
                         </div>
