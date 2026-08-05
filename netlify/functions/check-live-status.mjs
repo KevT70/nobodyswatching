@@ -134,7 +134,7 @@ async function resolveYouTubeChannelId(identifier, type, apiKey, cachedChannelId
 // now just a VOD) and generic liveBadgeText fields unrelated to
 // current live status.
 function findLiveVideoId(rawText) {
-    const liveMarkerMatch = rawText.match(/"badgeStyle":"THUMBNAIL_OVERLAY_BADGE_STYLE_LIVE"/);
+    const liveMarkerMatch = rawText.match(/"badgeStyle":\s*"THUMBNAIL_OVERLAY_BADGE_STYLE_LIVE"/);
     if (!liveMarkerMatch) return null;
 
     const liveIndex = liveMarkerMatch.index;
@@ -143,7 +143,7 @@ function findLiveVideoId(rawText) {
     const window = rawText.slice(windowStart, windowEnd);
     const liveIndexInWindow = liveIndex - windowStart;
 
-    const videoIdMatches = [...window.matchAll(/"videoId":"([a-zA-Z0-9_-]{11})"/g)];
+    const videoIdMatches = [...window.matchAll(/"videoId":\s*"([a-zA-Z0-9_-]{11})"/g)];
     if (videoIdMatches.length === 0) return null;
 
     let closest = null;
