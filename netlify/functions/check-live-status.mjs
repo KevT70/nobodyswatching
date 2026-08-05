@@ -103,7 +103,14 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
                 ? `https://www.youtube.com/@${identifier}/live`
                 : `https://www.youtube.com/channel/${identifier}/live`;
 
-            const response = await fetch(liveUrl, { redirect: 'follow' });
+            const response = await fetch(liveUrl, {
+                redirect: 'follow',
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.9'
+                }
+            });
 
             if (!response.ok && response.status !== 404) {
                 console.error(`YouTube /live check returned ${response.status} for ${identifier}`);
@@ -112,6 +119,9 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
 
             const finalUrl = response.url || '';
             const videoMatch = finalUrl.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+
+            // Temporary diagnostic logging — remove once we've confirmed this works reliably
+            console.log(`YouTube check for ${identifier} (${type}): requested ${liveUrl} -> status ${response.status}, redirected=${response.redirected}, finalUrl=${finalUrl}, videoMatch=${videoMatch ? videoMatch[1] : 'none'}`);
 
             if (!videoMatch) continue; // Not live — redirect stayed on the channel page
 
