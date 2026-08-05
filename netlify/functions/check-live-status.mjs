@@ -80,7 +80,11 @@ async function checkKickLive(usernames) {
                 headers: { 'Accept': 'application/json' }
             });
 
-            if (!response.ok) continue;
+            if (!response.ok) {
+                const bodySnippet = await response.text().catch(() => '');
+                console.error(`Kick returned ${response.status} for ${username}: ${bodySnippet.slice(0, 200)}`);
+                continue;
+            }
 
             const data = await response.json();
 
@@ -104,7 +108,10 @@ async function checkKickLive(usernames) {
 // YOUTUBE (requires YOUTUBE_API_KEY env var)
 // =============================================
 async function checkYouTubeLive(channelIdentifiers, apiKey) {
-    if (!apiKey) return new Map();
+    if (!apiKey) {
+        console.error('YOUTUBE_API_KEY is not set — skipping all YouTube checks');
+        return new Map();
+    }
     const liveMap = new Map();
 
     for (const { identifier, type } of channelIdentifiers) {
@@ -116,9 +123,16 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
                 const searchRes = await fetch(
                     `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(identifier)}&key=${apiKey}`
                 );
-                if (!searchRes.ok) continue;
+                if (!searchRes.ok) {
+                    const bodySnippet = await searchRes.text().catch(() => '');
+                    console.error(`YouTube handle lookup returned ${searchRes.status} for ${identifier}: ${bodySnippet.slice(0, 200)}`);
+                    continue;
+                }
                 const searchData = await searchRes.json();
-                if (!searchData.items || searchData.items.length === 0) continue;
+                if (!searchData.items || searchData.items.length === 0) {
+                    console.error(`YouTube handle lookup found no channel for ${identifier}`);
+                    continue;
+                }
                 channelId = searchData.items[0].id;
             }
 
@@ -126,7 +140,11 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
             const response = await fetch(
                 `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=live&type=video&key=${apiKey}`
             );
-            if (!response.ok) continue;
+            if (!response.ok) {
+                const bodySnippet = await response.text().catch(() => '');
+                console.error(`YouTube live search returned ${response.status} for ${identifier}: ${bodySnippet.slice(0, 200)}`);
+                continue;
+            }
 
             const data = await response.json();
 
