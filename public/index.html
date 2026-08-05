@@ -1888,7 +1888,7 @@
         <ul class="footer-links">
             <li><a href="/about.html">About</a></li>
             <li><a href="/privacy.html">Privacy</a></li>
-            <li><a href="https://bsky.app/profile/nobodyswatching.live" target="_blank" rel="noopener">Bluesky</a></li>
+            <li><a href="https://bsky.app/profile/xtaptapx.com" target="_blank" rel="noopener">Bluesky</a></li>
             <li><a href="https://discord.gg/MxD634NBsn" target="_blank" rel="noopener">Discord</a></li>
         </ul>
         <div class="footer-copy">© 2026 nobodyswatching.live. All rights reserved. No algorithms were harmed in the making of this site.</div>
@@ -2012,7 +2012,7 @@
         async function fetchProfiles() {
             const { data, error } = await sb
                 .from('profiles')
-                .select('*')
+                .select('username, avatar_url, bio, timezone, language, genres, top_games, twitch_url, youtube_url, kick_url, rumble_url, tiktok_url, velora_url, is_live, is_rerun, live_game, live_viewer_count, live_thumbnail_url, live_platform, last_live_at, badges')
                 .order('is_live', { ascending: false })
                 .order('last_live_at', { ascending: false, nullsFirst: false });
 
