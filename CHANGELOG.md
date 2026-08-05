@@ -10,6 +10,14 @@ All notable changes to NobodysWatching.live are documented here.
 - Amended to remove Kick Live Status checking as this is being blocked by the API. Changing YouTube approach to use the free redirect-based live detection as we're burning through API credits now that numbers have increased.
 
 ### Added
+- Gap 1 - display bug. Directory grid cards for live streamers currently just say "Live Now · 12 viewers" - no game name at all, even though we track it (live_game) and already show it prominently on the carousel and spotlight cards. So if someone's browsing the main directory and a streamer's live, you literally can't see what they're playing without clicking into their profile. That's a real oversight and an easy fix.
+
+Gap 1 fixed. Two changes:
+
+The actual fix - live streamers on the directory grid now show ● Live Now - Hollow Knight: Silksong · 👁 12 viewers instead of just ● Live Now · 👁 12 viewers. The game name comes from the same live_game field already powering the carousel and spotlight, so this was purely a display gap on the grid cards specifically.
+
+A defensive tweak alongside it - added flex-wrap to the meta line's CSS. With game names now potentially stacking alongside viewer count, timezone, and language on one line, a long title could've overflowed and gotten silently clipped by the card's overflow: hidden. Now it'll gracefully wrap onto a second line instead of disappearing.
+
 - What I've fixed: changed the select('*') to only pull the ~20 columns the homepage actually renders (username, bio, platform links, live status, etc.) instead of everything including unused fields. Small optimisation, but it reduces the payload size and read cost on every single visit.
 
 - VTuber added to both the profile checkboxes and the homepage genre filter.
