@@ -103,8 +103,9 @@ const INNERTUBE_CONTEXT = {
     }
 };
 
-async function resolveYouTubeChannelId(identifier, type, apiKey) {
+async function resolveYouTubeChannelId(identifier, type, apiKey, cachedChannelId) {
     if (type === 'channel_id') return identifier;
+    if (cachedChannelId) return cachedChannelId; // Already resolved on a previous run — skip the API call
     if (!apiKey) return null;
     try {
         const res = await fetch(
@@ -122,43 +123,50 @@ async function resolveYouTubeChannelId(identifier, type, apiKey) {
     }
 }
 
-// Recursively search an InnerTube JSON response for a video node that's
-// carrying a "LIVE" badge — resilient to YouTube shuffling exact paths
-// around, since we don't depend on a fixed structure.
-function findLiveVideoId(node, depth = 0) {
-    if (!node || typeof node !== 'object' || depth > 25) return null;
+// Search the raw InnerTube response TEXT for a live-badge marker, then
+// find the nearest videoId to it. This is deliberately loose about
+// exact JSON structure (fields aren't always siblings in the same
+// object) but related fields do end up serialized near each other,
+// so proximity in the raw text is a more forgiving signal than an
+// exact object-shape match.
+function findLiveVideoId(rawText) {
+    const liveMarkerMatch = rawText.match(/"style":"LIVE"|LIVE_NOW/);
+    if (!liveMarkerMatch) return null;
 
-    if (Array.isArray(node)) {
-        for (const item of node) {
-            const found = findLiveVideoId(item, depth + 1);
-            if (found) return found;
+    const liveIndex = liveMarkerMatch.index;
+    const windowStart = Math.max(0, liveIndex - 4000);
+    const windowEnd = Math.min(rawText.length, liveIndex + 4000);
+    const window = rawText.slice(windowStart, windowEnd);
+    const liveIndexInWindow = liveIndex - windowStart;
+
+    const videoIdMatches = [...window.matchAll(/"videoId":"([a-zA-Z0-9_-]{11})"/g)];
+    if (videoIdMatches.length === 0) return null;
+
+    let closest = null;
+    let closestDist = Infinity;
+    for (const m of videoIdMatches) {
+        const dist = Math.abs(m.index - liveIndexInWindow);
+        if (dist < closestDist) {
+            closestDist = dist;
+            closest = m[1];
         }
-        return null;
     }
-
-    if (typeof node.videoId === 'string' && node.videoId.length === 11) {
-        const serialized = JSON.stringify(node);
-        if (serialized.includes('"style":"LIVE"') || serialized.includes('LIVE_NOW') || serialized.includes('"text":"LIVE"')) {
-            return node.videoId;
-        }
-    }
-
-    for (const key of Object.keys(node)) {
-        const found = findLiveVideoId(node[key], depth + 1);
-        if (found) return found;
-    }
-    return null;
+    return closest;
 }
 
 async function checkYouTubeLive(channelIdentifiers, apiKey) {
     const liveMap = new Map();
+    const resolvedChannelIds = new Map(); // identifier -> channelId, for anything newly resolved this run
 
-    for (const { identifier, type } of channelIdentifiers) {
+    for (const { identifier, type, cachedChannelId } of channelIdentifiers) {
         try {
-            const channelId = await resolveYouTubeChannelId(identifier, type, apiKey);
+            const channelId = await resolveYouTubeChannelId(identifier, type, apiKey, cachedChannelId);
             if (!channelId) {
                 console.log(`YouTube check for ${identifier}: could not resolve channel ID, skipping`);
                 continue;
+            }
+            if (!cachedChannelId) {
+                resolvedChannelIds.set(identifier.toLowerCase(), channelId);
             }
 
             const response = await fetch(`https://www.youtube.com/youtubei/v1/browse?key=${INNERTUBE_KEY}`, {
@@ -180,11 +188,10 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
                 continue;
             }
 
-            const data = await response.json();
-            const videoId = findLiveVideoId(data);
+            const rawText = await response.text();
+            const videoId = findLiveVideoId(rawText);
 
             // Temporary diagnostic logging — remove once we've confirmed this works reliably
-            const rawText = JSON.stringify(data);
             console.log(`YouTube InnerTube check for ${identifier}: channelId=${channelId}, responseLength=${rawText.length}, containsLIVE=${rawText.includes('LIVE')}, videoId=${videoId || 'none'}`);
 
             if (!videoId) continue; // Not live
@@ -234,7 +241,7 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
         }
     }
 
-    return liveMap;
+    return { liveMap, resolvedChannelIds };
 }
 
 // =============================================
@@ -278,7 +285,7 @@ export default async function handler() {
         // 1. Get all profiles
         const { data: profiles, error: fetchError } = await supabase
             .from('profiles')
-            .select('id, twitch_username, kick_url, youtube_url, is_live, preferred_platform');
+            .select('id, twitch_username, kick_url, youtube_url, youtube_channel_id, is_live, preferred_platform');
 
         if (fetchError) {
             console.error('Supabase fetch error:', fetchError);
@@ -302,7 +309,11 @@ export default async function handler() {
             .filter(Boolean);
 
         const youtubeChannels = profiles
-            .map(p => extractYouTubeIdentifier(p.youtube_url))
+            .map(p => {
+                const info = extractYouTubeIdentifier(p.youtube_url);
+                if (!info) return null;
+                return { ...info, cachedChannelId: p.youtube_channel_id || null };
+            })
             .filter(Boolean);
 
         console.log(`Found: ${twitchUsernames.length} Twitch, ${kickUsernames.length} Kick, ${youtubeChannels.length} YouTube`);
@@ -312,13 +323,33 @@ export default async function handler() {
             ? await getTwitchToken(TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET)
             : null;
 
-        const [twitchLive, kickLive, youtubeLive] = await Promise.all([
+        const [twitchLive, kickLive, youtubeResult] = await Promise.all([
             twitchToken ? checkTwitchLive(twitchUsernames, TWITCH_CLIENT_ID, twitchToken) : new Map(),
             kickUsernames.length > 0 ? checkKickLive(kickUsernames) : new Map(),
-            youtubeChannels.length > 0 ? checkYouTubeLive(youtubeChannels, YOUTUBE_API_KEY) : new Map()
+            youtubeChannels.length > 0 ? checkYouTubeLive(youtubeChannels, YOUTUBE_API_KEY) : { liveMap: new Map(), resolvedChannelIds: new Map() }
         ]);
 
+        const youtubeLive = youtubeResult.liveMap;
+        const newlyResolvedChannelIds = youtubeResult.resolvedChannelIds;
+
         console.log(`Live: ${twitchLive.size} Twitch, ${kickLive.size} Kick, ${youtubeLive.size} YouTube`);
+
+        // 3b. Persist any newly-resolved YouTube channel IDs so future runs
+        // skip the paid resolve step for these profiles entirely.
+        if (newlyResolvedChannelIds.size > 0) {
+            const idUpdates = profiles
+                .filter(p => {
+                    const info = extractYouTubeIdentifier(p.youtube_url);
+                    return info && info.type === 'handle' && newlyResolvedChannelIds.has(info.identifier.toLowerCase());
+                })
+                .map(p => {
+                    const info = extractYouTubeIdentifier(p.youtube_url);
+                    const channelId = newlyResolvedChannelIds.get(info.identifier.toLowerCase());
+                    return supabase.from('profiles').update({ youtube_channel_id: channelId }).eq('id', p.id);
+                });
+            await Promise.all(idUpdates);
+            console.log(`Cached ${idUpdates.length} newly-resolved YouTube channel ID(s)`);
+        }
 
         // 4. Build combined live status per profile.
         // A streamer can be live on more than one platform at once — we track
