@@ -22,6 +22,26 @@ All notable changes to NobodysWatching.live are documented here.
 
 - Cleaned up all the old, now-unused CSS from the previous single-pill system so the stylesheet doesn't carry dead weight.
 
+- Fixed
+ - YouTube live detection was silently failing for everyone - root cause was the official YouTube Data API's search.list call (100 quota units per request) blowing through the entire 10,000-unit daily quota within minutes, given the number of linked YouTube channels
+ - Kick live detection was being silently blocked by Kick's bot-protection ("Request blocked by security policy")
+
+- Changed
+ - YouTube detection rebuilt on YouTube's internal "InnerTube" API - the same API youtube.com's own web player uses, and the technique used by tools like yt-dlp. Uses a public client key, not subject to the Developer API's daily quota
+ - YouTube channel handles are now resolved to a channel ID once and cached (youtube_channel_id column) instead of being re-resolved via the paid API on every 3-minute poll - cuts quota usage dramatically as the platform grows
+ - The official API is now only used for a single cheap videos.list call (1 unit, not 100) to fetch viewer count, and only for channels already confirmed live
+ - Stream title and thumbnail now come from YouTube's free oEmbed endpoint - no API key, no quota cost
+ - Kick live detection disabled - Kick remains a fully supported platform link (same as Rumble, TikTok, Velora) but live/offline status can no longer be reliably detected from a serverless function. Revisit if Kick ever ships an official API
+
+ - Added
+ - Multi-platform live support: streamers can now be tracked as live on more than one platform simultaneously (live_platforms array). Previously only one "primary" platform was ever recorded, even if someone was multi-streaming
+ - Preferred Platform setting on profiles - lets a streamer choose which platform gets top billing (the main "Watch Now" button) when they're live on more than one at once. Falls back to a sensible default order (Twitch > Kick > YouTube) if no preference is set or their preferred platform isn't currently live
+ - "Also live on" band on streamer profile pages - when someone's multi-streaming, every other platform they're currently live on now shows as a clickable pill alongside the main Watch Now button
+ - Live-aware platform pills across the directory grid, live carousel, and spotlight - platforms a streamer is genuinely live on right now render as solid coloured pills with a dot; linked-but-currently-offline platforms render muted/outlined, so viewers can see at a glance which links will actually take them to a live stream
+
+- Notes
+ - Kick's WAF block and YouTube's quota ceiling were both discovered via a real tester (TheJiggyJoe) reporting he was live on three platforms but only Twitch was showing - thanks to him and velsiraptor for patiently staying live while this got debugged
+
 ---
 
 ## [2026-04-08] - BUG FIXES
