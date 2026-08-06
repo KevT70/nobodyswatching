@@ -750,6 +750,7 @@
         .search-box {
             width: 100%;
             max-width: 340px;
+            position: relative;
         }
 
         .search-box input {
@@ -759,7 +760,7 @@
             color: var(--text-primary);
             background: var(--bg-card);
             border: 1px solid var(--border);
-            padding: 0.65rem 1rem;
+            padding: 0.65rem 2.2rem 0.65rem 2.1rem;
             border-radius: 8px;
             outline: none;
             transition: all 0.2s;
@@ -771,6 +772,38 @@
 
         .search-box input:focus {
             border-color: var(--accent);
+            background: var(--bg-card-hover);
+        }
+
+        .search-box-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .search-box-clear {
+            position: absolute;
+            right: 0.6rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .search-box-clear:hover {
+            color: var(--text-primary);
             background: var(--bg-card-hover);
         }
 
@@ -1741,7 +1774,9 @@
             </div>
             <div class="filter-controls">
                 <div class="search-box">
-                    <input type="text" id="game-search" placeholder="🔍 Search for a game — e.g. Minecraft, Valorant..." autocomplete="off">
+                    <span class="search-box-icon">🔍</span>
+                    <input type="text" id="game-search" placeholder="Search for a game — e.g. Minecraft, Valorant..." autocomplete="off">
+                    <span class="search-box-clear" id="search-clear" title="Clear search" style="display: none;">✕</span>
                 </div>
                 <div class="filters" id="filters">
                     <button class="filter-btn active" data-genre="all">All</button>
@@ -2073,11 +2108,18 @@
             container.style.display = 'block';
         }
 
+        function updateSearchClearVisibility() {
+            const searchBox = document.getElementById('game-search');
+            const clearBtn = document.getElementById('search-clear');
+            clearBtn.style.display = searchBox.value.trim() ? 'flex' : 'none';
+        }
+
         function filterByPlayingNow(game) {
             const searchBox = document.getElementById('game-search');
             searchBox.value = game;
             currentSearch = game;
             currentLiveGameOnly = true;
+            updateSearchClearVisibility();
             renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch, currentLiveGameOnly);
             document.getElementById('directory').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -2582,12 +2624,24 @@
         let currentLiveGameOnly = false;
         let searchDebounce = null;
         document.getElementById('game-search').addEventListener('input', (e) => {
+            updateSearchClearVisibility();
             clearTimeout(searchDebounce);
             searchDebounce = setTimeout(() => {
                 currentSearch = e.target.value;
                 currentLiveGameOnly = false; // manual typing always uses the broad search
                 renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch, currentLiveGameOnly);
             }, 250);
+        });
+
+        // Clear search button
+        document.getElementById('search-clear').addEventListener('click', () => {
+            const searchBox = document.getElementById('game-search');
+            searchBox.value = '';
+            currentSearch = '';
+            currentLiveGameOnly = false;
+            updateSearchClearVisibility();
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch, currentLiveGameOnly);
+            searchBox.focus();
         });
 
         // =============================================

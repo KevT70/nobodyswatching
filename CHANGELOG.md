@@ -4,6 +4,21 @@ All notable changes to NobodysWatching.live are documented here.
 
 ---
 
+## [2026-08-06] - Bug Fixes
+ - Minor update to clarify the search box. Show magnifying glass and clear method of removing the contents from the search field which in turn resets the directory back to a full listing. 
+
+## [2026-08-06] - "Playing Now" Chips + Spotlight Exemption
+
+### Added
+ - "Playing Now" chip row on the homepage, above the Spotlight - shows what games are currently being streamed across the site, most-played first (e.g. "Hollow Knight × 2"). Capped at 6 chips with a "+N more" overflow indicator to keep it a quick glance, not a wall of tags. Only appears when someone's actually live
+ - Clicking a chip filters the directory to that game and smoothly scrolls straight to the results - no manual scrolling required
+ - Spotlight exemption toggle (spotlight_exempt on profiles) - lets a streamer be manually excluded from ever being picked for the homepage Spotlight, without hiding them anywhere else on the site. Built for edge cases like AFK streams, hosting someone else's clips, or long-running VODs that are technically "live" by the platform's API but not genuinely active content. Toggle via Supabase, takes effect immediately
+ - Notes
+  - The chip list is entirely client-side - no new database columns or backend changes, just smarter use of data already being tracked
+  - Spotlight exemption was prompted by a real case: an AFK stream looping TikTok clips landed in the spotlight purely by having low viewers
+
+---
+
 ## [2026-05-08] - Additional Functionality added from feedback
 
 ### BUG FIXES
@@ -13,7 +28,7 @@ All notable changes to NobodysWatching.live are documented here.
 - Here's what changed:
 Username and badges are now on separate lines. Previously they shared one flex row that could wrap unpredictably (which is exactly what caused the "OG" badge to sometimes float onto its own awkward line, like you saw with mancavehawkeye's card).
 
-Badges now have a dedicated row with a reserved min-height. Whether a streamer has zero badges, one, or five, that row always takes up the same vertical space — invisible when empty, populated when there are badges to show. This keeps every card's header the same height regardless of badge count, so avatars and content line up cleanly across the whole grid.
+Badges now have a dedicated row with a reserved min-height. Whether a streamer has zero badges, one, or five, that row always takes up the same vertical space - invisible when empty, populated when there are badges to show. This keeps every card's header the same height regardless of badge count, so avatars and content line up cleanly across the whole grid.
 - Gap 1 - display bug. Directory grid cards for live streamers currently just say "Live Now · 12 viewers" - no game name at all, even though we track it (live_game) and already show it prominently on the carousel and spotlight cards. So if someone's browsing the main directory and a streamer's live, you literally can't see what they're playing without clicking into their profile. That's a real oversight and an easy fix.
 
 Gap 1 fixed. Two changes:
