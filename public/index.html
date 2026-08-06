@@ -2047,6 +2047,51 @@
             }
         }
 
+        /* ========== BACK TO TOP OF DIRECTORY ========== */
+        .back-to-directory-btn {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            z-index: 500;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px);
+        }
+
+        .back-to-directory-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .back-to-directory-btn:hover {
+            color: var(--accent-bright);
+            border-color: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 640px) {
+            .back-to-directory-btn {
+                bottom: 1rem;
+                left: 1rem;
+                width: 40px;
+                height: 40px;
+            }
+        }
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -3484,6 +3529,40 @@
     <a href="https://discord.gg/MxD634NBsn" target="_blank" rel="noopener" class="feedback-fab" title="Found a bug or got an idea? Join the Discord">
         💬 <span class="feedback-fab-text">Feedback</span>
     </a>
+
+    <!-- BACK TO TOP OF DIRECTORY -->
+    <button id="back-to-directory-btn" class="back-to-directory-btn" onclick="scrollToDirectoryTop()" title="Back to top of directory" aria-label="Back to top of directory">↑</button>
+
+    <script>
+        (function() {
+            const btn = document.getElementById('back-to-directory-btn');
+            const directorySection = document.getElementById('directory');
+            let ticking = false;
+
+            function updateVisibility() {
+                const rect = directorySection.getBoundingClientRect();
+                // Show once we've scrolled past the top of the directory,
+                // hide again once we've scrolled back above it.
+                if (rect.top < 0) {
+                    btn.classList.add('visible');
+                } else {
+                    btn.classList.remove('visible');
+                }
+                ticking = false;
+            }
+
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(updateVisibility);
+                    ticking = true;
+                }
+            });
+        })();
+
+        function scrollToDirectoryTop() {
+            document.getElementById('directory').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
 
 </body>
 </html>
