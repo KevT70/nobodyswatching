@@ -2362,7 +2362,7 @@
                 <option value="any">Any vibe</option>
             </select>
 
-            <button class="raid-find-btn" onclick="findRaidTarget()" id="raid-find-btn">Find someone</button>
+            <button class="raid-find-btn" onclick="startRaidSearch()" id="raid-find-btn">Find someone</button>
             <p class="raid-cancel-note">Closing this cancels the request</p>
         </div>
     </div>
@@ -3271,6 +3271,14 @@
                 pool = pool.filter(p => (p.vibes || []).includes(vibe));
             }
             return pool;
+        }
+
+        function startRaidSearch() {
+            // A fresh search (clicking "Find someone" from the filters modal)
+            // should never be limited by exclusions from a previous browsing
+            // session — only the "Someone else" reroll accumulates those.
+            raidShownIds = [];
+            findRaidTarget();
         }
 
         function findRaidTarget() {
