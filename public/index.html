@@ -1667,6 +1667,77 @@
             transform: translateY(-1px);
         }
 
+        .raid-action-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .raid-command-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .raid-command-box code {
+            flex: 1;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent-bright);
+            text-align: left;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .raid-copy-btn {
+            flex-shrink: 0;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .raid-copy-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent-bright);
+        }
+
+        .raid-preview-link {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            transition: color 0.2s;
+        }
+
+        .raid-preview-link:hover {
+            color: var(--text-secondary);
+        }
+
+        .raid-kick-note {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin: 0.5rem 0;
+        }
+
         .raid-reroll-btn {
             display: block;
             width: 100%;
@@ -3250,14 +3321,32 @@
             document.getElementById('raid-result-modal').style.display = 'flex';
         }
 
+        function extractKickUsernameClient(url) {
+            if (!url) return null;
+            const match = url.match(/kick\.com\/([a-zA-Z0-9_-]+)/);
+            return match ? match[1] : null;
+        }
+
+        function copyRaidCommand(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const original = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = original; }, 1800);
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                const original = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = original; }, 1800);
+            });
+        }
+
         function showRaidResult(p, fallbackNote) {
             document.getElementById('raid-filters-modal').style.display = 'none';
-
-            const watchUrl = (p.live_platform === 'youtube.com' && p.youtube_live_video_url)
-                ? p.youtube_live_video_url
-                : (p.live_platform === 'twitch.tv' ? p.twitch_url
-                    : p.live_platform === 'kick.com' ? p.kick_url
-                    : p.twitch_url || p.youtube_url || p.kick_url || '#');
 
             const thumbHtml = p.live_thumbnail_url
                 ? `<img src="${esc(p.live_thumbnail_url)}" alt="${esc(p.username)}">`
@@ -3266,6 +3355,43 @@
             const genreTag = (p.genres || [])[0] || '';
             const vibeTag = (p.vibes || [])[0] || '';
             const tagsLine = [vibeTag, genreTag].filter(Boolean).join(' · ');
+
+            // A raid only actually happens by typing a command in YOUR OWN
+            // chat — not by visiting the target's channel. So the primary
+            // action here is a copyable command where one exists, not a link.
+            let actionHtml = '';
+
+            if (p.live_platform === 'twitch.tv' && p.twitch_username) {
+                const command = `/raid ${p.twitch_username}`;
+                actionHtml = `
+                    <p class="raid-action-label">Paste this in your own Twitch chat</p>
+                    <div class="raid-command-box">
+                        <code>${esc(command)}</code>
+                        <button class="raid-copy-btn" onclick="copyRaidCommand('${esc(command).replace(/'/g, "\\'")}', this)">Copy</button>
+                    </div>
+                    <a href="${esc(p.twitch_url)}" target="_blank" rel="noopener" class="raid-preview-link">Preview their stream first →</a>
+                `;
+            } else if (p.live_platform === 'kick.com') {
+                const kickUsername = extractKickUsernameClient(p.kick_url);
+                const command = `/host ${kickUsername || p.username}`;
+                actionHtml = `
+                    <p class="raid-action-label">Paste this in your own Kick chat</p>
+                    <div class="raid-command-box">
+                        <code>${esc(command)}</code>
+                        <button class="raid-copy-btn" onclick="copyRaidCommand('${esc(command).replace(/'/g, "\\'")}', this)">Copy</button>
+                    </div>
+                    <p class="raid-kick-note">Kick calls this "Raid" in their app, but the actual chat command is /host.</p>
+                    <a href="${esc(p.kick_url)}" target="_blank" rel="noopener" class="raid-preview-link">Preview their stream first →</a>
+                `;
+            } else {
+                // YouTube has no raid feature at all — be upfront about that
+                const watchUrl = p.youtube_live_video_url || p.youtube_url || '#';
+                actionHtml = `
+                    <p class="raid-action-label">YouTube doesn't have a raid feature</p>
+                    <a href="${esc(watchUrl)}" target="_blank" rel="noopener" class="raid-go-btn">Visit their stream ↗</a>
+                    <p class="raid-kick-note">Share the link with your chat, or give them a shout-out instead.</p>
+                `;
+            }
 
             document.getElementById('raid-result-content').innerHTML = `
                 <div class="raid-back" onclick="backToRaidFilters()">‹ back</div>
@@ -3279,8 +3405,8 @@
                 ${p.live_game ? `<div class="raid-result-game">${esc(p.live_game)}</div>` : ''}
                 ${tagsLine ? `<div class="raid-result-meta">${esc(tagsLine)}</div>` : ''}
                 ${fallbackNote ? `<p class="raid-empty-state" style="font-size: 0.7rem; margin: -0.5rem 0 1rem;">${esc(fallbackNote)}</p>` : ''}
-                <a href="${esc(watchUrl)}" target="_blank" rel="noopener" class="raid-go-btn">Raid them ↗</a>
-                <button class="raid-reroll-btn" onclick="findRaidTarget()">🎲 Someone else</button>
+                ${actionHtml}
+                <button class="raid-reroll-btn" onclick="findRaidTarget()" style="margin-top: 0.75rem;">🎲 Someone else</button>
             `;
             document.getElementById('raid-result-modal').style.display = 'flex';
         }
