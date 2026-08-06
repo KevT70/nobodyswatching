@@ -6,6 +6,7 @@ All notable changes to NobodysWatching.live are documented here.
 
 ### [2026-08-06] - UPDATES 
 ## Bug Fixes
+ - Minor updates to the "Find Me a Raid" button.
  - Minor fix to prevent already logged in users receiving the CTA for Discord when updating their profile.
  - Minor update to clarify the search box. Show magnifying glass and clear method of removing the contents from the search field which in turn resets the directory back to a full listing. 
 
