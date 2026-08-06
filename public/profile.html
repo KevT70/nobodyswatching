@@ -1035,6 +1035,20 @@
             </div>
 
             <div class="form-group">
+                <label class="form-label">Vibe</label>
+                <div class="genre-checkboxes" id="vibe-checkboxes">
+                    <label class="genre-checkbox"><input type="checkbox" value="High Energy"><span>High Energy</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Chill & Relaxed"><span>Chill & Relaxed</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Competitive"><span>Competitive</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Story-Focused"><span>Story-Focused</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Silly & Casual"><span>Silly & Casual</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Cozy"><span>Cozy</span></label>
+                    <label class="genre-checkbox"><input type="checkbox" value="Wholesome"><span>Wholesome</span></label>
+                </div>
+                <div class="form-hint">*What's the atmosphere like on your stream? Helps other streamers find you for raids too.</div>
+            </div>
+
+            <div class="form-group">
                 <label class="form-label">Top 5 Games</label>
                 <div class="game-tags-container" id="game-tags-container">
                     <input type="text" class="game-tag-input" id="game-input"
@@ -1323,6 +1337,12 @@
                 cb.checked = selectedGenres.includes(cb.value);
             });
 
+            // Vibes (checkboxes)
+            const selectedVibes = profile.vibes || [];
+            document.querySelectorAll('#vibe-checkboxes input[type="checkbox"]').forEach(cb => {
+                cb.checked = selectedVibes.includes(cb.value);
+            });
+
             // Top games
             games = profile.top_games || [];
             renderGameTags();
@@ -1471,6 +1491,12 @@
                 selectedGenres.push(cb.value);
             });
 
+            // Collect selected vibes
+            const selectedVibes = [];
+            document.querySelectorAll('#vibe-checkboxes input[type="checkbox"]:checked').forEach(cb => {
+                selectedVibes.push(cb.value);
+            });
+
             const updates = {
                 username: newUsername,
                 avatar_url: document.getElementById('display-avatar').value.trim() || null,
@@ -1478,6 +1504,7 @@
                 timezone: document.getElementById('timezone').value || 'UTC',
                 language: document.getElementById('language').value || null,
                 genres: selectedGenres,
+                vibes: selectedVibes,
                 top_games: games,
                 twitch_url: twitchUrl,
                 twitch_username: twitchUsername,

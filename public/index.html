@@ -1430,6 +1430,271 @@
             transform: translateY(-1px);
         }
 
+        /* ========== RAID FINDER ========== */
+        .raid-finder-btn {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .raid-finder-btn:hover {
+            color: var(--accent-bright);
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            transform: translateY(-1px);
+        }
+
+        .raid-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .raid-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 380px;
+            width: 100%;
+            position: relative;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .raid-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.25rem;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .raid-close:hover { color: var(--text-primary); }
+
+        .raid-back {
+            position: absolute;
+            top: 1.15rem;
+            left: 1.25rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .raid-back:hover { color: var(--text-primary); }
+
+        .raid-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .raid-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .raid-prefill-hint {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--accent-bright);
+            background: var(--accent-glow);
+            border: 1px solid rgba(14, 165, 165, 0.25);
+            border-radius: 6px;
+            padding: 0.4rem 0.75rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .raid-filter-label {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: left;
+        }
+
+        .raid-modal .filter-select {
+            width: 100%;
+            margin-top: 0.35rem;
+        }
+
+        .raid-modal .filter-select.prefilled {
+            border-color: var(--accent);
+        }
+
+        .raid-find-btn {
+            width: 100%;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #fff;
+            background: var(--accent);
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .raid-find-btn:hover {
+            background: var(--accent-bright);
+            transform: translateY(-1px);
+        }
+
+        .raid-find-btn:disabled {
+            opacity: 0.6;
+            cursor: default;
+            transform: none;
+        }
+
+        .raid-cancel-note {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            margin-top: 0.9rem;
+        }
+
+        .raid-result-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: #fbbf24;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0.25rem 0 1rem;
+        }
+
+        .raid-result-thumb {
+            width: 100%;
+            height: 100px;
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .raid-result-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .raid-result-thumb .live-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+        }
+
+        .raid-result-thumb .live-viewer-count {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+        }
+
+        .raid-result-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.15rem;
+        }
+
+        .raid-result-game {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-bright);
+            margin-bottom: 0.25rem;
+        }
+
+        .raid-result-meta {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+        }
+
+        .raid-go-btn {
+            display: block;
+            width: 100%;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #fff;
+            background: var(--accent);
+            border: none;
+            padding: 0.7rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.6rem;
+            transition: all 0.2s;
+        }
+
+        .raid-go-btn:hover {
+            background: var(--accent-bright);
+            transform: translateY(-1px);
+        }
+
+        .raid-reroll-btn {
+            display: block;
+            width: 100%;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 0.6rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .raid-reroll-btn:hover {
+            border-color: var(--text-secondary);
+            color: var(--text-primary);
+        }
+
+        .raid-empty-state {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            padding: 1rem 0;
+        }
+
         /* ========== NAV USER MENU ========== */
         .nav-user {
             position: relative;
@@ -1758,6 +2023,8 @@
             Be the one who changes that.
         </p>
 
+        <button class="raid-finder-btn" onclick="openRaidFinder()">🎯 Find Me a Raid</button>
+
         <!-- Playing Now -->
         <div id="playing-now-row" style="display: none;"></div>
 
@@ -2002,6 +2269,40 @@
         </div>
     </div>
 
+    <!-- RAID FINDER: FILTERS -->
+    <div class="raid-overlay" id="raid-filters-modal" style="display: none;">
+        <div class="raid-modal">
+            <div class="raid-close" onclick="closeRaidFinder()">×</div>
+            <div class="section-comment" style="text-align: center;">// end of stream?</div>
+            <h3 class="raid-title">Find me a raid</h3>
+            <p class="raid-sub">We'll suggest a small streamer who fits. Filters are optional.</p>
+
+            <div class="raid-prefill-hint" id="raid-prefill-hint" style="display: none;">
+                ✨ Pre-filled from your profile
+            </div>
+
+            <label class="raid-filter-label">Genre</label>
+            <select class="filter-select" id="raid-genre-select">
+                <option value="any">Any genre</option>
+            </select>
+
+            <label class="raid-filter-label" style="margin-top: 1rem;">Vibe</label>
+            <select class="filter-select" id="raid-vibe-select">
+                <option value="any">Any vibe</option>
+            </select>
+
+            <button class="raid-find-btn" onclick="findRaidTarget()" id="raid-find-btn">Find someone</button>
+            <p class="raid-cancel-note">Closing this cancels the request</p>
+        </div>
+    </div>
+
+    <!-- RAID FINDER: RESULT -->
+    <div class="raid-overlay" id="raid-result-modal" style="display: none;">
+        <div class="raid-modal" id="raid-result-content">
+            <!-- Populated by JavaScript -->
+        </div>
+    </div>
+
     <!-- FOOTER -->
     <footer>
         <div class="footer-logo">nobodys<span>watching</span>.live</div>
@@ -2083,7 +2384,12 @@
 
         // Close modal on Escape or clicking overlay
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { closeSignInModal(); closeMotd(); }
+            if (e.key === 'Escape') {
+                closeSignInModal();
+                closeMotd();
+                document.getElementById('raid-filters-modal').style.display = 'none';
+                document.getElementById('raid-result-modal').style.display = 'none';
+            }
         });
         document.getElementById('signin-modal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeSignInModal();
@@ -2092,6 +2398,8 @@
         // =============================================
         // AUTH UI
         // =============================================
+        let currentUserId = null;
+
         function updateAuthUI(session) {
             const navAuthOut = document.getElementById('nav-auth-out');
             const navAuthIn = document.getElementById('nav-auth-in');
@@ -2099,6 +2407,8 @@
             const navUsername = document.getElementById('nav-username');
             const heroCta = document.getElementById('hero-cta');
             const ctaBtn = document.getElementById('cta-btn');
+
+            currentUserId = session ? session.user.id : null;
 
             if (session) {
                 const user = session.user;
@@ -2133,7 +2443,7 @@
         async function fetchProfiles() {
             const { data, error } = await sb
                 .from('profiles')
-                .select('username, avatar_url, bio, timezone, language, genres, top_games, twitch_url, youtube_url, kick_url, rumble_url, tiktok_url, velora_url, is_live, is_rerun, live_game, live_viewer_count, live_thumbnail_url, live_platform, live_platforms, youtube_live_video_url, spotlight_exempt, last_live_at, badges')
+                .select('id, username, avatar_url, bio, timezone, language, genres, vibes, top_games, twitch_url, youtube_url, kick_url, rumble_url, tiktok_url, velora_url, is_live, is_rerun, live_game, live_viewer_count, live_thumbnail_url, live_platform, live_platforms, youtube_live_video_url, spotlight_exempt, last_live_at, badges')
                 .order('is_live', { ascending: false })
                 .order('last_live_at', { ascending: false, nullsFirst: false });
 
@@ -2791,6 +3101,203 @@
 
         document.getElementById('motd-modal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeMotd();
+        });
+
+        // =============================================
+        // RAID FINDER
+        // =============================================
+        const RAID_GENRES = ['FPS', 'RPG', 'Battle Royale', 'Survival', 'Horror', 'Racing', 'Sports', 'Strategy', 'Sandbox', 'Platformer', 'Roguelike', 'Story Games', 'Rhythm Games', 'VTuber', 'Simulation', 'MMORPG', 'Fighting', 'Puzzle', 'Retro', 'Art', 'Music', 'DJ', 'Just Chatting', 'Makers & Crafting', 'Cooking', 'IRL', 'Variety'];
+        const RAID_VIBES = ['High Energy', 'Chill & Relaxed', 'Competitive', 'Story-Focused', 'Silly & Casual', 'Cozy', 'Wholesome'];
+
+        let raidShownIds = []; // avoid repeating the same suggestion within a session
+        let raidPrefilled = false;
+
+        function openRaidFinder() {
+            const genreSelect = document.getElementById('raid-genre-select');
+            const vibeSelect = document.getElementById('raid-vibe-select');
+
+            // Populate dropdowns once
+            if (genreSelect.options.length === 1) {
+                RAID_GENRES.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g;
+                    opt.textContent = g;
+                    genreSelect.appendChild(opt);
+                });
+            }
+            if (vibeSelect.options.length === 1) {
+                RAID_VIBES.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v;
+                    opt.textContent = v;
+                    vibeSelect.appendChild(opt);
+                });
+            }
+
+            // Pre-fill from the signed-in user's own profile, if we have one
+            raidPrefilled = false;
+            const hint = document.getElementById('raid-prefill-hint');
+            hint.style.display = 'none';
+            genreSelect.classList.remove('prefilled');
+            vibeSelect.classList.remove('prefilled');
+
+            if (currentUserId) {
+                const myProfile = allProfiles.find(p => p.id === currentUserId);
+                if (myProfile) {
+                    const myGenre = (myProfile.genres || [])[0];
+                    const myVibe = (myProfile.vibes || [])[0];
+                    if (myGenre || myVibe) {
+                        if (myGenre) genreSelect.value = myGenre;
+                        if (myVibe) vibeSelect.value = myVibe;
+                        genreSelect.classList.add('prefilled');
+                        vibeSelect.classList.add('prefilled');
+                        hint.style.display = 'inline-block';
+                        raidPrefilled = true;
+                    }
+                }
+            }
+
+            raidShownIds = [];
+            document.getElementById('raid-filters-modal').style.display = 'flex';
+        }
+
+        function closeRaidFinder() {
+            document.getElementById('raid-filters-modal').style.display = 'none';
+        }
+
+        // Clear the prefill hint the moment either dropdown is touched manually
+        document.getElementById('raid-genre-select').addEventListener('change', () => {
+            if (raidPrefilled) {
+                raidPrefilled = false;
+                document.getElementById('raid-prefill-hint').style.display = 'none';
+                document.getElementById('raid-genre-select').classList.remove('prefilled');
+                document.getElementById('raid-vibe-select').classList.remove('prefilled');
+            }
+        });
+        document.getElementById('raid-vibe-select').addEventListener('change', () => {
+            if (raidPrefilled) {
+                raidPrefilled = false;
+                document.getElementById('raid-prefill-hint').style.display = 'none';
+                document.getElementById('raid-genre-select').classList.remove('prefilled');
+                document.getElementById('raid-vibe-select').classList.remove('prefilled');
+            }
+        });
+
+        function getRaidCandidates(genre, vibe) {
+            // Genuinely live, not a rerun, not manually exempt, not the person themselves
+            let pool = allProfiles.filter(p =>
+                p.is_live &&
+                !p.is_rerun &&
+                !p.spotlight_exempt &&
+                p.id !== currentUserId &&
+                !raidShownIds.includes(p.id)
+            );
+
+            if (genre !== 'any') {
+                pool = pool.filter(p => (p.genres || []).includes(genre));
+            }
+            if (vibe !== 'any') {
+                pool = pool.filter(p => (p.vibes || []).includes(vibe));
+            }
+            return pool;
+        }
+
+        function findRaidTarget() {
+            const genre = document.getElementById('raid-genre-select').value;
+            const vibe = document.getElementById('raid-vibe-select').value;
+            const btn = document.getElementById('raid-find-btn');
+
+            btn.disabled = true;
+            btn.textContent = 'Finding...';
+
+            // Try genre + vibe, then relax to genre only, then anyone genuinely live
+            let candidates = getRaidCandidates(genre, vibe);
+            let fallbackNote = '';
+
+            if (candidates.length === 0 && genre !== 'any' && vibe !== 'any') {
+                candidates = getRaidCandidates(genre, 'any');
+                fallbackNote = `Nobody's live in that exact vibe right now, but here's a ${genre} streamer anyway.`;
+            }
+            if (candidates.length === 0) {
+                candidates = getRaidCandidates('any', 'any');
+                fallbackNote = "Nobody matched exactly, but here's someone great anyway.";
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Find someone';
+
+            if (candidates.length === 0) {
+                showRaidEmptyState();
+                return;
+            }
+
+            // Pick randomly from the lowest-viewer handful, so it's not always the same one person
+            const sorted = [...candidates].sort((a, b) => (a.live_viewer_count || 0) - (b.live_viewer_count || 0));
+            const pool = sorted.slice(0, 5);
+            const pick = pool[Math.floor(Math.random() * pool.length)];
+
+            raidShownIds.push(pick.id);
+            showRaidResult(pick, fallbackNote);
+        }
+
+        function showRaidEmptyState() {
+            document.getElementById('raid-filters-modal').style.display = 'none';
+            document.getElementById('raid-result-content').innerHTML = `
+                <div class="raid-back" onclick="backToRaidFilters()">‹ back</div>
+                <p class="raid-result-eyebrow" style="margin-top: 1.5rem;">// no luck this time</p>
+                <p class="raid-empty-state">Nobody's live that matches right now. Try a broader filter, or check back in a bit — streamers come and go all the time.</p>
+            `;
+            document.getElementById('raid-result-modal').style.display = 'flex';
+        }
+
+        function showRaidResult(p, fallbackNote) {
+            document.getElementById('raid-filters-modal').style.display = 'none';
+
+            const watchUrl = (p.live_platform === 'youtube.com' && p.youtube_live_video_url)
+                ? p.youtube_live_video_url
+                : (p.live_platform === 'twitch.tv' ? p.twitch_url
+                    : p.live_platform === 'kick.com' ? p.kick_url
+                    : p.twitch_url || p.youtube_url || p.kick_url || '#');
+
+            const thumbHtml = p.live_thumbnail_url
+                ? `<img src="${esc(p.live_thumbnail_url)}" alt="${esc(p.username)}">`
+                : '';
+
+            const genreTag = (p.genres || [])[0] || '';
+            const vibeTag = (p.vibes || [])[0] || '';
+            const tagsLine = [vibeTag, genreTag].filter(Boolean).join(' · ');
+
+            document.getElementById('raid-result-content').innerHTML = `
+                <div class="raid-back" onclick="backToRaidFilters()">‹ back</div>
+                <p class="raid-result-eyebrow">// found one for you</p>
+                <div class="raid-result-thumb">
+                    ${thumbHtml}
+                    <span class="live-badge">● LIVE</span>
+                    <span class="live-viewer-count">👁 ${p.live_viewer_count || 0} viewer${p.live_viewer_count !== 1 ? 's' : ''}</span>
+                </div>
+                <div class="raid-result-name">${esc(p.username)}</div>
+                ${p.live_game ? `<div class="raid-result-game">${esc(p.live_game)}</div>` : ''}
+                ${tagsLine ? `<div class="raid-result-meta">${esc(tagsLine)}</div>` : ''}
+                ${fallbackNote ? `<p class="raid-empty-state" style="font-size: 0.7rem; margin: -0.5rem 0 1rem;">${esc(fallbackNote)}</p>` : ''}
+                <a href="${esc(watchUrl)}" target="_blank" rel="noopener" class="raid-go-btn">Raid them ↗</a>
+                <button class="raid-reroll-btn" onclick="findRaidTarget()">🎲 Someone else</button>
+            `;
+            document.getElementById('raid-result-modal').style.display = 'flex';
+        }
+
+        function backToRaidFilters() {
+            document.getElementById('raid-result-modal').style.display = 'none';
+            document.getElementById('raid-filters-modal').style.display = 'flex';
+        }
+
+        document.getElementById('raid-filters-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeRaidFinder();
+        });
+
+        document.getElementById('raid-result-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                document.getElementById('raid-result-modal').style.display = 'none';
+            }
         });
 
         init();

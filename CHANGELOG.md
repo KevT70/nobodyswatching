@@ -9,6 +9,8 @@ All notable changes to NobodysWatching.live are documented here.
  - Minor update to clarify the search box. Show magnifying glass and clear method of removing the contents from the search field which in turn resets the directory back to a full listing. 
 
 ## Added
+ - Find me a raid option
+ - Additional items on Profile page for "Vibe" used when determining initial Raid candidate streams
  - Introduce message of the day modal
  - DJ category added to profile checkboxes and homepage genre filter.
  - "Playing Now" chip row on the homepage, above the Spotlight - shows what games are currently being streamed across the site, most-played first (e.g. "Hollow Knight × 2"). Capped at 6 chips with a "+N more" overflow indicator to keep it a quick glance, not a wall of tags. Only appears when someone's actually live
