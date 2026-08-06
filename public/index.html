@@ -2077,7 +2077,8 @@
             const searchBox = document.getElementById('game-search');
             searchBox.value = game;
             currentSearch = game;
-            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch);
+            currentLiveGameOnly = true;
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch, currentLiveGameOnly);
             document.getElementById('directory').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
@@ -2093,7 +2094,7 @@
             const reruns = allLive.filter(p => p.is_rerun);
             const liveProfiles = genuinelyLive.filter(p => (p.live_viewer_count || 0) <= VIEWER_CAP);
 
-            renderPlayingNow(allLive);
+            renderPlayingNow(genuinelyLive.filter(p => !p.spotlight_exempt));
 
             // === SPOTLIGHT ===
             // Prefer a genuinely live streamer with the fewest viewers.
@@ -2334,7 +2335,7 @@
         // =============================================
         // RENDER: STREAMER GRID
         // =============================================
-        function renderStreamerGrid(profiles, genre, timezone, language, searchTerm) {
+        function renderStreamerGrid(profiles, genre, timezone, language, searchTerm, liveGameOnly) {
             const grid = document.getElementById('streamer-grid');
             const emptyMsg = document.getElementById('grid-empty');
 
@@ -2348,7 +2349,14 @@
             if (language && language !== 'all') {
                 filtered = filtered.filter(p => p.language === language);
             }
-            if (searchTerm && searchTerm.trim()) {
+            if (liveGameOnly && searchTerm && searchTerm.trim()) {
+                // Triggered by a "Playing Now" chip — only show people who are
+                // genuinely live and playing this exact game right now. Unlike
+                // the general search, this deliberately excludes reruns and
+                // anyone who's merely listed the game as a favourite while offline.
+                const term = searchTerm.trim().toLowerCase();
+                filtered = filtered.filter(p => p.is_live && !p.is_rerun && !p.spotlight_exempt && (p.live_game || '').toLowerCase() === term);
+            } else if (searchTerm && searchTerm.trim()) {
                 const term = searchTerm.trim().toLowerCase();
                 filtered = filtered.filter(p => {
                     const topGames = (p.top_games || []).map(g => g.toLowerCase());
@@ -2545,31 +2553,36 @@
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentFilter = btn.dataset.genre;
-                renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch);
+                currentLiveGameOnly = false;
+                renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch, currentLiveGameOnly);
             });
         });
 
         // Timezone dropdown
         document.getElementById('timezone-filter').addEventListener('change', (e) => {
             currentTimezone = e.target.value;
-            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch);
+            currentLiveGameOnly = false;
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch, currentLiveGameOnly);
         });
 
         // Language dropdown
         let currentLanguage = 'all';
         document.getElementById('language-filter').addEventListener('change', (e) => {
             currentLanguage = e.target.value;
-            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch);
+            currentLiveGameOnly = false;
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch, currentLiveGameOnly);
         });
 
         // Game search box (debounced)
         let currentSearch = '';
+        let currentLiveGameOnly = false;
         let searchDebounce = null;
         document.getElementById('game-search').addEventListener('input', (e) => {
             clearTimeout(searchDebounce);
             searchDebounce = setTimeout(() => {
                 currentSearch = e.target.value;
-                renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch);
+                currentLiveGameOnly = false; // manual typing always uses the broad search
+                renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch, currentLiveGameOnly);
             }, 250);
         });
 
@@ -2590,7 +2603,7 @@
             allProfiles = await fetchProfiles();
             renderLiveCarousel(allProfiles);
             initCarouselDrag();
-            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch);
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch, currentLiveGameOnly);
             renderStats(allProfiles);
         }
 
