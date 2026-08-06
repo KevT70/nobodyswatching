@@ -862,6 +862,23 @@
         // =============================================
         // HELPERS
         // =============================================
+        // Native-script display names, per W3C i18n guidance
+        const LANGUAGE_NATIVE_NAMES = {
+            'English': 'English', 'Spanish': 'Español', 'Portuguese': 'Português',
+            'French': 'Français', 'German': 'Deutsch', 'Italian': 'Italiano',
+            'Dutch': 'Nederlands', 'Polish': 'Polski', 'Russian': 'Русский',
+            'Ukrainian': 'Українська', 'Turkish': 'Türkçe', 'Arabic': 'العربية',
+            'Hindi': 'हिन्दी', 'Japanese': '日本語', 'Korean': '한국어',
+            'Chinese': '中文', 'Thai': 'ไทย', 'Vietnamese': 'Tiếng Việt',
+            'Indonesian': 'Bahasa Indonesia', 'Filipino': 'Filipino', 'Swedish': 'Svenska',
+            'Norwegian': 'Norsk', 'Danish': 'Dansk', 'Finnish': 'Suomi',
+            'Czech': 'Čeština', 'Hungarian': 'Magyar', 'Romanian': 'Română',
+            'Greek': 'Ελληνικά', 'Other': 'Other'
+        };
+        function nativeLanguageName(lang) {
+            return LANGUAGE_NATIVE_NAMES[lang] || lang;
+        }
+
         function esc(str) {
             if (!str) return '';
             const div = document.createElement('div');
@@ -933,7 +950,7 @@
                     .join('');
             }
             document.getElementById('p-timezone').textContent = p.timezone ? `🕐 ${p.timezone}` : '';
-            document.getElementById('p-language').textContent = p.language ? `🌐 ${p.language}` : '';
+            document.getElementById('p-language').textContent = p.language ? `🌐 ${nativeLanguageName(p.language)}` : '';
 
             // Status banner
             const bannerEl = document.getElementById('status-banner');

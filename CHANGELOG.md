@@ -11,6 +11,7 @@ All notable changes to NobodysWatching.live are documented here.
  - Minor update to clarify the search box. Show magnifying glass and clear method of removing the contents from the search field which in turn resets the directory back to a full listing. 
 
 ## Added
+ - Local languages names with English equivalent in parentheses. Included on main directory, profiles and streamer pages.
  - Find me a raid option
  - Additional items on Profile page for "Vibe" used when determining initial Raid candidate streams
  - Introduce message of the day modal
