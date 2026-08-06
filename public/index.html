@@ -2760,6 +2760,7 @@
                     .from('site_messages')
                     .select('id, title, message')
                     .eq('active', true)
+                    .gt('expires_at', new Date().toISOString())
                     .order('created_at', { ascending: false })
                     .limit(1)
                     .maybeSingle();
