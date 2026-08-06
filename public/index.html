@@ -1358,6 +1358,78 @@
             margin-top: 1.25rem;
         }
 
+        /* ========== MESSAGE OF THE DAY ========== */
+        .motd-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .motd-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 440px;
+            width: 100%;
+            position: relative;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .motd-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.25rem;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .motd-close:hover { color: var(--text-primary); }
+
+        .motd-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .motd-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.75rem;
+            white-space: pre-line;
+        }
+
+        .motd-dismiss-btn {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: #fff;
+            background: var(--accent);
+            border: none;
+            padding: 0.65rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .motd-dismiss-btn:hover {
+            background: var(--accent-bright);
+            transform: translateY(-1px);
+        }
+
         /* ========== NAV USER MENU ========== */
         .nav-user {
             position: relative;
@@ -1919,6 +1991,17 @@
         </div>
     </div>
 
+    <!-- MESSAGE OF THE DAY -->
+    <div class="motd-overlay" id="motd-modal" style="display: none;">
+        <div class="motd-modal">
+            <div class="motd-close" onclick="closeMotd()">×</div>
+            <div class="section-comment" style="text-align: center;" id="motd-eyebrow">// a quick word</div>
+            <h3 class="motd-title" id="motd-title"></h3>
+            <p class="motd-text" id="motd-text"></p>
+            <button class="motd-dismiss-btn" onclick="closeMotd()">Got it</button>
+        </div>
+    </div>
+
     <!-- FOOTER -->
     <footer>
         <div class="footer-logo">nobodys<span>watching</span>.live</div>
@@ -2000,7 +2083,7 @@
 
         // Close modal on Escape or clicking overlay
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeSignInModal();
+            if (e.key === 'Escape') { closeSignInModal(); closeMotd(); }
         });
         document.getElementById('signin-modal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeSignInModal();
@@ -2664,7 +2747,50 @@
             initCarouselDrag();
             renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch, currentLiveGameOnly);
             renderStats(allProfiles);
+
+            checkMessageOfTheDay();
         }
+
+        // =============================================
+        // MESSAGE OF THE DAY
+        // =============================================
+        async function checkMessageOfTheDay() {
+            try {
+                const { data, error } = await sb
+                    .from('site_messages')
+                    .select('id, title, message')
+                    .eq('active', true)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+
+                if (error || !data) return;
+
+                const dismissedKey = `nw_dismissed_motd_${data.id}`;
+                if (localStorage.getItem(dismissedKey)) return;
+
+                document.getElementById('motd-title').textContent = data.title || "A quick word";
+                document.getElementById('motd-text').textContent = data.message;
+                document.getElementById('motd-modal').style.display = 'flex';
+                document.getElementById('motd-modal').dataset.messageId = data.id;
+            } catch (err) {
+                console.error('Message of the day check failed:', err);
+            }
+        }
+
+        function closeMotd() {
+            const modal = document.getElementById('motd-modal');
+            if (modal.style.display === 'none') return;
+            const messageId = modal.dataset.messageId;
+            if (messageId) {
+                localStorage.setItem(`nw_dismissed_motd_${messageId}`, 'true');
+            }
+            modal.style.display = 'none';
+        }
+
+        document.getElementById('motd-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeMotd();
+        });
 
         init();
     </script>
