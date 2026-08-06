@@ -4,12 +4,12 @@ All notable changes to NobodysWatching.live are documented here.
 
 ---
 
-## [2026-08-06] - Bug Fixes
+### [2026-08-06] - UPDATES 
+## Bug Fixes
  - Minor update to clarify the search box. Show magnifying glass and clear method of removing the contents from the search field which in turn resets the directory back to a full listing. 
 
-## [2026-08-06] - "Playing Now" Chips + Spotlight Exemption
-
-### Added
+## Added
+ - DJ category added to profile checkboxes and homepage genre filter.
  - "Playing Now" chip row on the homepage, above the Spotlight - shows what games are currently being streamed across the site, most-played first (e.g. "Hollow Knight × 2"). Capped at 6 chips with a "+N more" overflow indicator to keep it a quick glance, not a wall of tags. Only appears when someone's actually live
  - Clicking a chip filters the directory to that game and smoothly scrolls straight to the results - no manual scrolling required
  - Spotlight exemption toggle (spotlight_exempt on profiles) - lets a streamer be manually excluded from ever being picked for the homepage Spotlight, without hiding them anywhere else on the site. Built for edge cases like AFK streams, hosting someone else's clips, or long-running VODs that are technically "live" by the platform's API but not genuinely active content. Toggle via Supabase, takes effect immediately
