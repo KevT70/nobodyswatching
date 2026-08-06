@@ -405,6 +405,13 @@
             margin-bottom: 0.5rem;
         }
 
+        .spotlight-language {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
         /* ========== PLAYING NOW CHIPS ========== */
         .playing-now-row {
             display: flex;
@@ -641,6 +648,13 @@
             font-family: var(--font-mono);
             font-size: 0.75rem;
             color: var(--accent-bright);
+        }
+
+        .live-card-language {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
         }
 
         .live-card-platform {
@@ -2652,6 +2666,7 @@
                             <span class="spotlight-label">${spotlightLabel}</span>
                             <div class="spotlight-name">${esc(star.username)} ${renderBadges(star.badges)}</div>
                             <div class="spotlight-game">${esc(star.live_game || 'Streaming')}</div>
+                            ${star.language ? `<div class="spotlight-language">🌐 ${esc(nativeLanguageName(star.language))}</div>` : ''}
                             <div class="spotlight-viewers">${captionText}</div>
                             <div class="spotlight-platform">${pillsHtml}</div>
                         </div>
@@ -2697,6 +2712,7 @@
                         <div class="live-card-info">
                             <div class="live-card-name">${esc(p.username)} ${renderBadges(p.badges)}</div>
                             <div class="live-card-game">${esc(p.live_game || 'Streaming')}</div>
+                            ${p.language ? `<div class="live-card-language">🌐 ${esc(nativeLanguageName(p.language))}</div>` : ''}
                             <div class="live-card-platform">${pillsHtml}</div>
                         </div>
                     </div>
