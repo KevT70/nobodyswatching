@@ -3291,7 +3291,9 @@
             }
             if (candidates.length === 0) {
                 candidates = getRaidCandidates('any', 'any');
-                fallbackNote = "Nobody matched exactly, but here's someone great anyway.";
+                if (genre !== 'any' || vibe !== 'any') {
+                    fallbackNote = "Nobody matched exactly, but here's someone great anyway.";
+                }
             }
 
             btn.disabled = false;
@@ -3324,6 +3326,12 @@
         function extractKickUsernameClient(url) {
             if (!url) return null;
             const match = url.match(/kick\.com\/([a-zA-Z0-9_-]+)/);
+            return match ? match[1] : null;
+        }
+
+        function extractTwitchUsernameClient(url) {
+            if (!url) return null;
+            const match = url.match(/twitch\.tv\/([a-zA-Z0-9_]+)/);
             return match ? match[1] : null;
         }
 
@@ -3361,8 +3369,9 @@
             // action here is a copyable command where one exists, not a link.
             let actionHtml = '';
 
-            if (p.live_platform === 'twitch.tv' && p.twitch_username) {
-                const command = `/raid ${p.twitch_username}`;
+            if (p.live_platform === 'twitch.tv') {
+                const twitchUsername = p.twitch_username || extractTwitchUsernameClient(p.twitch_url);
+                const command = `/raid ${twitchUsername || p.username}`;
                 actionHtml = `
                     <p class="raid-action-label">Paste this in your own Twitch chat</p>
                     <div class="raid-command-box">
