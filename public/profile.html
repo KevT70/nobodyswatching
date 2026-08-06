@@ -1530,16 +1530,25 @@
                 showToast('Something went wrong. Give it another go.', 'error');
             } else {
                 showToast('Profile saved. Looking good.', 'success');
+                currentProfile = { ...currentProfile, ...updates };
                 maybeShowDiscordNudge();
             }
         }
 
         // =============================================
-        // DISCORD NUDGE — show once, after first successful save
+        // DISCORD NUDGE — show once ever, per account
         // =============================================
-        function maybeShowDiscordNudge() {
-            if (localStorage.getItem('nw_seen_discord_nudge')) return;
-            localStorage.setItem('nw_seen_discord_nudge', 'true');
+        async function maybeShowDiscordNudge() {
+            if (!currentProfile || currentProfile.has_seen_discord_nudge) return;
+
+            // Mark it seen immediately so a rapid double-save (or a slow
+            // network response) can't show it twice in a row.
+            currentProfile.has_seen_discord_nudge = true;
+            await sb
+                .from('profiles')
+                .update({ has_seen_discord_nudge: true })
+                .eq('id', currentUser.id);
+
             setTimeout(() => {
                 document.getElementById('discord-nudge-modal').style.display = 'flex';
             }, 900); // let the save toast register first
