@@ -2092,7 +2092,11 @@
             const allLive = profiles.filter(p => p.is_live);
             const genuinelyLive = allLive.filter(p => !p.is_rerun);
             const reruns = allLive.filter(p => p.is_rerun);
-            const liveProfiles = genuinelyLive.filter(p => (p.live_viewer_count || 0) <= VIEWER_CAP);
+            // The carousel shows everyone genuinely live under the viewer cap —
+            // including reruns. Being a rerun only disqualifies someone from
+            // the Spotlight (the site's single most prominent slot), not from
+            // appearing in the normal scrolling list like any other live streamer.
+            const liveProfiles = allLive.filter(p => (p.live_viewer_count || 0) <= VIEWER_CAP);
 
             renderPlayingNow(genuinelyLive.filter(p => !p.spotlight_exempt));
 
