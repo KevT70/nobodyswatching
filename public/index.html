@@ -405,6 +405,52 @@
             margin-bottom: 0.5rem;
         }
 
+        /* ========== PLAYING NOW CHIPS ========== */
+        .playing-now-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .playing-now-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .playing-now-chip {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 999px;
+            background: var(--accent-glow);
+            color: var(--accent-bright);
+            border: 1px solid rgba(14, 165, 165, 0.25);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .playing-now-chip:hover {
+            background: rgba(14, 165, 165, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .playing-now-chip.overflow {
+            background: var(--bg-card);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            cursor: default;
+        }
+
+        .playing-now-chip.overflow:hover {
+            transform: none;
+            background: var(--bg-card);
+        }
+
         .spotlight-label {
             font-family: var(--font-mono);
             font-size: 0.55rem;
@@ -1607,6 +1653,9 @@
             Be the one who changes that.
         </p>
 
+        <!-- Playing Now -->
+        <div id="playing-now-row" style="display: none;"></div>
+
         <!-- Spotlight -->
         <div id="spotlight-section" style="display: none;">
             <div class="section-comment" style="margin-bottom: 0.5rem;">// spotlight — go make their day</div>
@@ -1979,6 +2028,59 @@
         // =============================================
         // RENDER: LIVE CAROUSEL
         // =============================================
+        // =============================================
+        // RENDER: PLAYING NOW CHIPS
+        // =============================================
+        function renderPlayingNow(allLive) {
+            const container = document.getElementById('playing-now-row');
+
+            // Count how many live streamers are playing each game
+            const counts = new Map();
+            allLive.forEach(p => {
+                const game = (p.live_game || '').trim();
+                if (!game) return;
+                counts.set(game, (counts.get(game) || 0) + 1);
+            });
+
+            if (counts.size === 0) {
+                container.style.display = 'none';
+                container.innerHTML = '';
+                return;
+            }
+
+            // Most-played first; cap the visible list so it stays a glance, not a wall
+            const MAX_CHIPS = 6;
+            const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+            const visible = sorted.slice(0, MAX_CHIPS);
+            const overflowCount = sorted.length - visible.length;
+
+            const chipsHtml = visible.map(([game, count]) => {
+                const label = count > 1 ? `${esc(game)} × ${count}` : esc(game);
+                return `<span class="playing-now-chip" onclick="filterByPlayingNow('${esc(game).replace(/'/g, "\\'")}')">${label}</span>`;
+            }).join('');
+
+            const overflowHtml = overflowCount > 0
+                ? `<span class="playing-now-chip overflow">+${overflowCount} more</span>`
+                : '';
+
+            container.innerHTML = `
+                <div class="playing-now-row">
+                    <span class="playing-now-label">Playing now</span>
+                    ${chipsHtml}
+                    ${overflowHtml}
+                </div>
+            `;
+            container.style.display = 'block';
+        }
+
+        function filterByPlayingNow(game) {
+            const searchBox = document.getElementById('game-search');
+            searchBox.value = game;
+            currentSearch = game;
+            renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch);
+            document.getElementById('directory').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
         function renderLiveCarousel(profiles) {
             const carousel = document.getElementById('live-carousel');
             const emptyMsg = document.getElementById('live-empty');
@@ -1990,6 +2092,8 @@
             const genuinelyLive = allLive.filter(p => !p.is_rerun);
             const reruns = allLive.filter(p => p.is_rerun);
             const liveProfiles = genuinelyLive.filter(p => (p.live_viewer_count || 0) <= VIEWER_CAP);
+
+            renderPlayingNow(allLive);
 
             // === SPOTLIGHT ===
             // Prefer a genuinely live streamer with the fewest viewers.
