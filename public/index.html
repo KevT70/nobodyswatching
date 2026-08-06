@@ -1965,7 +1965,7 @@
         async function fetchProfiles() {
             const { data, error } = await sb
                 .from('profiles')
-                .select('username, avatar_url, bio, timezone, language, genres, top_games, twitch_url, youtube_url, kick_url, rumble_url, tiktok_url, velora_url, is_live, is_rerun, live_game, live_viewer_count, live_thumbnail_url, live_platform, live_platforms, youtube_live_video_url, last_live_at, badges')
+                .select('username, avatar_url, bio, timezone, language, genres, top_games, twitch_url, youtube_url, kick_url, rumble_url, tiktok_url, velora_url, is_live, is_rerun, live_game, live_viewer_count, live_thumbnail_url, live_platform, live_platforms, youtube_live_video_url, spotlight_exempt, last_live_at, badges')
                 .order('is_live', { ascending: false })
                 .order('last_live_at', { ascending: false, nullsFirst: false });
 
@@ -1994,12 +1994,20 @@
             // === SPOTLIGHT ===
             // Prefer a genuinely live streamer with the fewest viewers.
             // If nobody's genuinely live, fall back to the rerun with the fewest viewers.
+            // Streamers manually flagged spotlight_exempt are skipped for
+            // this pick only — they still appear normally everywhere else
+            // (directory, carousel). Useful for cases where someone is
+            // technically live but not actively streaming (AFK, hosting
+            // clips, etc) and shouldn't be the site's most prominent slot.
+            const spotlightCandidates = genuinelyLive.filter(p => !p.spotlight_exempt);
+            const rerunSpotlightCandidates = reruns.filter(p => !p.spotlight_exempt);
+
             let star = null;
             let isRerunSpotlight = false;
-            if (genuinelyLive.length > 0) {
-                star = [...genuinelyLive].sort((a, b) => (a.live_viewer_count || 0) - (b.live_viewer_count || 0))[0];
-            } else if (reruns.length > 0) {
-                star = [...reruns].sort((a, b) => (a.live_viewer_count || 0) - (b.live_viewer_count || 0))[0];
+            if (spotlightCandidates.length > 0) {
+                star = [...spotlightCandidates].sort((a, b) => (a.live_viewer_count || 0) - (b.live_viewer_count || 0))[0];
+            } else if (rerunSpotlightCandidates.length > 0) {
+                star = [...rerunSpotlightCandidates].sort((a, b) => (a.live_viewer_count || 0) - (b.live_viewer_count || 0))[0];
                 isRerunSpotlight = true;
             }
 
