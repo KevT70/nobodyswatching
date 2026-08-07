@@ -3192,9 +3192,18 @@
         // INIT
         // =============================================
         async function init() {
-            // Auth
-            const { data: { session } } = await sb.auth.getSession();
-            updateAuthUI(session);
+            // Auth — never let a broken/stale session block the rest of the
+            // site. The directory should always load, even if a visitor's
+            // stored sign-in session has gone stale or a background token
+            // refresh fails (this is exactly what happened in production —
+            // a bad refresh_token request took the whole page down with it).
+            try {
+                const { data: { session } } = await sb.auth.getSession();
+                updateAuthUI(session);
+            } catch (err) {
+                console.error('Auth session check failed, continuing as signed out:', err);
+                updateAuthUI(null);
+            }
 
             sb.auth.onAuthStateChange((event, session) => {
                 console.log('Auth event:', event);
