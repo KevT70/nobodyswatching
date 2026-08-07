@@ -4,6 +4,15 @@ All notable changes to NobodysWatching.live are documented here.
 
 ---
 
+### [2026-08-07] - UPDATES 
+## Bug Fixes
+ - Hit issue this morning where no profiles were being displayed. Infrastructure issue (database). Supabase upgrade resolved.
+
+## Added
+ - Added new Timezone for Newfoundland
+
+---
+
 ### [2026-08-06] - UPDATES 
 ## Bug Fixes
  - Minor updates to the "Find Me a Raid" button.
