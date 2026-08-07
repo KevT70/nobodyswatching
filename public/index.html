@@ -1730,18 +1730,38 @@
             color: var(--accent-bright);
         }
 
-        .raid-preview-link {
-            display: block;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-decoration: none;
-            margin-bottom: 0.5rem;
-            transition: color 0.2s;
+        .raid-preview-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
         }
 
-        .raid-preview-link:hover {
-            color: var(--text-secondary);
+        .raid-preview-btn {
+            flex: 1;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-bright);
+            background: transparent;
+            border: 1px solid var(--accent);
+            padding: 0.65rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .raid-preview-btn:hover {
+            background: var(--accent-glow);
+            transform: translateY(-1px);
+        }
+
+        .raid-copy-link-btn {
+            flex-shrink: 0;
+            padding: 0.65rem 0.85rem;
         }
 
         .raid-kick-note {
@@ -3461,41 +3481,57 @@
             const vibeTag = (p.vibes || [])[0] || '';
             const tagsLine = [vibeTag, genreTag].filter(Boolean).join(' · ');
 
+            // Figure out the URL that actually shows their stream, for the
+            // "check them out first" step — same logic used for the main
+            // Watch Now button on their profile page.
+            let previewUrl;
+            if (p.live_platform === 'twitch.tv') previewUrl = p.twitch_url;
+            else if (p.live_platform === 'kick.com') previewUrl = p.kick_url;
+            else previewUrl = p.youtube_live_video_url || p.youtube_url;
+
+            // "Check them out first" — a real button, not a subtle text
+            // link. Testers specifically asked to verify fit before
+            // committing to a raid, so this comes before the raid action,
+            // not after it.
+            const previewHtml = `
+                <div class="raid-preview-row">
+                    <a href="${esc(previewUrl)}" target="_blank" rel="noopener" class="raid-preview-btn">👀 Check them out first ↗</a>
+                    <button class="raid-copy-btn raid-copy-link-btn" onclick="copyRaidCommand('${esc(previewUrl).replace(/'/g, "\\'")}', this)" title="Copy stream link">🔗</button>
+                </div>
+            `;
+
             // A raid only actually happens by typing a command in YOUR OWN
-            // chat — not by visiting the target's channel. So the primary
-            // action here is a copyable command where one exists, not a link.
+            // chat — not by visiting the target's channel. So once someone's
+            // decided this is a good fit, the raid command is the next step.
             let actionHtml = '';
 
             if (p.live_platform === 'twitch.tv') {
                 const twitchUsername = p.twitch_username || extractTwitchUsernameClient(p.twitch_url);
                 const command = `/raid ${twitchUsername || p.username}`;
                 actionHtml = `
-                    <p class="raid-action-label">Paste this in your own Twitch chat</p>
+                    <p class="raid-action-label">Good fit? Paste this in your own Twitch chat</p>
                     <div class="raid-command-box">
                         <code>${esc(command)}</code>
                         <button class="raid-copy-btn" onclick="copyRaidCommand('${esc(command).replace(/'/g, "\\'")}', this)">Copy</button>
                     </div>
-                    <a href="${esc(p.twitch_url)}" target="_blank" rel="noopener" class="raid-preview-link">Preview their stream first →</a>
                 `;
             } else if (p.live_platform === 'kick.com') {
                 const kickUsername = extractKickUsernameClient(p.kick_url);
                 const command = `/host ${kickUsername || p.username}`;
                 actionHtml = `
-                    <p class="raid-action-label">Paste this in your own Kick chat</p>
+                    <p class="raid-action-label">Good fit? Paste this in your own Kick chat</p>
                     <div class="raid-command-box">
                         <code>${esc(command)}</code>
                         <button class="raid-copy-btn" onclick="copyRaidCommand('${esc(command).replace(/'/g, "\\'")}', this)">Copy</button>
                     </div>
                     <p class="raid-kick-note">Kick calls this "Raid" in their app, but the actual chat command is /host.</p>
-                    <a href="${esc(p.kick_url)}" target="_blank" rel="noopener" class="raid-preview-link">Preview their stream first →</a>
                 `;
             } else {
-                // YouTube has no raid feature at all — be upfront about that
-                const watchUrl = p.youtube_live_video_url || p.youtube_url || '#';
+                // YouTube has no raid feature at all — be upfront about that.
+                // The preview button above is effectively the only real
+                // action here, so this is just the honest explanation.
                 actionHtml = `
-                    <p class="raid-action-label">YouTube doesn't have a raid feature</p>
-                    <a href="${esc(watchUrl)}" target="_blank" rel="noopener" class="raid-go-btn">Visit their stream ↗</a>
-                    <p class="raid-kick-note">Share the link with your chat, or give them a shout-out instead.</p>
+                    <p class="raid-kick-note">YouTube doesn't have a raid feature — share the link with your chat, or give them a shout-out instead.</p>
                 `;
             }
 
@@ -3511,6 +3547,7 @@
                 ${p.live_game ? `<div class="raid-result-game">${esc(p.live_game)}</div>` : ''}
                 ${tagsLine ? `<div class="raid-result-meta">${esc(tagsLine)}</div>` : ''}
                 ${fallbackNote ? `<p class="raid-empty-state" style="font-size: 0.7rem; margin: -0.5rem 0 1rem;">${esc(fallbackNote)}</p>` : ''}
+                ${previewHtml}
                 ${actionHtml}
                 <button class="raid-reroll-btn" onclick="findRaidTarget()" style="margin-top: 0.75rem;">🎲 Someone else</button>
             `;

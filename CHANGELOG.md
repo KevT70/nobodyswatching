@@ -12,6 +12,7 @@ All notable changes to NobodysWatching.live are documented here.
 ## Added
  - Added new Timezone for Newfoundland
  - Added Discord Announcements for streamers who are live. (with caveats)
+ - Added button to Raid card to allow streamer to go check out the intended err...raidee, before committing. 
 
 ---
 
