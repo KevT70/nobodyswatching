@@ -7,6 +7,7 @@ All notable changes to NobodysWatching.live are documented here.
 ### [2026-08-07] - UPDATES 
 ## Bug Fixes
  - Hit issue this morning where no profiles were being displayed. Infrastructure issue (database). Supabase upgrade resolved.
+ - Issue processing streamers live status', viewer counts etc as these are serialised at present for Twitch & YouTube. Updating function to run batches of 8 in parallel.
 
 ## Added
  - Added new Timezone for Newfoundland

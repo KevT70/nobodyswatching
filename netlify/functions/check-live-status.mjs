@@ -11,6 +11,31 @@ export const config = {
 };
 
 // =============================================
+// CONCURRENCY HELPER
+//
+// Runs async work in parallel, but capped at a fixed number running at
+// once — a middle ground between "fully sequential" (too slow as the
+// user base grows, risks the function timing out) and "fully unbounded
+// Promise.all" (risks looking like burst/attack traffic to an unofficial
+// API and getting blocked, exactly what happened to us with Kick).
+// =============================================
+async function mapWithConcurrency(items, concurrency, workerFn) {
+    const results = new Array(items.length);
+    let nextIndex = 0;
+
+    async function worker() {
+        while (nextIndex < items.length) {
+            const i = nextIndex++;
+            results[i] = await workerFn(items[i]);
+        }
+    }
+
+    const workerCount = Math.min(concurrency, items.length);
+    await Promise.all(Array.from({ length: workerCount }, () => worker()));
+    return results;
+}
+
+// =============================================
 // TWITCH
 // =============================================
 async function getTwitchToken(clientId, clientSecret) {
@@ -31,23 +56,36 @@ async function getTwitchToken(clientId, clientSecret) {
 async function checkTwitchLive(usernames, clientId, accessToken) {
     if (usernames.length === 0) return new Map();
 
-    const allStreams = [];
+    // Build all the 100-user batches, then fetch them all at once instead
+    // of one after another — this is the official Twitch API, so there's
+    // no burst-detection risk here like there is with YouTube's InnerTube.
+    const batches = [];
     for (let i = 0; i < usernames.length; i += 100) {
-        const batch = usernames.slice(i, i + 100);
-        const params = batch.map(u => `user_login=${encodeURIComponent(u)}`).join('&');
-        const response = await fetch(`https://api.twitch.tv/helix/streams?${params}`, {
-            headers: {
-                'Client-ID': clientId,
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-        if (!response.ok) {
-            console.error(`Twitch API error: ${response.status}`);
-            continue;
-        }
-        const data = await response.json();
-        allStreams.push(...(data.data || []));
+        batches.push(usernames.slice(i, i + 100));
     }
+
+    const batchResults = await Promise.all(batches.map(async (batch) => {
+        const params = batch.map(u => `user_login=${encodeURIComponent(u)}`).join('&');
+        try {
+            const response = await fetch(`https://api.twitch.tv/helix/streams?${params}`, {
+                headers: {
+                    'Client-ID': clientId,
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+            if (!response.ok) {
+                console.error(`Twitch API error: ${response.status}`);
+                return [];
+            }
+            const data = await response.json();
+            return data.data || [];
+        } catch (err) {
+            console.error('Twitch batch fetch failed:', err.message);
+            return [];
+        }
+    }));
+
+    const allStreams = batchResults.flat();
 
     const liveMap = new Map();
     for (const stream of allStreams) {
@@ -163,12 +201,21 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
     const liveMap = new Map();
     const resolvedChannelIds = new Map(); // identifier -> channelId, for anything newly resolved this run
 
-    for (const { identifier, type, cachedChannelId } of channelIdentifiers) {
+    // Process channels several at a time instead of one after another —
+    // this was the actual cause of the function timing out as the number
+    // of YouTube-linked profiles grew. Capped at 8 concurrent, not
+    // unbounded: InnerTube is an unofficial API, and a sudden burst of
+    // 100+ simultaneous requests risks getting flagged/blocked the same
+    // way Kick's official-looking API blocked us for exactly this kind
+    // of traffic pattern.
+    const YOUTUBE_CONCURRENCY = 8;
+
+    await mapWithConcurrency(channelIdentifiers, YOUTUBE_CONCURRENCY, async ({ identifier, type, cachedChannelId }) => {
         try {
             const channelId = await resolveYouTubeChannelId(identifier, type, apiKey, cachedChannelId);
             if (!channelId) {
                 console.log(`YouTube check for ${identifier}: could not resolve channel ID, skipping`);
-                continue;
+                return;
             }
             if (!cachedChannelId) {
                 resolvedChannelIds.set(identifier.toLowerCase(), channelId);
@@ -190,13 +237,13 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
             if (!response.ok) {
                 const bodySnippet = await response.text().catch(() => '');
                 console.error(`YouTube InnerTube browse returned ${response.status} for ${identifier}: ${bodySnippet.slice(0, 200)}`);
-                continue;
+                return;
             }
 
             const rawText = await response.text();
             const videoId = findLiveVideoId(rawText);
 
-            if (!videoId) continue; // Not live
+            if (!videoId) return; // Not live
 
             // Free oEmbed call for title + thumbnail — no API key, no quota
             let title = null;
@@ -242,7 +289,7 @@ async function checkYouTubeLive(channelIdentifiers, apiKey) {
         } catch (err) {
             console.error(`YouTube check failed for ${identifier}:`, err.message);
         }
-    }
+    });
 
     return { liveMap, resolvedChannelIds };
 }
