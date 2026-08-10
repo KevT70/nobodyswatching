@@ -1203,6 +1203,7 @@
                 .from('profiles')
                 .select('*')
                 .ilike('username', username)
+                .eq('is_visible', true)
                 .single();
 
             if (error || !profile) {

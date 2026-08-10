@@ -2595,6 +2595,7 @@
             const { data, error } = await sb
                 .from('profiles')
                 .select('id, username, avatar_url, bio, timezone, language, genres, vibes, top_games, twitch_url, youtube_url, kick_url, rumble_url, tiktok_url, velora_url, is_live, is_rerun, live_game, live_viewer_count, live_thumbnail_url, live_platform, live_platforms, youtube_live_video_url, spotlight_exempt, last_live_at, badges')
+                .eq('is_visible', true)
                 .order('is_live', { ascending: false })
                 .order('last_live_at', { ascending: false, nullsFirst: false });
 

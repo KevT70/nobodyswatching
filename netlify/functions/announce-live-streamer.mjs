@@ -32,13 +32,15 @@ export default async function handler() {
 
     try {
         // 1. Get everyone genuinely live right now — same fairness bar as
-        // the on-site Spotlight: no reruns, no manually-exempt streamers.
+        // the on-site Spotlight: no reruns, no manually-exempt streamers,
+        // and never a hidden/flagged channel.
         const { data: liveProfiles, error: fetchError } = await supabase
             .from('profiles')
             .select('id, username, avatar_url, live_game, live_viewer_count, live_thumbnail_url')
             .eq('is_live', true)
             .eq('is_rerun', false)
-            .eq('spotlight_exempt', false);
+            .eq('spotlight_exempt', false)
+            .eq('is_visible', true);
 
         if (fetchError) {
             console.error('Supabase fetch error:', fetchError);

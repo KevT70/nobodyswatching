@@ -4,6 +4,21 @@ All notable changes to NobodysWatching.live are documented here.
 
 ---
 
+### [2026-08-10] - UPDATES 
+## Bug Fixes
+
+## Added
+ - is_visible flag on profiles - a manual, reversible moderation tool for hiding channels that are streambotting, showing spam/unrelated content, or otherwise misusing the platform. Distinct from spotlight_exempt (which still shows someone everywhere except the spotlight) - this is a full hide.
+ - Hidden profiles are excluded from: the directory, live carousel, spotlight, "Playing Now" chips, the "streamers listed" count, the Raid Finder, and the Discord "who's live" announcer
+ - Hidden profiles can no longer be viewed directly via their profile URL either - falls into the same "not found" state as a genuinely nonexistent username, so there's no way to tell "doesn't exist" apart from "was hidden"
+ - The 3-minute live-status poller now skips hidden profiles entirely, saving wasted Twitch/YouTube API calls on flagged accounts
+hidden_at and hidden_reason fields kept alongside the flag for an internal audit trail - nothing is ever deleted, just filtered out while hidden
+Notes
+ - Filtering happens at the database query level, not just hidden via CSS - a hidden profile's data never reaches a visitor's browser in the first place
+ - Fully reversible: flip is_visible back to true and clear the other two fields to restore a profile
+ 
+---
+
 ### [2026-08-07] - UPDATES 
 ## Bug Fixes
  - Hit issue this morning where no profiles were being displayed. Infrastructure issue (database). Supabase upgrade resolved.

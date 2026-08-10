@@ -332,10 +332,13 @@ export default async function handler() {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     try {
-        // 1. Get all profiles
+        // 1. Get all VISIBLE profiles — no point spending Twitch/YouTube
+        // API calls checking live status on channels that have already
+        // been hidden for streambotting or spam content.
         const { data: profiles, error: fetchError } = await supabase
             .from('profiles')
-            .select('id, twitch_username, kick_url, youtube_url, youtube_channel_id, is_live, preferred_platform');
+            .select('id, twitch_username, kick_url, youtube_url, youtube_channel_id, is_live, preferred_platform')
+            .eq('is_visible', true);
 
         if (fetchError) {
             console.error('Supabase fetch error:', fetchError);
