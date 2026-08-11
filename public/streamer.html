@@ -921,9 +921,9 @@
             <div id="p-platforms" class="platform-links"></div>
         </div>
 
-        <!-- Recommended -->
+        <!-- Recommended - only shown to the streamer viewing their own page -->
         <div class="profile-section" id="recommended-section" style="display: none;">
-            <div class="profile-section-title">// you might also like</div>
+            <div class="profile-section-title">// you might also like (only you can see this)</div>
             <p class="recommended-subtitle">matched on genre + top games. not sorted by size, we promise.</p>
             <div id="recommended-grid" class="recommended-grid"></div>
         </div>
@@ -1393,7 +1393,18 @@
 
             // Render
             renderProfile(profile);
-            renderRecommended(profile);
+
+            // Recommended channels are only shown to the streamer viewing
+            // their OWN public page - not to their audience. Never let a
+            // broken/stale session block the rest of the page from loading.
+            try {
+                const { data: { session } } = await sb.auth.getSession();
+                if (session && session.user.id === profile.id) {
+                    renderRecommended(profile);
+                }
+            } catch (err) {
+                console.error('Auth session check failed, skipping recommended channels:', err);
+            }
 
             // Show content
             document.getElementById('loading-state').style.display = 'none';
