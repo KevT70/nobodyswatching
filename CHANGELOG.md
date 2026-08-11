@@ -4,6 +4,21 @@ All notable changes to NobodysWatching.live are documented here.
 
 ---
 
+### [2026-08-11] - UPDATES
+
+## Added
+ - Achievements - private, participation-only badges visible only to the streamer on their own profile, never shown publicly and never tied to viewer/follower counts (deliberately, to stay consistent with the no-ranking ethos). New `achievements` catalog table plus `profile_achievements` join table; writes only ever happen server-side (service role), never from the client, so achievements are earned rather than self-granted
+ - Catalog: Profile set up, First stream, Full house (all platforms linked), Used Raid Finder, In the Spotlight, Told us your vibe, Feeling lucky (Random Streamer button), Playing the field (filtered by a live game), Multi-streaming (2+ platforms live at once), Regular (went live 5 times)
+ - New `times_live` counter column on profiles, incremented by the live-status poller on each offline -> live transition, powering the Regular achievement
+ - The live-status poller now also computes the homepage Spotlight winner itself each 3-minute run (same lowest-viewer, exemption-aware selection as the homepage) and awards In the Spotlight authoritatively - not left up to whichever visitor's browser happens to be looking at the time
+ - New `award-achievement` Netlify function - an authenticated endpoint the client calls when a signed-in streamer does something achievement-worthy. Self-reported achievements (Used Raid Finder, Feeling lucky, Playing the field) are awarded on request since there's no way to verify more than "this happened just now" - same honesty limit as not being able to confirm a raid actually went through on Twitch. Profile-state achievements (Profile set up, Full house, Told us your vibe) are re-verified against the saved profile row before awarding, so the endpoint can't be used to self-grant something that isn't true
+ - Private achievements section on the profile edit page - a compact pill strip, earned achievements shown filled, everything else collapsed into a single "N locked" pill with a view all / collapse toggle
+
+## Notes
+ - A "checking out other streamers" achievement was considered and deliberately left out for now - verifying it honestly would mean logging which profiles a signed-in user views, which is new data collection worth being deliberate about given the site's minimal-data stance
+
+---
+
 ### [2026-08-10] - UPDATES 
 ## Bug Fixes
 

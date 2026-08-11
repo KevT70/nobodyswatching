@@ -2550,6 +2550,7 @@
         // AUTH UI
         // =============================================
         let currentUserId = null;
+        let currentAccessToken = null;
 
         function updateAuthUI(session) {
             const navAuthOut = document.getElementById('nav-auth-out');
@@ -2560,6 +2561,7 @@
             const ctaBtn = document.getElementById('cta-btn');
 
             currentUserId = session ? session.user.id : null;
+            currentAccessToken = session ? session.access_token : null;
 
             if (session) {
                 const user = session.user;
@@ -2586,6 +2588,28 @@
                 ctaBtn.textContent = '⚡ Sign In & Get Listed';
                 ctaBtn.onclick = function(e) { e.preventDefault(); openSignInModal(); };
             }
+        }
+
+        // =============================================
+        // ACHIEVEMENTS — fire-and-forget reporting
+        //
+        // Private, participation-only achievements. Never blocks the UI and
+        // never shows an error if it fails (no signed-in session, network
+        // blip, etc.) — this is a nice-to-have, not something that should
+        // ever get in the way of the feature the person was actually using.
+        // The endpoint itself re-verifies anything that needs verifying
+        // (see award-achievement.mjs); the client is just reporting intent.
+        // =============================================
+        function reportAchievement(key) {
+            if (!currentAccessToken) return;
+            fetch('/.netlify/functions/award-achievement', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentAccessToken}`
+                },
+                body: JSON.stringify({ key })
+            }).catch(err => console.error(`Achievement report failed (${key}):`, err));
         }
 
         // =============================================
@@ -2666,6 +2690,7 @@
             currentSearch = game;
             currentLiveGameOnly = true;
             updateSearchClearVisibility();
+            reportAchievement('playing_the_field');
             renderStreamerGrid(allProfiles, currentFilter, currentTimezone, currentLanguage, currentSearch, currentLiveGameOnly);
             document.getElementById('directory').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -3154,6 +3179,7 @@
         function randomStreamer() {
             if (allProfiles.length === 0) return;
             const random = allProfiles[Math.floor(Math.random() * allProfiles.length)];
+            reportAchievement('feeling_lucky');
             window.location.href = `/streamer.html?user=${encodeURIComponent(random.username)}`;
         }
 
@@ -3428,6 +3454,7 @@
             const pick = pool[Math.floor(Math.random() * pool.length)];
 
             raidShownIds.push(pick.id);
+            reportAchievement('used_raid_finder');
             showRaidResult(pick, fallbackNote);
         }
 

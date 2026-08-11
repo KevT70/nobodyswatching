@@ -5,6 +5,7 @@
 // =============================================
 
 import { createClient } from '@supabase/supabase-js';
+import { loadAchievementIds, award } from './lib/achievements.mjs';
 
 export const config = {
     schedule: "*/3 * * * *"
@@ -337,7 +338,7 @@ export default async function handler() {
         // been hidden for streambotting or spam content.
         const { data: profiles, error: fetchError } = await supabase
             .from('profiles')
-            .select('id, twitch_username, kick_url, youtube_url, youtube_channel_id, is_live, preferred_platform')
+            .select('id, twitch_username, kick_url, youtube_url, youtube_channel_id, is_live, preferred_platform, spotlight_exempt, times_live')
             .eq('is_visible', true);
 
         if (fetchError) {
@@ -415,7 +416,19 @@ export default async function handler() {
             youtube: 'youtube.com'
         };
 
-        const updates = profiles.map(profile => {
+        // Achievement catalog, loaded once per run. Writes always go through
+        // this service-role client, never the client directly — see
+        // netlify/functions/lib/achievements.mjs for why.
+        const achievementIds = await loadAchievementIds(supabase);
+
+        const updateOps = [];
+        const awardOps = [];
+        // Snapshot of everyone genuinely (or rerun) live this run, used below
+        // to pick the Spotlight winner the same way the homepage does —
+        // computed here too so it can be awarded server-side.
+        const liveSnapshot = [];
+
+        for (const profile of profiles) {
             // Collect every platform this profile is currently live on
             const liveEntries = []; // [{ key: 'twitch.tv', data: {...} }, ...]
 
@@ -453,48 +466,95 @@ export default async function handler() {
                 // live on" pills need this too when YouTube isn't primary.
                 const ytEntry = liveEntries.find(e => e.key === 'youtube.com');
 
-                return supabase
-                    .from('profiles')
-                    .update({
-                        is_live: true,
-                        is_rerun: primary.data.isRerun || false,
-                        live_game: primary.data.game,
-                        live_viewer_count: primary.data.viewers,
-                        live_thumbnail_url: primary.data.thumbnail,
-                        live_platform: primary.key,
-                        live_platforms: liveEntries.map(e => e.key),
-                        youtube_live_video_url: ytEntry ? ytEntry.data.videoUrl : null,
-                        last_live_at: new Date().toISOString()
-                    })
-                    .eq('id', profile.id);
+                // Only count as a "new" stream — for the times_live counter and
+                // the First stream / Regular achievements — on an offline -> live
+                // transition, not on every 3-minute poll while already live.
+                const wasLive = !!profile.is_live;
+                const newTimesLive = wasLive ? (profile.times_live || 0) : (profile.times_live || 0) + 1;
+
+                updateOps.push(
+                    supabase
+                        .from('profiles')
+                        .update({
+                            is_live: true,
+                            is_rerun: primary.data.isRerun || false,
+                            live_game: primary.data.game,
+                            live_viewer_count: primary.data.viewers,
+                            live_thumbnail_url: primary.data.thumbnail,
+                            live_platform: primary.key,
+                            live_platforms: liveEntries.map(e => e.key),
+                            youtube_live_video_url: ytEntry ? ytEntry.data.videoUrl : null,
+                            last_live_at: new Date().toISOString(),
+                            times_live: newTimesLive
+                        })
+                        .eq('id', profile.id)
+                );
+
+                if (!wasLive) {
+                    awardOps.push(award(supabase, achievementIds, profile.id, 'first_stream'));
+                    if (newTimesLive >= 5) {
+                        awardOps.push(award(supabase, achievementIds, profile.id, 'regular'));
+                    }
+                }
+                if (liveEntries.length >= 2) {
+                    awardOps.push(award(supabase, achievementIds, profile.id, 'multi_streaming'));
+                }
+
+                liveSnapshot.push({
+                    id: profile.id,
+                    viewers: primary.data.viewers || 0,
+                    isRerun: primary.data.isRerun || false,
+                    spotlightExempt: !!profile.spotlight_exempt
+                });
             } else if (profile.is_live) {
-                return supabase
-                    .from('profiles')
-                    .update({
-                        is_live: false,
-                        is_rerun: false,
-                        live_game: null,
-                        live_viewer_count: 0,
-                        live_thumbnail_url: null,
-                        live_platform: null,
-                        live_platforms: [],
-                        youtube_live_video_url: null
-                    })
-                    .eq('id', profile.id);
+                updateOps.push(
+                    supabase
+                        .from('profiles')
+                        .update({
+                            is_live: false,
+                            is_rerun: false,
+                            live_game: null,
+                            live_viewer_count: 0,
+                            live_thumbnail_url: null,
+                            live_platform: null,
+                            live_platforms: [],
+                            youtube_live_video_url: null
+                        })
+                        .eq('id', profile.id)
+                );
             }
+        }
 
-            return null;
-        }).filter(Boolean);
-
-        const results = await Promise.all(updates);
+        const results = await Promise.all(updateOps);
         const errors = results.filter(r => r.error);
 
         if (errors.length > 0) {
             console.error(`${errors.length} update(s) failed:`, errors.map(e => e.error));
         }
 
+        // 5. Spotlight — same selection rule as the homepage: the lowest-viewer
+        // genuinely-live streamer, falling back to a rerun only if nobody's
+        // genuinely live. spotlight_exempt streamers are skipped for both.
+        // Computed here (not just client-side) so "In the Spotlight" can be
+        // awarded authoritatively, without trusting whichever visitor's
+        // browser happens to be looking at the homepage at the time.
+        const spotlightCandidates = liveSnapshot.filter(p => !p.isRerun && !p.spotlightExempt);
+        const rerunSpotlightCandidates = liveSnapshot.filter(p => p.isRerun && !p.spotlightExempt);
+
+        let spotlightWinner = null;
+        if (spotlightCandidates.length > 0) {
+            spotlightWinner = [...spotlightCandidates].sort((a, b) => a.viewers - b.viewers)[0];
+        } else if (rerunSpotlightCandidates.length > 0) {
+            spotlightWinner = [...rerunSpotlightCandidates].sort((a, b) => a.viewers - b.viewers)[0];
+        }
+        if (spotlightWinner) {
+            awardOps.push(award(supabase, achievementIds, spotlightWinner.id, 'hit_spotlight'));
+        }
+
+        await Promise.all(awardOps);
+
         const totalLive = twitchLive.size + kickLive.size + youtubeLive.size;
-        console.log(`Done. ${updates.length} profile(s) updated, ${totalLive} live total`);
+        console.log(`Done. ${updateOps.length} profile(s) updated, ${totalLive} live total, ${awardOps.length} achievement check(s) run`);
         return new Response(`Checked ${profiles.length} profiles, ${totalLive} live`, { status: 200 });
 
     } catch (err) {
