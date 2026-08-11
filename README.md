@@ -27,6 +27,7 @@ When you go live on Twitch, Kick, or YouTube, the site detects it automatically 
 - **"Playing Now" chips** — a glance-strip of every game currently being streamed on the site, click to filter and jump straight to results
 - **Spotlight** — the lowest-viewer genuinely-live streamer gets homepage priority every poll, not the biggest one
 - **Raid Finder** — pick a genre/vibe (or "any"), get a suggestion weighted toward the smallest streamers, preview them first, then get the copyable raid command
+- **Recommended channels** — every streamer profile page shows 3 others matched on genre/top games, picked at random, never sorted by size — with a "go get 'em" callout if one happens to be live
 - **Random Streamer button** — discover someone new by pure chance
 - **Achievements** — private, participation-only badges (profile setup, going live, linking platforms, using the discovery features) visible only to the streamer themselves, never tied to popularity
 - **Message of the Day** — dismissible, auto-expiring site-wide announcements

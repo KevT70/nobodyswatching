@@ -4,6 +4,16 @@ All notable changes to NobodysWatching.live are documented here.
 
 ---
 
+### [2026-08-11] - UPDATES (2)
+
+## Added
+ - Recommended channels - a "// you might also like" section at the bottom of every streamer profile page, showing 3 other streamers matched on genre and top games. Picked at random from whoever matches, never sorted or weighted by viewer count - same fairness rule as the Raid Finder and homepage Spotlight
+ - Cascading match: tries genre + top-game overlap first, widens to genre-or-game if that pool's too small, and falls back to anyone visible as a last resort so the section isn't empty on a quiet day
+ - A recommended streamer who happens to be live gets the same red avatar glow already used for the main profile avatar when live (`--live-red` / `--live-glow` - no new styling added), plus a "This legend is live right now, go get 'em, tiger" callout line; offline ones get a plain "worth a follow" line, same card treatment either way
+ - Entirely client-side, read-only - no new tables, no server writes, just a query against data the page already has access to
+
+---
+
 ### [2026-08-11] - UPDATES
 
 ## Added

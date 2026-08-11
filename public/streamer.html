@@ -344,6 +344,102 @@
             letter-spacing: 0.05em;
         }
 
+        /* ========== RECOMMENDED CHANNELS ========== */
+        /* Matched on genre/top games only, never sorted by viewer count or
+           followers - same fairness rule as the Raid Finder and Spotlight.
+           The live card reuses .profile-avatar.is-live's own glow treatment
+           (var(--live-red) / var(--live-glow)), just at card-avatar size. */
+        .recommended-subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: -0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .recommended-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .recommended-card {
+            display: block;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s;
+        }
+
+        .recommended-card:hover {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .recommended-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .recommended-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            object-fit: cover;
+            flex-shrink: 0;
+            background: var(--bg-secondary);
+        }
+
+        .recommended-avatar.is-live {
+            border-color: var(--live-red);
+            box-shadow: 0 0 16px var(--live-glow);
+        }
+
+        .recommended-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .recommended-meta {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        .recommended-meta.is-live-meta {
+            color: var(--live-red);
+        }
+
+        .recommended-genres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .recommended-callout {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        .recommended-callout.is-live-callout {
+            color: var(--accent-bright);
+        }
+
+        @media (max-width: 700px) {
+            .recommended-grid { grid-template-columns: 1fr; }
+        }
+
         /* ========== PLATFORM LINKS ========== */
         .platform-links {
             display: flex;
@@ -825,6 +921,13 @@
             <div id="p-platforms" class="platform-links"></div>
         </div>
 
+        <!-- Recommended -->
+        <div class="profile-section" id="recommended-section" style="display: none;">
+            <div class="profile-section-title">// you might also like</div>
+            <p class="recommended-subtitle">matched on genre + top games. not sorted by size, we promise.</p>
+            <div id="recommended-grid" class="recommended-grid"></div>
+        </div>
+
         <!-- Share -->
         <div class="share-section" id="share-section">
             <p>// share this profile</p>
@@ -1154,6 +1257,82 @@
         }
 
         // =============================================
+        // RECOMMENDED CHANNELS
+        //
+        // Matched on genre / top games overlap, then picked at random from
+        // whoever matches - never sorted or weighted by viewer count. Same
+        // fairness rule as the Raid Finder and Spotlight: "everyone shown
+        // equally" applies here too, not just on the homepage.
+        // =============================================
+        function pickRandom(pool, count) {
+            const shuffled = [...pool].sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, count);
+        }
+
+        async function renderRecommended(p) {
+            const section = document.getElementById('recommended-section');
+            const grid = document.getElementById('recommended-grid');
+
+            const { data: candidates, error } = await sb
+                .from('profiles')
+                .select('id, username, avatar_url, genres, top_games, is_live, live_game')
+                .eq('is_visible', true)
+                .neq('id', p.id);
+
+            if (error || !candidates || candidates.length === 0) return;
+
+            const myGenres = p.genres || [];
+            const myGames = p.top_games || [];
+
+            const sharesGenre = c => myGenres.length > 0 && (c.genres || []).some(g => myGenres.includes(g));
+            const sharesGame = c => myGames.length > 0 && (c.top_games || []).some(g => myGames.includes(g));
+
+            // Cascading fallback, same pattern as the Raid Finder: start
+            // narrow, widen only as far as needed to get 3 candidates.
+            let pool = candidates.filter(c => sharesGenre(c) && sharesGame(c));
+            if (pool.length < 3) {
+                pool = candidates.filter(c => sharesGenre(c) || sharesGame(c));
+            }
+            if (pool.length < 3) {
+                pool = candidates;
+            }
+
+            const picks = pickRandom(pool, 3);
+            if (picks.length === 0) return;
+
+            grid.innerHTML = picks.map(c => {
+                const isLive = !!c.is_live;
+                const profileUrl = `/streamer.html?user=${encodeURIComponent(c.username)}`;
+                const sharedGenres = (c.genres || []).filter(g => myGenres.includes(g)).slice(0, 2);
+                const genresToShow = sharedGenres.length > 0 ? sharedGenres : (c.genres || []).slice(0, 2);
+
+                const metaHtml = isLive
+                    ? `<div class="recommended-meta is-live-meta">Live Now${c.live_game ? ' · ' + esc(c.live_game) : ''}</div>`
+                    : `<div class="recommended-meta">Offline</div>`;
+
+                const calloutHtml = isLive
+                    ? `<div class="recommended-callout is-live-callout">This legend is live right now. Go get 'em, tiger.</div>`
+                    : `<div class="recommended-callout">Not live right now, but worth a follow.</div>`;
+
+                return `
+                    <a href="${profileUrl}" class="recommended-card">
+                        <div class="recommended-card-header">
+                            <img src="${esc(c.avatar_url || '')}" alt="${esc(c.username)}" class="recommended-avatar ${isLive ? 'is-live' : ''}">
+                            <div>
+                                <div class="recommended-name">${esc(c.username)}</div>
+                                ${metaHtml}
+                            </div>
+                        </div>
+                        ${genresToShow.length > 0 ? `<div class="recommended-genres">${genresToShow.map(g => `<span class="profile-genre-tag">${esc(g)}</span>`).join('')}</div>` : ''}
+                        ${calloutHtml}
+                    </a>
+                `;
+            }).join('');
+
+            section.style.display = 'block';
+        }
+
+        // =============================================
         // COPY SHARE URL
         // =============================================
         async function randomStreamer() {
@@ -1214,6 +1393,7 @@
 
             // Render
             renderProfile(profile);
+            renderRecommended(profile);
 
             // Show content
             document.getElementById('loading-state').style.display = 'none';
