@@ -458,6 +458,51 @@
             background: var(--bg-card);
         }
 
+        /* ========== CAROUSEL VIEWER FILTER ========== */
+        /* A narrowing filter, not a sort - picking a threshold below never
+           reorders anyone, it just removes profiles above it before the
+           carousel renders. Order stays whatever it already was. */
+        .viewer-filter-row {
+            margin-top: 1.25rem;
+        }
+
+        .viewer-filter-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            margin-bottom: 0.6rem;
+        }
+
+        .viewer-filter-chips {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .viewer-filter-chip {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.45rem 1rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .viewer-filter-chip:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        .viewer-filter-chip.active {
+            color: var(--accent-bright);
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
         .spotlight-label {
             font-family: var(--font-mono);
             font-size: 0.55rem;
@@ -2188,10 +2233,21 @@
             <!-- Populated by JavaScript -->
         </div>
         <div id="live-empty" style="display: none;">
-            <p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); padding: 2rem 0;">
-                Nobody's live right now. Ironic, isn't it? Check back soon — or better yet, 
+            <p id="live-empty-text" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); padding: 2rem 0;">
+                Nobody's live right now. Ironic, isn't it? Check back soon — or better yet,
                 <a href="#join" style="color: var(--accent-bright); text-decoration: none;">list your stream</a> and be the first.
             </p>
+        </div>
+
+        <!-- Carousel viewer filter — narrows the carousel above, never sorts it -->
+        <div class="viewer-filter-row">
+            <div class="viewer-filter-label">// find someone smaller right now</div>
+            <div class="viewer-filter-chips" id="viewer-filter-chips">
+                <span class="viewer-filter-chip active" data-max="any" onclick="setCarouselMaxViewers(null, this)">Any</span>
+                <span class="viewer-filter-chip" data-max="5" onclick="setCarouselMaxViewers(5, this)">Under 5</span>
+                <span class="viewer-filter-chip" data-max="10" onclick="setCarouselMaxViewers(10, this)">Under 10</span>
+                <span class="viewer-filter-chip" data-max="25" onclick="setCarouselMaxViewers(25, this)">Under 25</span>
+            </div>
         </div>
     </section>
 
@@ -2480,6 +2536,7 @@
         let allProfiles = [];
         let currentFilter = 'all';
         let currentTimezone = 'all';
+        let carouselMaxViewers = null; // null = "Any", otherwise a number (strict less-than)
 
         // =============================================
         // AUTH FUNCTIONS
@@ -2684,6 +2741,13 @@
             clearBtn.style.display = searchBox.value.trim() ? 'flex' : 'none';
         }
 
+        function setCarouselMaxViewers(max, chipEl) {
+            carouselMaxViewers = max;
+            document.querySelectorAll('#viewer-filter-chips .viewer-filter-chip').forEach(c => c.classList.remove('active'));
+            chipEl.classList.add('active');
+            renderLiveCarousel(allProfiles);
+        }
+
         function filterByPlayingNow(game) {
             const searchBox = document.getElementById('game-search');
             searchBox.value = game;
@@ -2709,7 +2773,17 @@
             // including reruns. Being a rerun only disqualifies someone from
             // the Spotlight (the site's single most prominent slot), not from
             // appearing in the normal scrolling list like any other live streamer.
-            const liveProfiles = allLive.filter(p => (p.live_viewer_count || 0) <= VIEWER_CAP);
+            let liveProfiles = allLive.filter(p => (p.live_viewer_count || 0) <= VIEWER_CAP);
+
+            // Optional, viewer-controlled narrowing on top of the fixed cap
+            // above — a filter, not a sort. Removes anyone at/over the
+            // threshold, but never reorders who's left. Off (null) by
+            // default, same "everyone shown equally" default as everywhere
+            // else on the site.
+            const preFilterCount = liveProfiles.length;
+            if (carouselMaxViewers !== null) {
+                liveProfiles = liveProfiles.filter(p => (p.live_viewer_count || 0) < carouselMaxViewers);
+            }
 
             renderPlayingNow(genuinelyLive.filter(p => !p.spotlight_exempt));
 
@@ -2772,7 +2846,15 @@
             // === CAROUSEL: genuinely live streamers under the viewer cap ===
             if (liveProfiles.length === 0) {
                 carousel.style.display = 'none';
+                const emptyText = document.getElementById('live-empty-text');
                 if (allLive.length === 0) {
+                    // Genuinely nobody live at all
+                    emptyText.innerHTML = `Nobody's live right now. Ironic, isn't it? Check back soon — or better yet,
+                        <a href="#join" style="color: var(--accent-bright); text-decoration: none;">list your stream</a> and be the first.`;
+                    emptyMsg.style.display = 'block';
+                } else if (carouselMaxViewers !== null && preFilterCount > 0) {
+                    // People ARE live, the viewer filter is just narrower than what's out there right now
+                    emptyText.innerHTML = `Nobody's live under ${carouselMaxViewers} viewers right now. Try a wider filter, or check back in a bit.`;
                     emptyMsg.style.display = 'block';
                 } else {
                     emptyMsg.style.display = 'none';

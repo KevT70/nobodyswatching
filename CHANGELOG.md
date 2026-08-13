@@ -4,6 +4,14 @@ All notable changes to NobodysWatching.live are documented here.
 
 ---
 
+### [2026-08-13] - UPDATES
+
+## Added
+ - Carousel max-viewers filter - a chip row ("Any" / "Under 5" / "Under 10" / "Under 25") below the live carousel, letting viewers narrow it down to smaller channels themselves. A filter, not a sort - picking a threshold only removes profiles at or above it, it never reorders who's left, and it's off ("Any") by default same as every other filter on the site. Community-requested, with a deliberate design constraint: no option to sort ascending/descending by viewer count was added alongside it, since that would cross from "narrowing what's shown" into "ranking by popularity," which the site avoids on principle
+ - Distinct empty-state copy when the viewer filter is just narrower than who's currently live (vs the existing "nobody's live at all" message), so it's clear the filter can be widened rather than reading like the site's broken
+
+---
+
 ### [2026-08-11] - UPDATES (2)
 
 ## Added
