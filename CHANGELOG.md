@@ -4,6 +4,21 @@ All notable changes to NobodysWatching.live are documented here.
 
 ---
 
+### [2026-08-13] - UPDATES (3)
+
+## Added
+ - Dynamic sitemap.xml, served via a Netlify function at /sitemap.xml (redirect in netlify.toml) rather than a static file, since the real value is every streamer's profile page getting indexed, not just the 3 static pages - profile URLs are database-driven, so there's no build step to bake them in ahead of time. Excludes profile.html (the signed-in owner's own edit form, not public content) and anything with is_visible: false, same rule as everywhere else on the site
+ - robots.txt, pointing crawlers at the new sitemap
+
+---
+
+### [2026-08-13] - UPDATES (2)
+
+## Added
+ - Skeleton loaders on the homepage (live carousel + a fixed 6 on the directory grid, since the real count isn't known until the fetch resolves) and the streamer profile page. Static markup shown on first paint, no JS wiring needed beyond that - the existing render functions already overwrite it once real data arrives. Homepage previously showed nothing at all during the initial fetch; streamer page previously showed plain "// loading..." text
+
+---
+
 ### [2026-08-13] - UPDATES
 
 ## Added

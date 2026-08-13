@@ -764,6 +764,36 @@
             color: var(--text-muted);
         }
 
+        /* Skeleton - shown on first paint, swapped out once renderProfile() runs */
+        @keyframes skeleton-shimmer {
+            0% { background-position: -300px 0; }
+            100% { background-position: 300px 0; }
+        }
+
+        .skel {
+            background-color: var(--bg-card-hover);
+            background-image: linear-gradient(90deg, var(--bg-card-hover) 0px, var(--bg-secondary) 40px, var(--bg-card-hover) 80px);
+            background-size: 300px 100%;
+            animation: skeleton-shimmer 1.6s linear infinite;
+            border-radius: 4px;
+        }
+
+        .skel-loading-hero {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: left;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .skel-loading-avatar {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
         .error-state h2 {
             font-size: 2rem;
             font-weight: 800;
@@ -871,7 +901,14 @@
     <!-- LOADING STATE -->
     <div class="streamer-page" id="loading-state">
         <div class="loading-state">
-            <p>// loading streamer profile...</p>
+            <div class="skel-loading-hero">
+                <div class="skel skel-loading-avatar"></div>
+                <div style="flex: 1;">
+                    <div class="skel" style="height: 22px; width: 55%; margin-bottom: 12px;"></div>
+                    <div class="skel" style="height: 12px; width: 35%; margin-bottom: 10px;"></div>
+                    <div class="skel" style="height: 10px; width: 75%;"></div>
+                </div>
+            </div>
         </div>
     </div>
 
