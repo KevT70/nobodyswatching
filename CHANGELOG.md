@@ -4,6 +4,19 @@ All notable changes to NobodysWatching.live are documented here.
 
 ---
 
+### [2026-08-15] - UPDATES
+
+## Added
+ - Prev/next arrows on the live carousel - solid circular buttons on the left/right edges, always visible (not hover-reveal), because it turns out "drag the row with your mouse" wasn't exactly self-explanatory. Streamer-requested. Clicking pauses the auto-scroll the same way dragging already does, and resumes it a few seconds later
+ - Arrows only show up when there's actually something to page through - hidden when the carousel content fits without overflowing (e.g. only 1-2 people live), recalculated on window resize. No dead buttons pointing nowhere
+ - `aria-label`s on both buttons ("Previous streamer" / "Next streamer") for keyboard and screen reader users
+ - Desktop/tablet only for now - mobile already has touch swipe, so arrows are hidden under 768px to avoid cluttering a screen that's already tight on space
+
+## Fixed
+ - The viewer-count filter chips (Any / Under 5 / Under 10 / Under 25) were re-rendering the carousel's card list without re-attaching the drag handlers, so dragging (and now the arrows) would silently stop working the moment someone used that filter. Re-binding now happens on every re-render, not just the initial page load
+
+---
+
 ### [2026-08-13] - UPDATES (3)
 
 ## Added

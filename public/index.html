@@ -654,6 +654,56 @@
             border-radius: 4px;
         }
 
+        .live-carousel-wrap {
+            position: relative;
+        }
+
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(calc(-50% - 8px));
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            color: var(--accent-bright);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+            z-index: 2;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s;
+        }
+
+        .carousel-arrow:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+            box-shadow: 0 4px 20px rgba(14, 165, 165, 0.35);
+        }
+
+        .carousel-arrow.carousel-prev {
+            left: -6px;
+        }
+
+        .carousel-arrow.carousel-next {
+            right: -6px;
+        }
+
+        .carousel-arrow.is-hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .carousel-arrow {
+                display: none !important;
+            }
+        }
+
         .live-card {
             flex: 0 0 300px;
             scroll-snap-align: start;
@@ -2286,12 +2336,16 @@
             <div id="spotlight-card"></div>
         </div>
 
-        <div class="live-carousel" id="live-carousel">
-            <!-- Skeleton shown on first paint - overwritten by renderLiveCarousel() once data arrives -->
-            <div class="skel-live-card"><div class="skel skel-thumb"></div><div class="skel-body"><div class="skel" style="height:14px;width:70%;margin-bottom:8px;"></div><div class="skel" style="height:10px;width:50%;"></div></div></div>
-            <div class="skel-live-card"><div class="skel skel-thumb"></div><div class="skel-body"><div class="skel" style="height:14px;width:60%;margin-bottom:8px;"></div><div class="skel" style="height:10px;width:45%;"></div></div></div>
-            <div class="skel-live-card"><div class="skel skel-thumb"></div><div class="skel-body"><div class="skel" style="height:14px;width:65%;margin-bottom:8px;"></div><div class="skel" style="height:10px;width:55%;"></div></div></div>
-            <div class="skel-live-card"><div class="skel skel-thumb"></div><div class="skel-body"><div class="skel" style="height:14px;width:55%;margin-bottom:8px;"></div><div class="skel" style="height:10px;width:40%;"></div></div></div>
+        <div class="live-carousel-wrap">
+            <button class="carousel-arrow carousel-prev is-hidden" id="carousel-prev" type="button" aria-label="Previous streamer">‹</button>
+            <div class="live-carousel" id="live-carousel">
+                <!-- Skeleton shown on first paint - overwritten by renderLiveCarousel() once data arrives -->
+                <div class="skel-live-card"><div class="skel skel-thumb"></div><div class="skel-body"><div class="skel" style="height:14px;width:70%;margin-bottom:8px;"></div><div class="skel" style="height:10px;width:50%;"></div></div></div>
+                <div class="skel-live-card"><div class="skel skel-thumb"></div><div class="skel-body"><div class="skel" style="height:14px;width:60%;margin-bottom:8px;"></div><div class="skel" style="height:10px;width:45%;"></div></div></div>
+                <div class="skel-live-card"><div class="skel skel-thumb"></div><div class="skel-body"><div class="skel" style="height:14px;width:65%;margin-bottom:8px;"></div><div class="skel" style="height:10px;width:55%;"></div></div></div>
+                <div class="skel-live-card"><div class="skel skel-thumb"></div><div class="skel-body"><div class="skel" style="height:14px;width:55%;margin-bottom:8px;"></div><div class="skel" style="height:10px;width:40%;"></div></div></div>
+            </div>
+            <button class="carousel-arrow carousel-next is-hidden" id="carousel-next" type="button" aria-label="Next streamer">›</button>
         </div>
         <div id="live-empty" style="display: none;">
             <p id="live-empty-text" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted); padding: 2rem 0;">
@@ -2813,6 +2867,9 @@
             document.querySelectorAll('#viewer-filter-chips .viewer-filter-chip').forEach(c => c.classList.remove('active'));
             chipEl.classList.add('active');
             renderLiveCarousel(allProfiles);
+            // renderLiveCarousel rebuilds .live-carousel-inner, so drag/arrow
+            // bindings need to be re-attached to the new element each time.
+            initCarouselDrag();
         }
 
         function filterByPlayingNow(game) {
@@ -2987,6 +3044,23 @@
             let currentTranslate = 0;
             let resumeTimer = null;
             const isDuplicated = !inner.classList.contains('no-scroll-anim');
+            const prevBtn = document.getElementById('carousel-prev');
+            const nextBtn = document.getElementById('carousel-next');
+
+            function getStep() {
+                const firstCard = inner.querySelector('.live-card');
+                const cardWidth = firstCard ? firstCard.offsetWidth : 300;
+                const gapPx = parseFloat(window.getComputedStyle(inner).gap) || 20;
+                return cardWidth + gapPx;
+            }
+
+            function updateArrowVisibility() {
+                if (!prevBtn || !nextBtn) return;
+                const contentWidth = isDuplicated ? inner.scrollWidth / 2 : inner.scrollWidth;
+                const hasOverflow = contentWidth > carousel.offsetWidth + 1; // +1 dodges subpixel rounding
+                prevBtn.classList.toggle('is-hidden', !hasOverflow);
+                nextBtn.classList.toggle('is-hidden', !hasOverflow);
+            }
 
             function getTranslateX() {
                 const style = window.getComputedStyle(inner);
@@ -3068,6 +3142,37 @@
                 carousel.classList.remove('dragging');
                 resumeAutoScroll();
             }
+
+            function stepCarousel(direction) {
+                // direction: 1 = next (advance, same way auto-scroll moves), -1 = prev
+                pauseAutoScroll();
+                currentTranslate -= getStep() * direction;
+
+                if (isDuplicated) {
+                    const totalWidth = inner.scrollWidth / 2;
+                    if (currentTranslate > 0) currentTranslate -= totalWidth;
+                    if (currentTranslate < -totalWidth) currentTranslate += totalWidth;
+                } else {
+                    const maxDrag = getMaxDrag();
+                    if (currentTranslate > 0) currentTranslate = 0;
+                    if (currentTranslate < maxDrag) currentTranslate = maxDrag;
+                }
+
+                inner.style.transform = `translateX(${currentTranslate}px)`;
+                resumeAutoScroll();
+            }
+
+            if (prevBtn) prevBtn.addEventListener('click', () => stepCarousel(-1));
+            if (nextBtn) nextBtn.addEventListener('click', () => stepCarousel(1));
+
+            updateArrowVisibility();
+            // Re-bind on resize each time this runs, so only one listener
+            // (pointing at the current carousel's DOM) is ever active.
+            if (window.__carouselResizeHandler) {
+                window.removeEventListener('resize', window.__carouselResizeHandler);
+            }
+            window.__carouselResizeHandler = updateArrowVisibility;
+            window.addEventListener('resize', window.__carouselResizeHandler);
 
             // Mouse events
             carousel.addEventListener('mousedown', (e) => {
