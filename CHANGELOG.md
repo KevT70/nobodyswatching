@@ -4,6 +4,20 @@ All notable changes to NobodysWatching.live are documented here.
 
 ---
 
+[2026-08-24] — Discord "Who's Live" Announcer: Fair Rotation Fix
+## Fixed
+ - The Discord live announcer was selecting from the lowest-viewer 5 people live at any given moment — at 410 signups with 30+ concurrent streamers, this meant anyone above the smallest viewer tier could be permanently excluded from ever appearing, not by chance but structurally. It also meant a small streamer succeeding and growing their viewer count could quietly lose their spot in rotation — the opposite of what the feature is for.
+
+## Changed
+ - Selection now ranks everyone eligible by how long it's been since they were last announced, using the existing discord_announcements history. Never-announced counts as maximally overdue, so brand-new streamers going live for the first time aren't stuck behind everyone else's history.
+ - Still picks randomly from the top handful of most-overdue candidates each cycle (not a rigid, fully predictable queue), keeping some spontaneity while guaranteeing fair rotation over time.
+ - Removed the old separate "don't repeat the last person" check — it's now handled automatically, since whoever was just announced has the most recent timestamp and naturally ranks least-overdue.
+
+## Notes
+ - Everyone eligible now reliably surfaces eventually, regardless of viewer count — no one can be mathematically locked out of the rotation anymore.
+
+---
+
 ### [2026-08-15] - UPDATES
 
 ## Added

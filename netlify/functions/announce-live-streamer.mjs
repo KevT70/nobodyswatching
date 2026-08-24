@@ -52,25 +52,44 @@ export default async function handler() {
             return new Response('Nobody live, skipped', { status: 200 });
         }
 
-        // 2. Avoid repeating the same person twice in a row, but only if
-        // there's actually someone else to pick instead.
-        const { data: lastAnnouncement } = await supabase
+        // 2. Rank everyone by how long it's been since they were last
+        // announced — never-announced counts as maximally overdue. This
+        // replaces an earlier "lowest viewer count" model, which had a
+        // real problem at scale: with enough people live at once, anyone
+        // above the very smallest tier could be permanently excluded
+        // from the pool, and worse, a small streamer succeeding and
+        // growing their viewer count would quietly lose their spot in
+        // rotation — the opposite of what this feature is for. Ranking
+        // by overdue-ness instead guarantees everyone eligible surfaces
+        // eventually, and naturally avoids repeating whoever was just
+        // announced (their timestamp is now the most recent, so they
+        // rank least-overdue without needing separate repeat-avoidance logic).
+        const candidateIds = liveProfiles.map(p => p.id);
+        const { data: history } = await supabase
             .from('discord_announcements')
-            .select('streamer_id')
-            .order('announced_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+            .select('streamer_id, announced_at')
+            .in('streamer_id', candidateIds)
+            .order('announced_at', { ascending: false });
 
-        let candidates = liveProfiles;
-        if (lastAnnouncement && liveProfiles.length > 1) {
-            const withoutLast = liveProfiles.filter(p => p.id !== lastAnnouncement.streamer_id);
-            if (withoutLast.length > 0) candidates = withoutLast;
-        }
+        const lastAnnouncedMap = new Map();
+        (history || []).forEach(row => {
+            if (!lastAnnouncedMap.has(row.streamer_id)) {
+                lastAnnouncedMap.set(row.streamer_id, row.announced_at);
+            }
+        });
 
-        // 3. Pick randomly from the lowest-viewer handful — same fairness
-        // philosophy as the on-site Spotlight and the Raid Finder.
-        const sorted = [...candidates].sort((a, b) => (a.live_viewer_count || 0) - (b.live_viewer_count || 0));
-        const pool = sorted.slice(0, 5);
+        const ranked = liveProfiles.map(p => {
+            const lastAnnounced = lastAnnouncedMap.get(p.id);
+            const lastAnnouncedTime = lastAnnounced ? new Date(lastAnnounced).getTime() : -Infinity;
+            return { profile: p, lastAnnouncedTime };
+        });
+
+        ranked.sort((a, b) => a.lastAnnouncedTime - b.lastAnnouncedTime);
+
+        // 3. Pick randomly from the handful who've gone longest without a
+        // turn — keeps a little spontaneity rather than a rigid, fully
+        // predictable queue, while still guaranteeing fair rotation overall.
+        const pool = ranked.slice(0, 5).map(r => r.profile);
         const pick = pool[Math.floor(Math.random() * pool.length)];
 
         // 4. Post to Discord as a rich embed
@@ -99,7 +118,9 @@ export default async function handler() {
             return new Response('Discord post failed', { status: 500 });
         }
 
-        // 5. Log this pick so the next cycle can avoid repeating it immediately
+        // 5. Log this pick — this history is what the overdue-ranking above
+        // is built from, so every announcement here feeds fair rotation
+        // for everyone else going forward.
         await supabase
             .from('discord_announcements')
             .insert({ streamer_id: pick.id });
