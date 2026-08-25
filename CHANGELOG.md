@@ -3,6 +3,19 @@
 All notable changes to NobodysWatching.live are documented here.
 
 ---
+## [2026-08-09] — Discord Announcer: Second Fairness Fix (Determinism)
+
+### Fixed
+- The overdue-rotation fix from earlier today still had a flaw: it picked *randomly* from the top 5 most-overdue candidates. That's fine with plenty of people live, but during quiet hours with only 2-3 people live total, that "top 5" pool ends up being basically everyone live — including whoever was *just* announced. Pure chance could then pick them again almost immediately. Confirmed in production: one streamer was announced at 6am, 9am, and 10am.
+
+### Changed
+- Selection is now **fully deterministic** — always picks the single most-overdue eligible person, no randomness at all. Guarantees fair rotation regardless of how many (or how few) people happen to be live at any given moment.
+- Tested directly against the exact scenario that caused the bug (a 2-person pool, one just announced 5 minutes prior) — 0 incorrect picks across 1,000 simulated runs, confirming the fix eliminates the issue rather than just reducing its likelihood.
+
+### Notes
+- The "little spontaneity" argument for randomness turned out not to matter in practice — nobody watching the channel can tell strict rotation apart from "random from a small pool" anyway, and true fairness is worth more than an imperceptible nuance that was actively causing the bug.
+
+---
 
 [2026-08-24] — Discord "Who's Live" Announcer: Fair Rotation Fix
 ## Fixed

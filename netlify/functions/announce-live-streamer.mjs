@@ -86,11 +86,15 @@ export default async function handler() {
 
         ranked.sort((a, b) => a.lastAnnouncedTime - b.lastAnnouncedTime);
 
-        // 3. Pick randomly from the handful who've gone longest without a
-        // turn — keeps a little spontaneity rather than a rigid, fully
-        // predictable queue, while still guaranteeing fair rotation overall.
-        const pool = ranked.slice(0, 5).map(r => r.profile);
-        const pick = pool[Math.floor(Math.random() * pool.length)];
+        // 3. Always pick the single most overdue person — deterministic,
+        // not random. Randomly picking from a "top 5 overdue" pool sounds
+        // fair, but breaks down badly with few candidates: during quiet
+        // hours with only 2-3 people live, that pool is basically
+        // everyone live, including whoever was JUST announced, and pure
+        // chance could pick them again almost immediately. Taking the
+        // single most overdue candidate directly guarantees fairness
+        // regardless of how many people happen to be live at once.
+        const pick = ranked[0].profile;
 
         // 4. Post to Discord as a rich embed
         const profileUrl = `https://nobodyswatching.live/streamer.html?user=${encodeURIComponent(pick.username)}`;
