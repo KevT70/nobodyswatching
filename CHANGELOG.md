@@ -3,7 +3,7 @@
 All notable changes to NobodysWatching.live are documented here.
 
 ---
-## [2026-08-09] — Discord Announcer: Second Fairness Fix (Determinism)
+[2026-08-25] — Discord Announcer: Second Fairness Fix (Determinism)
 
 ### Fixed
 - The overdue-rotation fix from earlier today still had a flaw: it picked *randomly* from the top 5 most-overdue candidates. That's fine with plenty of people live, but during quiet hours with only 2-3 people live total, that "top 5" pool ends up being basically everyone live — including whoever was *just* announced. Pure chance could then pick them again almost immediately. Confirmed in production: one streamer was announced at 6am, 9am, and 10am.
