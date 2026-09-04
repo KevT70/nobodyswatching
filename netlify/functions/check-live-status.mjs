@@ -108,17 +108,104 @@ async function checkTwitchLive(usernames, clientId, accessToken) {
 }
 
 // =============================================
-// KICK — live detection disabled.
+// KICK
 //
-// Kick's WAF actively blocks requests from this API endpoint
-// ("Request blocked by security policy"), and that's not something
-// we can reliably work around from a serverless function. Kick
-// stays a supported platform LINK on profiles — same as Rumble,
-// TikTok, and Velora — but we don't attempt to detect live status
-// on it for now. Revisit if Kick ever ships an official API.
+// Kick's official Public API launched in 2025 — the WAF block that
+// took this offline originally applied to Kick's unofficial/scraped
+// endpoints, not to api.kick.com. Uses the same client_credentials
+// flow as Twitch, but keys off a numeric broadcaster_user_id rather
+// than a username, so there's a one-time resolve step — cached, same
+// pattern already used below for the YouTube channel ID.
 // =============================================
-async function checkKickLive(usernames) {
-    return new Map();
+async function getKickToken(clientId, clientSecret) {
+    const response = await fetch('https://id.kick.com/oauth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            client_id: clientId,
+            client_secret: clientSecret,
+            grant_type: 'client_credentials'
+        })
+    });
+    if (!response.ok) throw new Error(`Kick token error: ${response.status}`);
+    const data = await response.json();
+    return data.access_token;
+}
+
+async function resolveKickBroadcasterId(username, accessToken, cachedBroadcasterId) {
+    if (cachedBroadcasterId) return cachedBroadcasterId; // Already resolved on a previous run — skip the lookup
+    try {
+        const res = await fetch(`https://api.kick.com/public/v1/channels?slug=${encodeURIComponent(username)}`, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        if (!res.ok) {
+            console.error(`Kick channel resolve returned ${res.status} for ${username}`);
+            return null;
+        }
+        const data = await res.json();
+        return data.data?.[0]?.broadcaster_user_id || null;
+    } catch (err) {
+        console.error(`Kick channel resolve failed for ${username}:`, err.message);
+        return null;
+    }
+}
+
+async function checkKickLive(kickProfiles, accessToken) {
+    const liveMap = new Map(); // keyed by username.toLowerCase()
+    const resolvedBroadcasterIds = new Map(); // username -> broadcaster_user_id, for anything newly resolved this run
+
+    if (kickProfiles.length === 0) return { liveMap, resolvedBroadcasterIds };
+
+    // Resolve any un-cached usernames to numeric IDs first, capped at 5
+    // concurrent — this is Kick's official API, but no reason to hammer
+    // it with an unbounded burst just because we technically can.
+    const KICK_RESOLVE_CONCURRENCY = 5;
+    const idResults = await mapWithConcurrency(kickProfiles, KICK_RESOLVE_CONCURRENCY, async ({ username, cachedBroadcasterId }) => {
+        const id = await resolveKickBroadcasterId(username, accessToken, cachedBroadcasterId);
+        if (id && !cachedBroadcasterId) {
+            resolvedBroadcasterIds.set(username.toLowerCase(), id);
+        }
+        return id ? { username, id } : null;
+    });
+
+    const resolved = idResults.filter(Boolean);
+    if (resolved.length === 0) return { liveMap, resolvedBroadcasterIds };
+
+    // GET /livestreams accepts up to 50 broadcaster_user_id params per call
+    const batches = [];
+    for (let i = 0; i < resolved.length; i += 50) {
+        batches.push(resolved.slice(i, i + 50));
+    }
+
+    await Promise.all(batches.map(async (batch) => {
+        const params = batch.map(b => `broadcaster_user_id=${b.id}`).join('&');
+        try {
+            const response = await fetch(`https://api.kick.com/public/v1/livestreams?${params}`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            if (!response.ok) {
+                console.error(`Kick livestreams API error: ${response.status}`);
+                return;
+            }
+            const data = await response.json();
+            const idToUsername = new Map(batch.map(b => [b.id, b.username]));
+
+            for (const stream of data.data || []) {
+                const username = idToUsername.get(stream.broadcaster_user_id);
+                if (!username) continue;
+                liveMap.set(username.toLowerCase(), {
+                    game: stream.category?.name || null,
+                    viewers: stream.viewer_count || 0,
+                    thumbnail: stream.thumbnail || null,
+                    platform: 'kick.com'
+                });
+            }
+        } catch (err) {
+            console.error('Kick batch fetch failed:', err.message);
+        }
+    }));
+
+    return { liveMap, resolvedBroadcasterIds };
 }
 
 // =============================================
@@ -320,6 +407,8 @@ export default async function handler() {
     const {
         TWITCH_CLIENT_ID,
         TWITCH_CLIENT_SECRET,
+        KICK_CLIENT_ID,
+        KICK_CLIENT_SECRET,
         YOUTUBE_API_KEY,
         SUPABASE_URL,
         SUPABASE_SERVICE_ROLE_KEY
@@ -338,7 +427,7 @@ export default async function handler() {
         // been hidden for streambotting or spam content.
         const { data: profiles, error: fetchError } = await supabase
             .from('profiles')
-            .select('id, twitch_username, kick_url, youtube_url, youtube_channel_id, is_live, preferred_platform, spotlight_exempt, times_live')
+            .select('id, twitch_username, kick_url, kick_broadcaster_id, youtube_url, youtube_channel_id, is_live, preferred_platform, spotlight_exempt, times_live')
             .eq('is_visible', true);
 
         if (fetchError) {
@@ -358,8 +447,12 @@ export default async function handler() {
             .map(p => p.twitch_username)
             .filter(Boolean);
 
-        const kickUsernames = profiles
-            .map(p => extractKickUsername(p.kick_url))
+        const kickChannels = profiles
+            .map(p => {
+                const username = extractKickUsername(p.kick_url);
+                if (!username) return null;
+                return { username, cachedBroadcasterId: p.kick_broadcaster_id || null };
+            })
             .filter(Boolean);
 
         const youtubeChannels = profiles
@@ -370,23 +463,47 @@ export default async function handler() {
             })
             .filter(Boolean);
 
-        console.log(`Found: ${twitchUsernames.length} Twitch, ${kickUsernames.length} Kick, ${youtubeChannels.length} YouTube`);
+        console.log(`Found: ${twitchUsernames.length} Twitch, ${kickChannels.length} Kick, ${youtubeChannels.length} YouTube`);
 
         // 3. Check all platforms in parallel
         const twitchToken = twitchUsernames.length > 0
             ? await getTwitchToken(TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET)
             : null;
 
-        const [twitchLive, kickLive, youtubeResult] = await Promise.all([
+        const kickToken = (KICK_CLIENT_ID && KICK_CLIENT_SECRET && kickChannels.length > 0)
+            ? await getKickToken(KICK_CLIENT_ID, KICK_CLIENT_SECRET)
+            : null;
+
+        const [twitchLive, kickResult, youtubeResult] = await Promise.all([
             twitchToken ? checkTwitchLive(twitchUsernames, TWITCH_CLIENT_ID, twitchToken) : new Map(),
-            kickUsernames.length > 0 ? checkKickLive(kickUsernames) : new Map(),
+            kickToken ? checkKickLive(kickChannels, kickToken) : { liveMap: new Map(), resolvedBroadcasterIds: new Map() },
             youtubeChannels.length > 0 ? checkYouTubeLive(youtubeChannels, YOUTUBE_API_KEY) : { liveMap: new Map(), resolvedChannelIds: new Map() }
         ]);
+
+        const kickLive = kickResult.liveMap;
+        const newlyResolvedBroadcasterIds = kickResult.resolvedBroadcasterIds;
 
         const youtubeLive = youtubeResult.liveMap;
         const newlyResolvedChannelIds = youtubeResult.resolvedChannelIds;
 
         console.log(`Live: ${twitchLive.size} Twitch, ${kickLive.size} Kick, ${youtubeLive.size} YouTube`);
+
+        // 3a. Persist any newly-resolved Kick broadcaster IDs so future runs
+        // skip the resolve step for these profiles entirely.
+        if (newlyResolvedBroadcasterIds.size > 0) {
+            const kickIdUpdates = profiles
+                .filter(p => {
+                    const username = extractKickUsername(p.kick_url);
+                    return username && newlyResolvedBroadcasterIds.has(username.toLowerCase());
+                })
+                .map(p => {
+                    const username = extractKickUsername(p.kick_url);
+                    const broadcasterId = newlyResolvedBroadcasterIds.get(username.toLowerCase());
+                    return supabase.from('profiles').update({ kick_broadcaster_id: broadcasterId }).eq('id', p.id);
+                });
+            await Promise.all(kickIdUpdates);
+            console.log(`Cached ${kickIdUpdates.length} newly-resolved Kick broadcaster ID(s)`);
+        }
 
         // 3b. Persist any newly-resolved YouTube channel IDs so future runs
         // skip the paid resolve step for these profiles entirely.

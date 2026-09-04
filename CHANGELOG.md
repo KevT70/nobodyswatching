@@ -3,6 +3,20 @@
 All notable changes to NobodysWatching.live are documented here.
 
 ---
+[2026-09-04] - KICK LIVE DETECTION RESTORED
+
+### Fixed
+Kick live detection is back. Turns out "revisit if Kick ever ships an official API" wasn't wishful thinking, it was foreshadowing — they shipped one, and it actually works
+Kick-only streamers were never showing as live, even while very much live, since launch. Sorry to anyone who spent months looking offline
+
+### Changed
+checkKickLive() rebuilt from scratch on Kick's new official Public API (api.kick.com) instead of the old approach that got blocked by their bot protection. Uses an app access token via client_credentials, same pattern as the Twitch check
+Kick usernames are resolved to numeric broadcaster IDs once and cached, instead of re-resolving on every 3-minute poll — the same caching trick already used for YouTube channel IDs, because we've apparently got a type
+
+### Added
+kick_broadcaster_id column on profiles, populated automatically the first time a Kick-linked profile gets checked
+
+---
 [2026-08-25] — Discord Announcer: Second Fairness Fix (Determinism)
 
 ### Fixed
